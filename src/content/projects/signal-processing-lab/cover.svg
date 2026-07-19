@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="Signal processing lab placeholder cover">
+  <rect width="1200" height="720" fill="#100a1f"/>
+  <circle cx="600" cy="360" r="250" fill="#251343" stroke="#8b5cf6" stroke-width="3"/>
+  <path d="M100 360 Q180 110 260 360 T420 360 T580 360 T740 360 T900 360 T1060 360" fill="none" stroke="#c084fc" stroke-width="12" stroke-linecap="round"/>
+  <path d="M136 450 Q246 260 356 450 T576 450 T796 450 T1016 450" fill="none" stroke="#22d3ee" stroke-width="7" stroke-linecap="round" opacity=".72"/>
+  <g fill="#fef3c7" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="700">
+    <text x="92" y="112">SIGNAL LAB</text>
+  </g>
+</svg>

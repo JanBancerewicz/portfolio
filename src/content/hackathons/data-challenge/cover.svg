@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="Data challenge placeholder cover">
+  <rect width="1200" height="720" fill="#0c1019"/>
+  <g opacity=".92">
+    <rect x="120" y="450" width="104" height="150" rx="16" fill="#22d3ee"/>
+    <rect x="280" y="354" width="104" height="246" rx="16" fill="#8b5cf6"/>
+    <rect x="440" y="250" width="104" height="350" rx="16" fill="#f59e0b"/>
+    <rect x="600" y="304" width="104" height="296" rx="16" fill="#fb7185"/>
+    <rect x="760" y="190" width="104" height="410" rx="16" fill="#67e8f9"/>
+    <rect x="920" y="118" width="104" height="482" rx="16" fill="#c084fc"/>
+  </g>
+  <path d="M92 604 H1108" stroke="#f8fafc" stroke-width="4" opacity=".28"/>
+  <text x="118" y="112" fill="#e5e7eb" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="700">DATA CHALLENGE</text>
+</svg>
