@@ -140,3 +140,10 @@ dist
 
 my_assets/*.jpg
 my_assets/*.gif
+# local dev logs
+.vite-dev.*.log
+dist-ssr
+
+.claude/
+# .github
+temp/

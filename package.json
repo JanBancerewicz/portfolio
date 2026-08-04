@@ -1,27 +1,31 @@
 {
-  "name": "developer-portfolio-scaffold",
+  "name": "jan-bancerewicz-portfolio",
   "private": true,
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "preview": "vite preview"
+    "dev": "vite --host",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
+    "covers": "node scripts/generate-covers.mjs",
+    "preview": "vite preview",
+    "hero": "node scripts/generate-hero-mosaic.mjs",
+    "icons": "node scripts/generate-tech-icons.mjs"
   },
   "dependencies": {
-    "@mdx-js/react": "^3.1.1",
     "@mdx-js/rollup": "^3.1.1",
-    "lucide-react": "^1.17.0",
+    "animejs": "^4.5.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.0"
+    "react-router-dom": "^7.18.2"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.0",
+    "@types/node": "^26.1.2",
     "@types/react": "^19.2.16",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.2",
-    "sharp": "^0.34.5",
+    "sharp": "^0.35.3",
+    "simple-icons": "^16.28.0",
     "tailwindcss": "^4.3.0",
     "typescript": "^6.0.3",
     "vite": "^8.0.16"

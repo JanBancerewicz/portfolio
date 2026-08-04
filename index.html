@@ -3,22 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Jan Bancerewicz — AI &amp; software developer</title>
     <meta
       name="description"
-      content="Minimal developer portfolio scaffold built with Vite, React, TypeScript and Tailwind CSS."
+      content="Jan Bancerewicz — AI &amp; software developer working on LLM interpretability, computer vision and biosignal models. Projects, hackathons, certificates and writing."
     />
-    <title>Developer Portfolio</title>
+    <meta name="theme-color" content="#f2f1ec" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e0e0b" media="(prefers-color-scheme: dark)" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Jan Bancerewicz — AI &amp; software developer" />
+    <meta
+      property="og:description"
+      content="Projects, hackathons, certificates and writing from an AI &amp; software developer working on LLM interpretability, computer vision and biosignal models."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,400..700;1,400&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+
     <script>
+      // Applies the stored theme and marks JS as available before first paint,
+      // so there is no flash of the wrong theme and no flash of the
+      // pre-animation state of revealed elements.
       (function () {
+        var root = document.documentElement;
+        root.classList.add("js");
+        var theme;
         try {
-          var theme = localStorage.getItem("theme");
-          if (theme !== "light" && theme !== "dark") theme = "dark";
-          document.documentElement.dataset.theme = theme;
-          document.documentElement.style.colorScheme = theme;
+          theme = localStorage.getItem("theme");
         } catch (e) {
-          document.documentElement.dataset.theme = "dark";
-          document.documentElement.style.colorScheme = "dark";
+          theme = null;
         }
+        if (theme !== "light" && theme !== "dark") {
+          theme =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
+        }
+        root.dataset.theme = theme;
+        root.style.colorScheme = theme;
+
+        // The "js" class is what hides elements before their reveal animation
+        // runs. If the bundle never boots, drop it so the prerendered content
+        // stays readable instead of leaving a blank page.
+        window.setTimeout(function () {
+          if (!root.hasAttribute("data-booted")) root.classList.remove("js");
+        }, 4000);
       })();
     </script>
   </head>
