@@ -2,6 +2,7 @@ import { site } from "../../data/site";
 import { Reveal } from "../motion/Reveal";
 import { SplitLines } from "../motion/SplitLines";
 import { Container } from "../ui/Container";
+import { Terminal } from "../ui/Terminal";
 
 /**
  * Shared by the homepage and every index page, so there is one contact block
@@ -33,7 +34,7 @@ export function Contact({ index = "06" }: { index?: string }) {
 
             <Reveal className="mt-8 max-w-lg" delay={160}>
               <p className="text-[1.125rem] leading-relaxed text-ink-muted">
-                The fastest way to reach me is LinkedIn — I read every message and
+                The fastest way to reach me is LinkedIn or Mail — I read every message and
                 reply within a day or two. Tell me what you are building and I
                 will tell you honestly whether I am the right person for it.
               </p>
@@ -71,15 +72,19 @@ export function Contact({ index = "06" }: { index?: string }) {
               </a>
             </Reveal>
 
-            <Reveal className="mt-12 grid gap-px border-t border-rule sm:grid-cols-3" stagger={60}>
+            <Reveal
+              className="mt-12 grid gap-x-6 gap-y-px border-t border-rule sm:grid-cols-2 lg:grid-cols-4"
+              stagger={60}
+            >
               <ContactRow label="LinkedIn" value="jan-bancerewicz" href={site.links.linkedin} />
               <ContactRow label="GitHub" value="JanBancerewicz" href={site.links.github} />
+              <ContactRow label="ORCID" value="0009-0001-3898-5576" href={site.links.orcid} />
               <ContactRow label="CV" value="Download PDF" href={site.links.cv} />
             </Reveal>
           </div>
 
           <div className="md:col-span-5">
-            <BookACall />
+            <Terminal />
           </div>
         </div>
       </Container>
@@ -109,54 +114,5 @@ function ContactRow({
         <span className="link-wipe">{value}</span>
       </span>
     </a>
-  );
-}
-
-/**
- * Google Calendar appointment schedule. Renders the real widget once
- * `site.bookingEmbedUrl` is filled in, and an honest placeholder until then —
- * never a fake booking form.
- */
-function BookACall() {
-  return (
-    <Reveal className="sticky top-24" delay={200}>
-      <div className="rounded-sm border border-rule bg-paper-raised p-6 shadow-[var(--shadow-card)]">
-        <div className="flex items-baseline justify-between gap-4 border-b border-rule pb-3">
-          <h3 className="text-lg font-medium tracking-[-0.025em]">Book a call</h3>
-          <span className="label">20 min</span>
-        </div>
-
-        <p className="mt-4 text-[1rem] leading-relaxed text-ink-muted">
-          Prefer talking to typing? Grab a slot straight from my calendar — no
-          back-and-forth, no agenda needed.
-        </p>
-
-        {site.bookingEmbedUrl ? (
-          <div className="mt-5 overflow-hidden rounded-sm border border-rule">
-            <iframe
-              src={site.bookingEmbedUrl}
-              title="Book a call — appointment scheduling"
-              className="block h-[560px] w-full border-0"
-              loading="lazy"
-            />
-          </div>
-        ) : (
-          <div className="mt-5 rounded-sm border border-dashed border-rule-strong bg-paper-sunken px-5 py-8 text-center">
-            <p className="label">Calendar embed not configured</p>
-            <p className="mx-auto mt-3 max-w-xs text-[0.9375rem] leading-relaxed text-ink-muted">
-              Google Calendar → Appointment schedules → Share → Embed, then paste
-              the iframe <code className="font-mono text-[0.8em]">src</code> into{" "}
-              <code className="font-mono text-[0.8em]">bookingEmbedUrl</code> in{" "}
-              <code className="font-mono text-[0.8em]">src/data/site.ts</code>.
-            </p>
-          </div>
-        )}
-
-        <p className="label mt-5">
-          Timezone <span className="mx-1 text-rule-strong">/</span>{" "}
-          {site.timezone}
-        </p>
-      </div>
-    </Reveal>
   );
 }

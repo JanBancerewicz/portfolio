@@ -71,7 +71,7 @@ GitHub Actions**.
 
 | What | Where |
 | --- | --- |
-| Name, tagline, email, links, booking URL, stats | `src/data/site.ts` |
+| Name, tagline, email, links, availability, stats | `src/data/site.ts` |
 | Nav items | `src/data/site.ts` (`navigation`) |
 | Tech stack table + marquee | `src/data/technologies.ts` |
 | Hackathons | `src/data/hackathons.ts` |
@@ -115,11 +115,21 @@ Same shape, minus the reel: `src/content/blog/my-post/index.mdx` plus a
 `cover.svg`. `date` (`YYYY-MM-DD`) orders the list and the newest post is
 automatically the featured one on `/blog`.
 
-### Book a call
+### The contact terminal
 
-`site.bookingEmbedUrl` is empty, so the contact section shows a note instead of a
-widget. Fill it from Google Calendar → Appointment schedules → Share → Embed,
-copying the iframe's `src`.
+The contact section carries a small shell instead of a booking widget — an
+interactive link tree. Every route out of the page (email, LinkedIn, ORCID,
+GitHub, CV, and the two index pages) is a command, and the same set is one click
+away in the chip row underneath for anyone who would rather not type.
+
+Commands live in one `commands` record in `src/components/ui/Terminal.tsx`;
+adding one is a single entry, and setting `suggest: true` also puts it in the
+chip row. `help` is generated from that record, so it cannot drift. External
+links open in a new tab with `rel="noreferrer noopener"`; `projects` and `blog`
+navigate through React Router rather than reloading.
+
+It is dark in both themes on purpose — a terminal that follows the page into a
+light palette stops reading as a terminal.
 
 ## Motion
 

@@ -372,6 +372,96 @@ html.js [data-split][data-split-ready] {
   height: max(19rem, min(64vh, 36rem, 74vw * 1.4444));
 }
 
+/* ---------------------------------------------------------------------------
+   Terminal
+
+   Deliberately dark in both themes. A terminal that follows the page into a
+   light palette stops reading as a terminal, and the reel posters already
+   establish a dark surface in this design.
+--------------------------------------------------------------------------- */
+
+.terminal {
+  --term-bg: #131319;
+  --term-fg: #d7d5cc;
+  --term-dim: #7e7c74;
+  --term-accent: var(--accent);
+
+  background: var(--term-bg);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.terminal-screen {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: var(--term-fg);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.terminal-screen::-webkit-scrollbar {
+  width: 6px;
+}
+
+.terminal-screen::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 3px;
+}
+
+.terminal-chrome {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  color: var(--term-dim);
+}
+
+.terminal-line {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.terminal-dim {
+  color: var(--term-dim);
+}
+
+.terminal-error {
+  color: #ff8a6d;
+}
+
+.terminal-echo {
+  color: var(--term-fg);
+}
+
+.terminal-caret {
+  color: var(--term-accent);
+}
+
+.terminal-link {
+  color: var(--term-accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-thickness: 1px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .terminal-link:hover {
+    background: color-mix(in srgb, var(--term-accent) 22%, transparent);
+  }
+}
+
+.terminal-input {
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  line-height: 1.65;
+  color: var(--term-fg);
+  caret-color: var(--term-accent);
+}
+
+.terminal-input::placeholder {
+  color: rgba(255, 255, 255, 0.22);
+}
+
 /* Brand marks sit monochrome until hovered. */
 .tech-mark svg {
   color: inherit;
