@@ -1,0 +1,49 @@
+import cover from "./cover.svg";
+
+export const meta = {
+  slug: "what-comments-do-to-a-model",
+  title: "What comments actually do to a model",
+  date: "2026-07-12",
+  category: "LLM interpretability",
+  readingTime: "8 min",
+  summary:
+    "Everyone benchmarks LLM code output by reading it. That measures prose, not reasoning. Here is what changes when you probe the model instead.",
+  cover,
+  tags: ["LLMs", "Interpretability", "Research"],
+};
+
+The standard way to find out whether comments help a language model write code
+is to run it twice, read both answers, and decide which looks smarter. That is
+a measurement of the output. It tells you almost nothing about whether the
+model *reasoned* differently, or simply narrated the same reasoning in a more
+confident voice.
+
+## Why output-only evaluation misleads
+
+PLACEHOLDER — the concrete failure case. A model can produce a better-looking
+answer for reasons entirely unrelated to comprehension: comments shift the
+distribution toward tutorial-style code, which reads as clearer whether or not
+anything upstream changed.
+
+## Three ways to look inside instead
+
+- **Logit masking.** Suppress the comment tokens' contribution and see where
+  the effect appears. If it only shows at the final token, the comments were
+  decoration.
+- **Hidden state analysis.** Compare layer-by-layer trajectories rather than
+  endpoints. Two runs that finish in the same place may have taken very
+  different routes.
+- **Weight inspection.** Which heads change their attribution when a comment
+  is present, and are they the ones you would expect.
+
+## What this changes in practice
+
+PLACEHOLDER — the takeaway a working developer can use tomorrow. If comments do
+real mechanistic work, code written for AI review should be commented
+differently from code written for humans, and stripped-source benchmarks are
+measuring a different task than they think.
+
+## Caveats
+
+PLACEHOLDER — model family, scale, and how much of this generalises. Be honest
+about what a single-architecture study can and cannot claim.

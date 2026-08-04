@@ -1,0 +1,57 @@
+import cover from "./cover.svg";
+import poster from "./poster.svg";
+
+export const meta = {
+  slug: "core-llm-comments",
+  title: "CORE",
+  date: "2026",
+  category: "LLM interpretability",
+  role: "Research — probing, experiments, analysis",
+  summary:
+    "COmments as a REasoning: do code comments actually change how a language model reasons, or only how its output reads? We answer it by opening the model up rather than grading what comes out.",
+  cover,
+  poster,
+  // Drop an 8s vertical clip next to this file, import it, and set `reel`.
+  // reel,
+  reelCaption:
+    "Do comments change how an LLM thinks, or just how it writes? We opened the model to find out.",
+  tags: ["PyTorch", "Transformers", "LLM fine-tuning", "Python"],
+  featured: true,
+  links: [{ label: "GitHub", href: "https://github.com/JanBancerewicz" }],
+};
+
+Everyone has an opinion about whether comments help a language model write
+better code. Almost all of that opinion is formed by reading the model's output
+and deciding whether it looks smarter. That is a measurement of prose, not of
+reasoning. CORE is a second research paper, in preparation with the Gradient PG
+AI/ML science club, that tries to answer the question mechanistically.
+
+## The question
+
+Given the same function with and without comments, does the model take a
+different internal route to its answer — or does it arrive the same way and
+merely narrate differently?
+
+## How we probe it
+
+Three angles, none of which depend on judging output quality:
+
+- **Logit masking.** Suppress the comment tokens' contribution and watch what
+  moves. If the reasoning genuinely depends on them, the effect should show up
+  well before the final token.
+- **Hidden state analysis.** Compare layer-by-layer representations of the
+  commented and uncommented versions, looking for where the two trajectories
+  diverge rather than whether they end in the same place.
+- **Weight inspection.** Which heads and circuits change their attribution when
+  a comment is present.
+
+## Why it matters
+
+PLACEHOLDER — the practical version of the finding. If comments do real work
+inside the model, that changes how we should write code destined for AI review,
+and how much we should trust a model that has only ever seen stripped source.
+
+## Status
+
+PLACEHOLDER — paper in preparation. Update with the venue and the headline
+result once you have them.

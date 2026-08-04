@@ -1,0 +1,58 @@
+import cover from "./cover.svg";
+import poster from "./poster.svg";
+
+export const meta = {
+  slug: "qwen-vl-angiography",
+  title: "Qwen-VL for Angiography",
+  date: "2026",
+  category: "Vision-language models",
+  role: "Fine-tuning, evaluation, benchmarking",
+  summary:
+    "Fine-tuned Qwen-VL 3 for coronary artery segmentation on angiography images. Dice 0.7984, IoU 0.6704 — slightly ahead of U-Net ResNet-34, the prior state of the art for this task.",
+  cover,
+  poster,
+  // Drop an 8s vertical clip next to this file, import it, and set `reel`.
+  // reel,
+  reelCaption:
+    "A vision-language model beating U-Net at coronary segmentation. Dice 0.7984, IoU 0.6704.",
+  tags: ["Qwen-VL", "Segmentation", "PyTorch", "OpenCV"],
+  featured: true,
+  links: [{ label: "GitHub", href: "https://github.com/JanBancerewicz" }],
+};
+
+Segmentation on coronary angiography is a hard, narrow, well-benchmarked
+problem, and the answer has been a U-Net variant for years. This project asked
+whether a general vision-language model, fine-tuned properly, could compete
+with a purpose-built architecture on its home turf.
+
+## The setup
+
+Qwen-VL 3, fine-tuned on angiography frames for pixel-level segmentation of the
+coronary tree, evaluated against U-Net ResNet-34 on the same split.
+
+## Result
+
+| Metric | Qwen-VL 3 (fine-tuned) |
+| --- | --- |
+| Dice | 0.7984 |
+| IoU | 0.6704 |
+| Precision | 0.8504 |
+| Recall | 0.7609 |
+
+Slightly ahead of the U-Net ResNet-34 baseline, which is the interesting part:
+a model that was never designed for this beat one that was, given the right
+adaptation.
+
+## What I would defend
+
+- **Precision above recall was the right trade for the first pass.** In a
+  diagnostic context a confident false vessel is a worse failure than a missed
+  faint one, because it is the one a reader will not double-check.
+- **Same split, same preprocessing, or the comparison is worthless.** Most of
+  the work in beating a baseline is making sure you actually raced it.
+
+## Limitations
+
+PLACEHOLDER — the honest section. Dataset size, how much of the gain survives a
+different split, and inference cost against U-Net, which is dramatically
+cheaper to run.

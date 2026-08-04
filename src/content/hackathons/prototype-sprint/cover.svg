@@ -1,8 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" role="img" aria-label="Prototype sprint placeholder cover">
-  <rect width="1200" height="720" fill="#10151d"/>
-  <rect x="112" y="116" width="430" height="488" rx="28" fill="#172033" stroke="#22d3ee" stroke-width="3"/>
-  <rect x="658" y="116" width="430" height="488" rx="28" fill="#21172f" stroke="#f59e0b" stroke-width="3"/>
-  <path d="M192 246 H462 M192 328 H390 M192 410 H446" stroke="#67e8f9" stroke-width="18" stroke-linecap="round"/>
-  <path d="M732 238 H1018 M732 340 H956 M732 444 H1032" stroke="#fbbf24" stroke-width="18" stroke-linecap="round"/>
-  <text x="112" y="72" fill="#e5e7eb" font-family="Inter, Arial, sans-serif" font-size="34" font-weight="700">48H PROTOTYPE</text>
-</svg>

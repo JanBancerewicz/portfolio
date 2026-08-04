@@ -1,0 +1,50 @@
+import cover from "./cover.svg";
+import poster from "./poster.svg";
+
+export const meta = {
+  slug: "jetson-yolo-boat",
+  title: "Autonomous Boat Vision",
+  date: "2025",
+  category: "Edge AI / robotics",
+  role: "Vision & deployment",
+  summary:
+    "YOLO object detection running on an NVIDIA Jetson aboard the Gradient PG autonomous boat — real-time awareness of the surroundings with inference on embedded hardware, no uplink.",
+  cover,
+  poster,
+  // Drop an 8s vertical clip next to this file, import it, and set `reel`.
+  // reel,
+  reelCaption:
+    "Real-time detection on an NVIDIA Jetson, on a boat, with no connection to anything.",
+  tags: ["YOLO", "NVIDIA Jetson", "PyTorch", "Linux"],
+  links: [{ label: "GitHub", href: "https://github.com/JanBancerewicz" }],
+};
+
+A model that works in a notebook and a model that works on a boat are different
+artefacts. This one had to run on an NVIDIA Jetson, in daylight, on water,
+inside a power budget, with nothing to phone home to.
+
+## The constraint
+
+Everything interesting about this project is a consequence of one fact: there
+is no uplink. Inference happens on the vessel or it does not happen. That rules
+out the comfortable answer — stream frames somewhere with a real GPU — and
+turns model size, quantisation and frame budget into design decisions rather
+than afterthoughts.
+
+## What I built
+
+Detection over the boat's camera feed, running on the Jetson, producing a
+continuous picture of what is around the hull for the navigation stack to use.
+
+## Decisions worth defending
+
+- **Latency over accuracy at the margin.** A detection that arrives two seconds
+  late is not a worse detection, it is a hazard.
+- **Handle glare as a first-class case.** Water reflects the sky directly into
+  the lens for a good part of the day; treating that as an edge case means
+  building something that only works in the morning.
+
+## Result
+
+PLACEHOLDER — sustained FPS on the Jetson, the classes it detects reliably, and
+the conditions where it stops being trustworthy.

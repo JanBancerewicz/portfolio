@@ -1,0 +1,52 @@
+import cover from "./cover.svg";
+import poster from "./poster.svg";
+
+export const meta = {
+  slug: "shelf-vision-pipeline",
+  title: "Shelf Vision",
+  date: "2026",
+  category: "Computer vision",
+  role: "Pipeline design & retrieval",
+  summary:
+    "A four-stage pipeline for retail shelf product recognition — YOLO detection, embedding retrieval, heuristic reranking, contextual reranking — built at Hackology II and scored on COCO-format boxes at mAP@0.5.",
+  cover,
+  poster,
+  // Drop an 8s vertical clip next to this file, import it, and set `reel`.
+  // reel,
+  reelCaption:
+    "Four stages to tell one shampoo bottle from another: detect, retrieve, rerank, rerank again.",
+  tags: ["YOLO", "OpenCV", "Python", "PyTorch"],
+  links: [{ label: "GitHub", href: "https://github.com/JanBancerewicz" }],
+};
+
+Finding products on a shelf is a detection problem for about ten minutes, and
+then it becomes a retrieval problem. Detection tells you *something* is there.
+The hard part is that forty of the somethings are the same brand in slightly
+different packaging, and a classifier with a fixed label set is obsolete the
+moment the store changes supplier.
+
+## The pipeline
+
+1. **Detect** — YOLO proposes boxes. Recall matters far more than precision
+   here; anything missed at this stage cannot be recovered later.
+2. **Retrieve** — each crop is embedded and matched against a product gallery,
+   so adding a new product means adding an image, not retraining a classifier.
+3. **Heuristic rerank** — cheap structural signals: shelf row, neighbour
+   agreement, box geometry.
+4. **Contextual rerank** — products cluster. A crop between two of the same SKU
+   is very likely a third.
+
+Scored on COCO-format bounding boxes at mAP@0.5.
+
+## What I would defend
+
+- **Retrieval over classification.** A gallery you can extend beats a label set
+  you have to retrain, in a domain where the catalogue changes weekly.
+- **Rerank in two cheap passes instead of one expensive one.** The heuristic
+  pass removes most of the candidates the contextual pass would have to think
+  about.
+
+## Result
+
+PLACEHOLDER — the mAP figure and where the pipeline still breaks: reflective
+packaging, deep shelves, and anything at a sharp angle.

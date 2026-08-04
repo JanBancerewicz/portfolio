@@ -1,0 +1,64 @@
+import cover from "./cover.svg";
+import poster from "./poster.svg";
+
+export const meta = {
+  slug: "hrv-mobile-ml",
+  title: "HRV on a Phone",
+  date: "2026",
+  category: "Applied ML / biosignals",
+  role: "Author — pipeline, models, evaluation, paper",
+  summary:
+    "CNN and LSTM models reading heart rate variability out of photoplethysmographic signals captured by an ordinary phone camera. Published in TASK Quarterly, accepted into the Europe AI Summer Research programme, and now becoming a real app.",
+  cover,
+  poster,
+  // Drop an 8s vertical clip next to this file, import it, and set `reel`.
+  // reel,
+  reelCaption:
+    "Heart rate variability from a phone camera. Published, peer-reviewed, and now shipping to real users.",
+  tags: ["PyTorch", "CNN / LSTM", "EEG / PPG", "Python", "Kotlin"],
+  featured: true,
+  links: [
+    {
+      label: "Paper",
+      href: "https://journal.mostwiedzy.pl/TASKQuarterly/article/view/3699",
+    },
+    { label: "GitHub", href: "https://github.com/JanBancerewicz" },
+  ],
+};
+
+Heart rate variability is a genuinely useful signal — it tracks stress,
+recovery and autonomic state — and measuring it properly normally means a chest
+strap. This work asks how much of that you can recover from a phone camera
+pressed against a fingertip, and answers it with a model rather than with
+better optics.
+
+## The problem
+
+Photoplethysmographic signals from a phone are noisy in every way that matters:
+the hand moves, the exposure drifts, ambient light leaks in, and the sampling
+rate is whatever the camera feels like giving you. Classical peak detection
+falls apart well before the signal becomes unusable to a human eye.
+
+## The approach
+
+A CNN front end learns the morphology of a pulse waveform under exactly those
+distortions; an LSTM stage carries the temporal structure that HRV is actually
+made of. The pipeline is deterministic end to end — every published number
+regenerates from the raw recordings with one command.
+
+## Result
+
+Published as **Analysis of HRV Using Mobile Devices and Machine Learning** in
+TASK Quarterly (2026). In July 2026 the work was accepted into the
+**Europe AI Summer Research programme**.
+
+## What is next
+
+I am turning it into a production-ready mobile app rather than leaving it as a
+research artefact — which means the boring half of the work starts now: battery
+cost, capture guidance for people who have never held their finger on a camera
+for ninety seconds, and honest error bars when the signal is simply too poor to
+report a number.
+
+PLACEHOLDER — add the accuracy figures against the reference device once you
+are ready to state them publicly.
