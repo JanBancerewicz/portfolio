@@ -1,100 +1,132 @@
-import { ArrowDownRight, ArrowRight, Download } from "lucide-react";
-import { skills } from "../../data/skills";
-import { Badge } from "../ui/Badge";
-import { FogReveal } from "../ui/FogReveal";
-import { HeroPortrait } from "../ui/HeroPortrait";
+import { Link } from "react-router-dom";
+import { site, stats } from "../../data/site";
+import { Reveal } from "../motion/Reveal";
+import { SplitLines } from "../motion/SplitLines";
+import { Ticker } from "../motion/Ticker";
+import { Container } from "../ui/Container";
+import { HeroMosaic } from "../ui/HeroMosaic";
 
-const roles = [
-  "software developer",
-  "computer science student",
-  "hackathon enthusiast",
-];
+/**
+ * Shared by both halves of the headline so the split across two elements is
+ * invisible. Sized so the last line clears the plate's column.
+ */
+const HEADLINE = "display text-[clamp(2.5rem,7.6vw,6.75rem)]";
 
 export function Hero() {
   return (
-    <section
-      id="home"
-      className="grid min-h-screen scroll-mt-28 items-center gap-12 pb-20 pt-32 lg:grid-cols-[1.05fr_0.95fr] lg:pb-24 lg:pt-36"
-    >
-      <div className="max-w-3xl">
-        <FogReveal>
-          <div className="theme-surface mb-7 inline-flex items-center gap-3 rounded-full border border-cyan-300/20 bg-cyan-300/10 px-3 py-1.5 font-mono text-xs text-accent shadow-[0_0_40px_rgba(34,211,238,0.12)]">
-            <span className="size-2 rounded-full bg-cyan-300 shadow-[0_0_18px_rgba(34,211,238,0.95)]" />
-            available for placeholder opportunities
-          </div>
-        </FogReveal>
-
-        <FogReveal delay={90}>
-          <p className="mb-4 font-mono text-sm text-accent-soft transition-colors duration-300">
-            $ whoami
-          </p>
-        </FogReveal>
-
-        <FogReveal delay={160}>
-          <h1 className="hero-title text-balance max-w-4xl text-5xl font-semibold leading-[0.95] text-foreground transition-colors duration-300 sm:text-7xl lg:text-8xl">
-            Janusz Kowalski
-          </h1>
-        </FogReveal>
-
-        <div className="mt-6 flex flex-col gap-2 font-mono text-base text-foreground-soft transition-colors duration-300 sm:text-lg">
-          {roles.map((role, index) => (
-            <FogReveal key={role} delay={260 + index * 110}>
-              <span className="flex items-center gap-2">
-                <ArrowDownRight size={17} className="text-cyan-500 dark:text-cyan-300" />
-                <span className={role === roles[0] ? "caret" : undefined}>
-                  {role}
-                </span>
+    <section className="pt-32 md:pt-40">
+      <Container>
+        <Reveal
+          className="flex flex-wrap items-center justify-between gap-4 border-b border-rule pb-4"
+          duration={520}
+        >
+          <span className="label">
+            {site.name} <span className="mx-1 text-rule-strong">/</span>{" "}
+            {site.role}
+          </span>
+          {site.availability.open ? (
+            <span className="label flex items-center gap-2 text-ink">
+              <span className="relative flex size-1.5">
+                <span className="absolute inset-0 animate-ping rounded-full bg-accent opacity-70" />
+                <span className="relative size-1.5 rounded-full bg-accent" />
               </span>
-            </FogReveal>
-          ))}
+              {site.availability.label}
+            </span>
+          ) : null}
+        </Reveal>
+
+        {/* The headline breaks after its second line so the short last line
+            leaves a gap on the right. The plate fills it, spanning down beside
+            the standfirst — no dead space on either side. */}
+        <SplitLines
+          className={`${HEADLINE} mt-10 md:mt-14`}
+          delay={120}
+        >
+          I build software that
+          <br />
+          survives contact with
+        </SplitLines>
+
+        <div className="mt-2 grid gap-x-8 gap-y-8 md:grid-cols-12">
+          <SplitLines
+            as="p"
+            className={`${HEADLINE} md:col-span-7 md:row-start-1`}
+            delay={300}
+          >
+            <em>real data</em>.
+          </SplitLines>
+
+          {/* Row 1 on mobile puts the plate directly under the headline;
+              on desktop it spans both rows of the right-hand column. */}
+          <Reveal
+            className="md:col-span-5 md:col-start-8 md:row-span-2 md:row-start-1 md:self-center"
+            delay={560}
+            duration={700}
+            y={24}
+          >
+            <HeroMosaic />
+          </Reveal>
+
+          <div className="md:col-span-7 md:row-start-2 md:pt-6">
+            <Reveal delay={520} duration={620}>
+              <p className="max-w-md text-[1.125rem] leading-relaxed text-ink-muted">
+                {site.tagline}
+              </p>
+            </Reveal>
+
+            <Reveal
+              className="mt-10 flex flex-col gap-3 sm:flex-row"
+              delay={620}
+              duration={620}
+            >
+              <Link
+                to="/#work"
+                className="press group inline-flex items-center justify-between gap-8 rounded-full bg-ink px-6 py-3.5 text-[1rem] font-medium text-paper transition-colors duration-200 hover:bg-accent hover:text-accent-ink"
+              >
+                See the work
+                <span className="transition-transform duration-200 ease-out group-hover:translate-y-0.5">
+                  ↓
+                </span>
+              </Link>
+              <a
+                href={site.links.linkedin}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="press group inline-flex items-center justify-between gap-8 rounded-full border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
+              >
+                Get in touch
+                <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">
+                  ↗
+                </span>
+              </a>
+            </Reveal>
+          </div>
         </div>
 
-        <FogReveal delay={520}>
-          <p className="mt-8 max-w-2xl text-base leading-8 text-muted transition-colors duration-300 sm:text-lg">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer
-            ultricies velit vitae sem posuere, sed porttitor lorem tincidunt.
-          </p>
-        </FogReveal>
-
-        <FogReveal delay={650}>
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row">
-            <a
-              href="#projects"
-              className="inline-flex items-center justify-center gap-2 rounded-full bg-cyan-300 px-5 py-3 font-mono text-sm font-semibold text-slate-950 shadow-[0_18px_55px_rgba(34,211,238,0.26)] transition hover:-translate-y-0.5 hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
+        <Reveal
+          className="mt-16 grid grid-cols-2 border-t border-rule md:mt-24 md:grid-cols-4"
+          stagger={70}
+          delay={760}
+        >
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              className="border-b border-rule px-0 py-6 pr-6 md:border-b-0 md:border-r md:px-6 md:first:pl-0"
             >
-              View projects
-              <ArrowRight size={17} />
-            </a>
-            <a
-              href="/resume.pdf"
-              className="theme-surface inline-flex items-center justify-center gap-2 rounded-full border border-border bg-surface px-5 py-3 font-mono text-sm font-semibold text-foreground backdrop-blur-xl transition hover:-translate-y-0.5 hover:border-violet-300/45 hover:text-violet-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300 dark:hover:text-violet-100"
-            >
-              <Download size={17} />
-              Download resume
-            </a>
+              <div className="text-4xl font-medium tracking-[-0.045em] md:text-5xl">
+                <Ticker value={stat.value} suffix={stat.suffix} />
+              </div>
+              <div className="label mt-2">{stat.label}</div>
+            </div>
+          ))}
+          <div className="border-b border-rule py-6 md:border-b-0 md:px-6">
+            <div className="text-4xl font-medium tracking-[-0.045em] md:text-5xl">
+              PL
+            </div>
+            <div className="label mt-2">{site.location}</div>
           </div>
-        </FogReveal>
-
-        <FogReveal delay={780}>
-          <div className="mt-9 flex flex-wrap gap-2.5">
-            {skills.map((skill, index) => (
-              <Badge
-                key={skill}
-                tone={index % 4 === 0 ? "cyan" : index % 4 === 1 ? "violet" : "default"}
-              >
-                {skill}
-              </Badge>
-            ))}
-          </div>
-        </FogReveal>
-      </div>
-
-      <FogReveal
-        className="relative flex w-full max-w-md items-center justify-center py-4 lg:ml-auto lg:max-w-lg"
-        delay={320}
-      >
-        <HeroPortrait />
-      </FogReveal>
+        </Reveal>
+      </Container>
     </section>
   );
 }

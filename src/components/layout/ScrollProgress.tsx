@@ -1,46 +1,71 @@
-import { useEffect, useState } from "react";
+import { utils } from "animejs";
+import { useEffect, useRef } from "react";
 
+/**
+ * Scroll position readout: a hairline bar pinned above the navigation.
+ *
+ * Constant, scroll-linked motion, so it is driven directly on `transform`
+ * (never through a CSS variable on a parent, which forces a style recalc on
+ * every child) and smoothed with a lerp so the bar glides rather than snapping
+ * frame to frame.
+ */
 export function ScrollProgress() {
-  const [progress, setProgress] = useState(0);
+  const barRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const bar = barRef.current;
+    if (!bar) return;
+
+    let current = 0;
+    let target = 0;
     let frame = 0;
 
-    const updateProgress = () => {
-      const scrollableHeight =
+    // The loop runs only while the bar is catching up, then stops — a portfolio
+    // page has no business holding a frame every 16ms when nothing is moving.
+    const tick = () => {
+      current += (target - current) * 0.18;
+
+      if (Math.abs(target - current) < 0.0004) {
+        current = target;
+        bar.style.transform = `scaleX(${current})`;
+        frame = 0;
+        return;
+      }
+
+      bar.style.transform = `scaleX(${current})`;
+      frame = requestAnimationFrame(tick);
+    };
+
+    const measure = () => {
+      const scrollable =
         document.documentElement.scrollHeight - window.innerHeight;
-      const nextProgress =
-        scrollableHeight > 0 ? window.scrollY / scrollableHeight : 0;
-
-      setProgress(Math.min(100, Math.max(0, nextProgress * 100)));
+      target = scrollable > 0 ? utils.clamp(window.scrollY / scrollable, 0, 1) : 0;
+      if (!frame) frame = requestAnimationFrame(tick);
     };
 
-    const requestUpdate = () => {
-      window.cancelAnimationFrame(frame);
-      frame = window.requestAnimationFrame(updateProgress);
-    };
+    measure();
+    current = target;
+    bar.style.transform = `scaleX(${current})`;
 
-    updateProgress();
-
-    window.addEventListener("scroll", requestUpdate, { passive: true });
-    window.addEventListener("resize", requestUpdate);
+    window.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
 
     return () => {
-      window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", requestUpdate);
-      window.removeEventListener("resize", requestUpdate);
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
     };
   }, []);
 
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-x-0 top-0 z-[80] h-1 bg-surface transition-colors duration-300"
+      className="pointer-events-none absolute inset-x-0 top-0 h-[2px] bg-rule/60"
     >
       <div
-        data-scroll-progress-bar
-        className="h-full rounded-r-full bg-gradient-to-r from-cyan-300 via-blue-500 to-violet-500 shadow-[0_0_24px_rgba(34,211,238,0.55)]"
-        style={{ width: `${progress}%` }}
+        ref={barRef}
+        className="h-full origin-left bg-accent"
+        style={{ transform: "scaleX(0)" }}
       />
     </div>
   );

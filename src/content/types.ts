@@ -1,9 +1,9 @@
 import type { ComponentType } from "react";
 
-export type ContentAccent = "cyan" | "violet" | "amber" | "rose";
+export type ContentKind = "project" | "post";
 
 export type ContentLink = {
-  label: "GitHub" | "Demo" | "Case Study" | "Website" | "Devpost";
+  label: "GitHub" | "Demo" | "Website" | "Devpost" | "Paper";
   href: string;
 };
 
@@ -13,17 +13,38 @@ export type ContentMeta = {
   summary: string;
   cover: string;
   tags: string[];
-  accent: ContentAccent;
-  year?: string;
-  category?: string;
-  result?: string;
+  /** Sort key: `YYYY` for projects, `YYYY-MM-DD` for posts. */
+  date: string;
+  /** Eyebrow shown on cards. */
+  category: string;
+  /** Projects only — pulls the entry into the featured showcase. */
+  featured?: boolean;
+  /** Projects only. */
   role?: string;
-  date?: string;
   links?: ContentLink[];
+
+  /**
+   * Projects only — the vertical 9:16 still shown on the carousel. Generated
+   * as `poster.svg` alongside the entry until a real frame exists.
+   */
+  poster?: string;
+  /**
+   * Projects only — an ~8s vertical clip that autoplays, loops and is muted
+   * on the carousel. Drop an `.mp4` next to `index.mdx`, import it, and set
+   * this; the poster shows through until it is set.
+   */
+  reel?: string;
+  /**
+   * Projects only — one or two lines, written like a short's caption rather
+   * than a case-study summary. Falls back to `summary`.
+   */
+  reelCaption?: string;
+  /** Posts only. */
+  readingTime?: string;
 };
 
 export type ContentEntry = {
-  kind: "project" | "hackathon";
+  kind: ContentKind;
   meta: ContentMeta;
   Component: ComponentType;
 };

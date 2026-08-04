@@ -1,141 +1,87 @@
-import { Award, CalendarDays, MoveRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import { certificates } from "../../data/certificates";
-import { Badge } from "../ui/Badge";
-import { FogReveal } from "../ui/FogReveal";
-import { SectionHeading } from "../ui/SectionHeading";
-
-const toneClasses = {
-  cyan: "from-cyan-300/20 via-blue-500/10 to-transparent border-cyan-300/25",
-  violet:
-    "from-violet-300/20 via-indigo-500/10 to-transparent border-violet-300/25",
-  amber:
-    "from-amber-300/20 via-orange-500/10 to-transparent border-amber-300/25",
-  rose: "from-rose-300/20 via-fuchsia-500/10 to-transparent border-rose-300/25",
-};
+import { certificateGroups } from "../../data/certificates";
+import { Reveal } from "../motion/Reveal";
+import { Container } from "../ui/Container";
+import { SectionHeader } from "../ui/SectionHeader";
 
 export function Certificates() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [sectionHeight, setSectionHeight] = useState(1400);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    const track = trackRef.current;
-
-    if (!section || !track) {
-      return;
-    }
-
-    const updateMetrics = () => {
-      const availableWidth = section.clientWidth;
-      const maxTranslate = Math.max(0, track.scrollWidth - availableWidth);
-      setSectionHeight(window.innerHeight + maxTranslate + 260);
-      updateScroll(maxTranslate);
-    };
-
-    const updateScroll = (knownMaxTranslate?: number) => {
-      const maxTranslate =
-        knownMaxTranslate ?? Math.max(0, track.scrollWidth - section.clientWidth);
-      const rect = section.getBoundingClientRect();
-      const maxScroll = Math.max(1, section.offsetHeight - window.innerHeight);
-      const progress = Math.min(
-        1,
-        Math.max(0, Math.abs(Math.min(0, rect.top)) / maxScroll),
-      );
-
-      track.style.transform = `translate3d(${-maxTranslate * progress}px, 0, 0)`;
-    };
-
-    updateMetrics();
-
-    const handleScroll = () => updateScroll();
-    const handleResize = () => updateMetrics();
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
+  const total = certificateGroups.reduce(
+    (count, group) => count + group.items.length,
+    0,
+  );
 
   return (
-    <section
-      id="certificates"
-      ref={sectionRef}
-      className="relative -mx-5 scroll-mt-0 sm:-mx-6 lg:-mx-8"
-      style={{ height: sectionHeight }}
-    >
-      <div className="sticky top-0 flex h-screen flex-col justify-center overflow-hidden px-5 py-24 sm:px-6 lg:px-8">
-        <div className="mx-auto w-full max-w-7xl">
-          <FogReveal>
-            <SectionHeading
-              eyebrow="Certificates"
-              title="Horizontal Certificate Scroll"
-              description="This section locks into a horizontal certificate rail while the page still scrolls vertically."
-            />
-          </FogReveal>
+    <section id="certificates" className="scroll-mt-24 pt-28 md:pt-40">
+      <Container>
+        <SectionHeader
+          index="03"
+          title="Certificates &amp; Courses"
+          lede={
+            <>
+              Coursework, published research and the certifications behind it —
+              grouped by source so you can skip to the ones you care about.
+            </>
+          }
+          aside={`${total} total`}
+        />
 
-          <FogReveal delay={120}>
-            <div className="theme-surface mb-6 inline-flex items-center gap-3 rounded-full border border-border bg-surface px-4 py-2 font-mono text-xs text-foreground-soft backdrop-blur-xl">
-              <MoveRight size={15} className="text-accent" />
-              vertical scroll drives the horizontal rail
+        <Reveal className="grid gap-x-10 gap-y-12 md:grid-cols-2 lg:grid-cols-3" stagger={65}>
+          {certificateGroups.map((group) => (
+            <div key={group.issuer}>
+              <div className="flex items-baseline justify-between gap-4 border-b border-rule-strong pb-2.5">
+                <h3 className="text-lg font-medium tracking-[-0.025em]">
+                  {group.issuer}
+                </h3>
+                <span className="label shrink-0">
+                  {String(group.items.length).padStart(2, "0")}
+                </span>
+              </div>
+              <p className="label mt-2.5">{group.note}</p>
+
+              <ul className="mt-4">
+                {group.items.map((item) => (
+                  <li key={item.title} className="border-b border-rule">
+                    <CertificateRow {...item} />
+                  </li>
+                ))}
+              </ul>
             </div>
-          </FogReveal>
-
-          <div className="overflow-visible">
-            <div
-              ref={trackRef}
-              data-cert-track
-              className="flex w-max gap-5 transition-transform duration-75 ease-linear will-change-transform"
-            >
-              {certificates.map((certificate, index) => (
-                <article
-                  key={certificate.title}
-                  className="theme-surface group relative h-[360px] w-[82vw] max-w-[420px] shrink-0 overflow-hidden rounded-[2rem] border border-border bg-surface p-6 shadow-[var(--shadow-elevated)] backdrop-blur-xl sm:w-[420px]"
-                >
-                  <div
-                    aria-hidden="true"
-                    className={`absolute inset-x-0 top-0 h-36 border-b bg-gradient-to-br ${toneClasses[certificate.tone]}`}
-                  />
-                  <div className="relative flex h-full flex-col">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="theme-surface inline-flex size-12 items-center justify-center rounded-2xl border border-border bg-surface-inset text-foreground">
-                        <Award size={22} />
-                      </div>
-                      <span className="font-mono text-6xl font-semibold text-foreground/10">
-                        0{index + 1}
-                      </span>
-                    </div>
-
-                    <div className="mt-auto">
-                      <div className="theme-surface mb-4 inline-flex items-center gap-2 rounded-full border border-border bg-surface-inset px-3 py-1.5 font-mono text-[11px] text-foreground-soft">
-                        <CalendarDays size={13} />
-                        {certificate.date}
-                      </div>
-                      <h3 className="text-2xl font-semibold leading-tight text-foreground transition-colors duration-300">
-                        {certificate.title}
-                      </h3>
-                      <p className="mt-3 text-sm text-muted transition-colors duration-300">
-                        {certificate.issuer} / {certificate.status}
-                      </p>
-                      <div className="mt-6 flex flex-wrap gap-2">
-                        {certificate.tags.map((tag) => (
-                          <Badge key={tag} tone={certificate.tone}>
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+          ))}
+        </Reveal>
+      </Container>
     </section>
+  );
+}
+
+function CertificateRow({
+  title,
+  year,
+  credentialUrl,
+}: {
+  title: string;
+  year: string;
+  credentialUrl?: string;
+}) {
+  const content = (
+    <>
+      <span className="text-[1rem] leading-snug text-ink-muted transition-colors duration-200 group-hover:text-ink">
+        {title}
+      </span>
+      <span className="label shrink-0 pt-0.5">{year}</span>
+    </>
+  );
+
+  if (!credentialUrl) {
+    return <div className="group flex items-start justify-between gap-4 py-3">{content}</div>;
+  }
+
+  return (
+    <a
+      href={credentialUrl}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="group flex items-start justify-between gap-4 py-3"
+    >
+      {content}
+    </a>
   );
 }

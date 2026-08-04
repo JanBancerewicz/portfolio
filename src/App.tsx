@@ -1,83 +1,63 @@
 import { useEffect } from "react";
 import { Route, Routes, useLocation } from "react-router-dom";
 import { Footer } from "./components/layout/Footer";
-import { Navbar } from "./components/layout/Navbar";
-import { ScrollProgress } from "./components/layout/ScrollProgress";
-import { CaseStudyPage } from "./components/pages/CaseStudyPage";
+import { Header } from "./components/layout/Header";
+import { ArticlePage } from "./components/pages/ArticlePage";
+import { BlogIndexPage } from "./components/pages/BlogIndexPage";
+import { Home } from "./components/pages/Home";
 import { NotFoundPage } from "./components/pages/NotFoundPage";
-import { Certificates } from "./components/sections/Certificates";
-import { Hackathons } from "./components/sections/Hackathons";
-import { Hero } from "./components/sections/Hero";
-import { Links } from "./components/sections/Links";
-import { PinnedProjects } from "./components/sections/PinnedProjects";
-import { Resume } from "./components/sections/Resume";
-import { TechMarquee } from "./components/sections/TechMarquee";
-import { NetworkBackground } from "./components/ui/NetworkBackground";
+import { ProjectsIndexPage } from "./components/pages/ProjectsIndexPage";
 
-function AppShell() {
+/**
+ * Routes that end on a full-height pinned section and must therefore be the
+ * last thing on the page — anything after them is something you can overshoot
+ * into at the exact moment the layout is asking you to stop.
+ */
+const ROUTES_WITHOUT_FOOTER = ["/projects"];
+
+export default function App() {
+  const { pathname } = useLocation();
+  // A static host serves this route as `/projects/`, while the prerender asks
+  // for `/projects` — compare without the trailing slash or the two disagree
+  // and the footer reappears after hydration.
+  const route = pathname.replace(/\/+$/, "") || "/";
+  const showFooter = !ROUTES_WITHOUT_FOOTER.includes(route);
+
   return (
-    <div className="theme-surface min-h-screen overflow-x-clip bg-background text-foreground">
-      <NetworkBackground />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-0 bg-[linear-gradient(to_right,var(--grid-line)_1px,transparent_1px),linear-gradient(to_bottom,var(--grid-line-soft)_1px,transparent_1px)] bg-[size:72px_72px] transition-opacity duration-300"
-      />
-      <div
-        aria-hidden="true"
-        className="pointer-events-none fixed inset-0 z-0 bg-[radial-gradient(ellipse_at_top,var(--overlay-top),transparent_45%),linear-gradient(180deg,var(--overlay-mid),color-mix(in_srgb,var(--overlay-bottom)_92%,transparent)_62%,var(--overlay-bottom))] transition-[background] duration-300"
-      />
-      <div className="relative z-10">
-        <HashScroll />
-        <ScrollProgress />
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/projects/:slug" element={<CaseStudyPage kind="project" />} />
-          <Route
-            path="/hackathons/:slug"
-            element={<CaseStudyPage kind="hackathon" />}
-          />
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-        <Footer />
-      </div>
-    </div>
+    <>
+      <ScrollBehaviour />
+      <Header />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/projects" element={<ProjectsIndexPage />} />
+        <Route path="/projects/:slug" element={<ArticlePage kind="project" />} />
+        <Route path="/blog" element={<BlogIndexPage />} />
+        <Route path="/blog/:slug" element={<ArticlePage kind="post" />} />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+      {showFooter ? <Footer /> : null}
+    </>
   );
 }
 
-function HashScroll() {
+/**
+ * Route changes jump to the top instantly — navigation is not an animation.
+ * In-page hash links keep the browser's smooth scroll.
+ */
+function ScrollBehaviour() {
   const location = useLocation();
 
   useEffect(() => {
     if (location.hash) {
-      window.setTimeout(() => {
-        document
-          .querySelector(location.hash)
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
-      }, 0);
-      return;
+      const target = document.querySelector(location.hash);
+      if (target) {
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+        return;
+      }
     }
 
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [location.hash, location.pathname]);
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, [location.hash, location.key, location.pathname]);
 
   return null;
-}
-
-function HomePage() {
-  return (
-    <main className="mx-auto flex w-full max-w-7xl flex-col px-5 sm:px-6 lg:px-8">
-      <Hero />
-      <TechMarquee />
-      <PinnedProjects />
-      <Hackathons />
-      <Certificates />
-      <Resume />
-      <Links />
-    </main>
-  );
-}
-
-export default function App() {
-  return <AppShell />;
 }

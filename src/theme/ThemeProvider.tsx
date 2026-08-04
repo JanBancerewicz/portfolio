@@ -7,72 +7,48 @@ import {
   type ReactNode,
 } from "react";
 
-export type Theme = "dark" | "light";
+type Theme = "light" | "dark";
 
-const STORAGE_KEY = "theme";
-
-type ThemeContextValue = {
+const ThemeContext = createContext<{
   theme: Theme;
-  toggleTheme: () => void;
-  setTheme: (theme: Theme) => void;
-};
+  toggle: () => void;
+}>({ theme: "light", toggle: () => {} });
 
-const ThemeContext = createContext<ThemeContextValue | null>(null);
-
-function getStoredTheme(): Theme {
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "light" || stored === "dark") {
-      return stored;
-    }
-  } catch {
-    // localStorage may be unavailable
-  }
-  return "dark";
-}
-
-function applyTheme(theme: Theme) {
-  document.documentElement.dataset.theme = theme;
-  document.documentElement.style.colorScheme = theme;
+function readTheme(): Theme {
+  if (typeof document === "undefined") return "light";
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof document === "undefined") {
-      return "dark";
-    }
-    const current = document.documentElement.dataset.theme;
-    return current === "light" || current === "dark" ? current : getStoredTheme();
-  });
+  const [theme, setTheme] = useState<Theme>("light");
 
+  // The inline bootstrap script in index.html already applied the theme before
+  // first paint; sync React's copy after mount so SSR and client agree.
   useEffect(() => {
-    applyTheme(theme);
-    try {
-      localStorage.setItem(STORAGE_KEY, theme);
-    } catch {
-      // ignore write failures
-    }
-  }, [theme]);
-
-  const setTheme = useCallback((next: Theme) => {
-    setThemeState(next);
+    setTheme(readTheme());
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    setThemeState((current) => (current === "dark" ? "light" : "dark"));
+  const toggle = useCallback(() => {
+    setTheme((previous) => {
+      const next: Theme = previous === "dark" ? "light" : "dark";
+      document.documentElement.dataset.theme = next;
+      document.documentElement.style.colorScheme = next;
+      try {
+        localStorage.setItem("theme", next);
+      } catch {
+        // Private mode / storage disabled — the choice just won't persist.
+      }
+      return next;
+    });
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={{ theme, toggle }}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
 export function useTheme() {
-  const context = useContext(ThemeContext);
-  if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider");
-  }
-  return context;
+  return useContext(ThemeContext);
 }

@@ -1,87 +1,85 @@
-import { ArrowUpRight, CalendarDays, Trophy, UsersRound } from "lucide-react";
-import { Link } from "react-router-dom";
-import { hackathonEntries } from "../../content";
-import { Badge } from "../ui/Badge";
-import { Card } from "../ui/Card";
-import { FogReveal } from "../ui/FogReveal";
-import { SectionHeading } from "../ui/SectionHeading";
+import { hackathons } from "../../data/hackathons";
+import { Reveal } from "../motion/Reveal";
+import { Container } from "../ui/Container";
+import { SectionHeader } from "../ui/SectionHeader";
 
 export function Hackathons() {
+  const wins = hackathons.filter((entry) => entry.highlight).length;
+
   return (
-    <section id="hackathons" className="scroll-mt-28 py-20 sm:py-24">
-      <FogReveal>
-        <SectionHeading
-          eyebrow="Competitions"
-          title="Hackathons & Competitions"
-          description="A stronger section for fast builds, teamwork, prototypes and competition outcomes."
+    <section id="hackathons" className="scroll-mt-24 pt-28 md:pt-40">
+      <Container>
+        <SectionHeader
+          index="02"
+          title="Hackathons & competitions"
+          lede={
+            <>
+              Where most of my applied AI work starts: a weekend, a hard problem
+              and no time to be precious about the approach.
+            </>
+          }
+          aside={`${wins} podium ${wins === 1 ? "finish" : "finishes"}`}
         />
-      </FogReveal>
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        {hackathonEntries.map(({ meta: event }, index) => (
-          <FogReveal key={event.title} delay={index * 100}>
-            <Card className="flex min-h-[360px] flex-col p-0">
-              <div className="relative h-40 overflow-hidden border-b border-border">
-                <img
-                  src={event.cover}
-                  alt=""
-                  className="h-full w-full object-cover opacity-90"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background/82 via-transparent to-transparent" />
-                <div className="theme-surface absolute bottom-4 left-5 inline-flex size-9 items-center justify-center rounded-full border border-cyan-300/30 bg-cyan-300/10 font-mono text-xs text-accent backdrop-blur">
-                  {index + 1}
-                </div>
-              </div>
+        <Reveal className="border-t border-rule" stagger={70}>
+          {hackathons.map((entry) => (
+            <article
+              key={entry.name}
+              className="group relative grid gap-4 border-b border-rule py-7 md:grid-cols-12 md:gap-8 md:py-9"
+            >
+              {/* Accent rule wiping in from the left on hover. */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-x-0 top-0 h-px origin-left scale-x-0 bg-accent transition-transform duration-500 ease-out group-hover:scale-x-100"
+              />
 
-              <div className="flex flex-1 flex-col p-5">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                  <div>
-                    <div className="mb-3 flex flex-wrap gap-2">
-                      <span className="theme-surface inline-flex items-center gap-2 rounded-full border border-cyan-300/25 bg-cyan-300/10 px-3 py-1.5 font-mono text-[11px] text-accent">
-                        <CalendarDays size={13} />
-                        {event.date ?? event.year}
-                      </span>
-                      <span className="theme-surface inline-flex items-center gap-2 rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1.5 font-mono text-[11px] text-violet-700 dark:text-violet-100">
-                        <UsersRound size={13} />
-                        {event.role}
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-semibold text-foreground transition-colors duration-300">
-                      {event.title}
-                    </h3>
-                  </div>
-                  {event.result ? (
-                    <div className="theme-surface inline-flex w-fit items-center gap-2 rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-2 font-mono text-xs text-amber-700 dark:text-amber-100">
-                      <Trophy size={14} />
-                      {event.result}
-                    </div>
-                  ) : null}
-                </div>
+              <div className="label md:col-span-2 md:pt-1.5">{entry.date}</div>
 
-                <p className="mt-3 flex-1 text-sm leading-7 text-muted transition-colors duration-300">
-                  {event.summary}
+              <div className="md:col-span-6">
+                <h3 className="text-xl font-medium tracking-[-0.03em] md:text-[1.625rem]">
+                  {entry.href ? (
+                    <a
+                      href={entry.href}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="link-wipe"
+                    >
+                      {entry.name}
+                    </a>
+                  ) : (
+                    entry.name
+                  )}
+                </h3>
+                <p className="label mt-1.5">{entry.organiser}</p>
+                <p className="mt-3 max-w-xl text-[1rem] leading-relaxed text-ink-muted">
+                  {entry.what}
                 </p>
-
-                <div className="mt-5 flex flex-wrap gap-2">
-                  {event.tags.map((tag) => (
-                    <Badge key={tag} tone={index % 2 === 0 ? "cyan" : "violet"}>
+                <ul className="mt-4 flex flex-wrap gap-2">
+                  {entry.tags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="label rounded-full border border-rule px-2.5 py-1"
+                    >
                       {tag}
-                    </Badge>
+                    </li>
                   ))}
-                </div>
-
-                <Link
-                  to={`/hackathons/${event.slug}`}
-                  className="mt-6 inline-flex h-10 w-fit items-center justify-center gap-2 rounded-full bg-cyan-300 px-4 font-mono text-xs font-semibold text-slate-950 transition hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-300"
-                >
-                  Details
-                  <ArrowUpRight size={16} />
-                </Link>
+                </ul>
               </div>
-            </Card>
-          </FogReveal>
-        ))}
-      </div>
+
+              <div className="md:col-span-4 md:pt-1 md:text-right">
+                <div
+                  className={`text-lg font-medium tracking-[-0.02em] md:text-xl ${
+                    entry.highlight ? "text-accent" : "text-ink"
+                  }`}
+                >
+                  {entry.result}
+                </div>
+                <div className="label mt-1.5">{entry.role}</div>
+              </div>
+            </article>
+          ))}
+        </Reveal>
+      </Container>
     </section>
   );
 }
