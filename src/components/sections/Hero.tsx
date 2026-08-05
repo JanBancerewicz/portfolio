@@ -4,6 +4,7 @@ import { Reveal } from "../motion/Reveal";
 import { SplitLines } from "../motion/SplitLines";
 import { Ticker } from "../motion/Ticker";
 import { Container } from "../ui/Container";
+import { ContourField } from "../ui/ContourField";
 import { HeroMosaic } from "../ui/HeroMosaic";
 
 /**
@@ -14,7 +15,9 @@ const HEADLINE = "display text-[clamp(2.5rem,7.6vw,6.75rem)]";
 
 export function Hero() {
   return (
-    <section className="pt-32 md:pt-40">
+    // <section className="relative isolate pt-32 md:pt-40">
+    <section className="relative isolate pt-20 md:pt-24">
+      <ContourField seed={3} levels={18} intensity={0.07} />
       <Container>
         <Reveal
           className="flex flex-wrap items-center justify-between gap-4 border-b border-rule pb-4"
@@ -92,7 +95,7 @@ export function Hero() {
                 href={site.links.linkedin}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="press group inline-flex items-center justify-between gap-8 rounded-full border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
+                className="press group inline-flex items-center justify-between gap-8 rounded-sm border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
               >
                 Get in touch
                 <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">
@@ -103,29 +106,33 @@ export function Hero() {
           </div>
         </div>
 
+        {/*
+          A readout, not a stat block. Three giant numbers with small labels is
+          the template answer for a hero closer; setting the same figures in
+          mono at instrument scale keeps the information and drops the cliché.
+        */}
         <Reveal
-          className="mt-16 grid grid-cols-2 border-t border-rule md:mt-24 md:grid-cols-4"
-          stagger={70}
+          className="mt-16 flex flex-wrap items-baseline gap-x-9 gap-y-3 border-y border-rule py-4 md:mt-20"
+          stagger={60}
           delay={760}
         >
           {stats.map((stat) => (
-            <div
-              key={stat.label}
-              className="border-b border-rule px-0 py-6 pr-6 md:border-b-0 md:border-r md:px-6 md:first:pl-0"
-            >
-              <div className="text-4xl font-medium tracking-[-0.045em] md:text-5xl">
+            <div key={stat.label} className="flex items-baseline gap-2.5">
+              <span className="font-mono text-[1.375rem] font-medium tracking-[-0.02em] text-ink md:text-[1.5rem]">
                 <Ticker value={stat.value} suffix={stat.suffix} />
-              </div>
-              <div className="label mt-2">{stat.label}</div>
+              </span>
+              <span className="label">{stat.label}</span>
             </div>
           ))}
-          <div className="border-b border-rule py-6 md:border-b-0 md:px-6">
-            <div className="text-4xl font-medium tracking-[-0.045em] md:text-5xl">
-              PL
-            </div>
-            <div className="label mt-2">{site.location}</div>
+
+          <div className="flex items-baseline gap-2.5 md:ml-auto">
+            <span aria-hidden="true" className="text-accent">
+              ◆
+            </span>
+            <span className="label">{site.location}</span>
           </div>
         </Reveal>
+
       </Container>
     </section>
   );

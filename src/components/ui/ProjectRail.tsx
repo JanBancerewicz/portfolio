@@ -1,6 +1,7 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { ContentEntry } from "../../content/types";
+import { site } from "../../data/site";
 import { prefersReducedMotion } from "../../lib/motion";
 import { TechIconRow } from "./TechIcon";
 
@@ -46,6 +47,7 @@ export function ProjectRail({ entries }: { entries: ContentEntry[] }) {
 
 function PinnedRail({ entries }: { entries: ContentEntry[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const readoutRef = useRef<HTMLSpanElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -55,17 +57,23 @@ function PinnedRail({ entries }: { entries: ContentEntry[] }) {
 
   useEffect(() => {
     const section = sectionRef.current;
+    const sticky = stickyRef.current;
     const track = trackRef.current;
-    if (!section || !track) return;
+    if (!section || !sticky || !track) return;
 
     let frame = 0;
     let lastActive = -1;
+
+    /** Prefer the sticky pane's real height over innerHeight — zoom and
+     *  `svh`/`dvh` disagree with `window.innerHeight`, and that mismatch
+     *  made progress never quite reach 1 (so Back to start never appeared). */
+    const viewportHeight = () => sticky.clientHeight || window.innerHeight;
 
     /** Rail travel drives the section's extra height one-for-one. */
     const layout = () => {
       const travel = Math.max(0, track.scrollWidth - window.innerWidth);
       travelRef.current = travel;
-      section.style.height = `${window.innerHeight + travel}px`;
+      section.style.height = `${viewportHeight() + travel}px`;
       render();
     };
 
@@ -73,7 +81,8 @@ function PinnedRail({ entries }: { entries: ContentEntry[] }) {
       frame = 0;
 
       const travel = travelRef.current;
-      const distance = section.offsetHeight - window.innerHeight;
+      const view = viewportHeight();
+      const distance = Math.max(0, section.offsetHeight - view);
       const scrolled = -section.getBoundingClientRect().top;
       const progress =
         distance > 0 ? Math.min(1, Math.max(0, scrolled / distance)) : 0;
@@ -84,8 +93,9 @@ function PinnedRail({ entries }: { entries: ContentEntry[] }) {
         progressRef.current.style.transform = `scaleX(${Math.max(0.06, progress)})`;
       }
 
-      setAtStart(progress <= 0.001);
-      setAtEnd(progress >= 0.999);
+      // Pixel slack: zoom leaves fractional tops that never hit 0.999 exactly.
+      setAtStart(distance <= 0 || progress <= 0.001);
+      setAtEnd(distance > 0 && scrolled >= distance - 2);
 
       const index = Math.min(
         entries.length - 1,
@@ -107,9 +117,10 @@ function PinnedRail({ entries }: { entries: ContentEntry[] }) {
     window.addEventListener("resize", layout);
 
     // Card widths depend on viewport height, so the track can change size
-    // without a resize event (fonts loading, images decoding).
+    // without a resize event (fonts loading, images decoding, browser zoom).
     const observer = new ResizeObserver(layout);
     observer.observe(track);
+    observer.observe(sticky);
 
     return () => {
       if (frame) cancelAnimationFrame(frame);
@@ -123,8 +134,10 @@ function PinnedRail({ entries }: { entries: ContentEntry[] }) {
   /** Controls move the page, because the page is what drives the rail. */
   const scrollToProgress = (progress: number) => {
     const section = sectionRef.current;
+    const sticky = stickyRef.current;
     if (!section) return;
-    const distance = section.offsetHeight - window.innerHeight;
+    const view = sticky?.clientHeight || window.innerHeight;
+    const distance = Math.max(0, section.offsetHeight - view);
     const top = section.offsetTop + distance * Math.min(1, Math.max(0, progress));
     window.scrollTo({
       top,
@@ -134,8 +147,10 @@ function PinnedRail({ entries }: { entries: ContentEntry[] }) {
 
   const step = (direction: 1 | -1) => {
     const section = sectionRef.current;
+    const sticky = stickyRef.current;
     if (!section) return;
-    const distance = section.offsetHeight - window.innerHeight;
+    const view = sticky?.clientHeight || window.innerHeight;
+    const distance = Math.max(0, section.offsetHeight - view);
     if (distance <= 0) return;
     const current = Math.min(
       1,
@@ -148,14 +163,28 @@ function PinnedRail({ entries }: { entries: ContentEntry[] }) {
 
   return (
     <div ref={sectionRef} className="relative">
-      <div className="sticky top-0 flex h-svh flex-col justify-center overflow-hidden">
-        <div
-          ref={trackRef}
-          className="rail-gutter flex w-max gap-[1.8rem] will-change-transform"
-        >
-          {entries.map((entry, index) => (
-            <ReelCard key={entry.meta.slug} entry={entry} index={index + 1} />
-          ))}
+      {/*
+        Start-aligned (not centered): the projects masthead sits above this
+        shelf, so vertical centering left a large empty band under the lede.
+        Top padding clears the fixed header once the shelf pins to the viewport.
+        Overflow is clipped on the track only — clipping the whole pane hid
+        Back to start whenever cards + chrome exceeded the zoomed viewport.
+      */}
+      <div
+        ref={stickyRef}
+        className="sticky top-0 flex h-svh flex-col justify-start pt-16 md:pt-20"
+      >
+        {/* Clip the track alone so sideways travel cannot spill; keep controls
+            packed under the cards (not flexed to the bottom of the pane). */}
+        <div className="shrink-0 overflow-x-hidden">
+          <div
+            ref={trackRef}
+            className="rail-gutter flex w-max gap-[1.8rem] will-change-transform"
+          >
+            {entries.map((entry, index) => (
+              <ReelCard key={entry.meta.slug} entry={entry} index={index + 1} />
+            ))}
+          </div>
         </div>
 
         <RailControls
@@ -167,7 +196,22 @@ function PinnedRail({ entries }: { entries: ContentEntry[] }) {
           onPrevious={() => step(-1)}
           onNext={() => step(1)}
           onBackToStart={() => scrollToProgress(0)}
-          hint="Scroll to move along the shelf — every reel opens a case study"
+          hint={
+            <>
+              Looking for more? Check my repositories on{" "}
+              <a
+                href={site.links.github}
+                target="_blank"
+                rel="noreferrer noopener"
+                className="group inline-flex items-baseline gap-2.5"
+              >
+                <span>GitHub</span>
+                <span className="text-[1rem] font-normal normal-case tracking-normal text-ink-muted transition-colors duration-200 group-hover:text-ink">
+                  <span className="link-wipe">JanBancerewicz</span>
+                </span>
+              </a>
+            </>
+          }
         />
       </div>
     </div>
@@ -316,10 +360,10 @@ function RailControls({
   onPrevious: () => void;
   onNext: () => void;
   onBackToStart: () => void;
-  hint: string;
+  hint: React.ReactNode;
 }) {
   return (
-    <div className="rail-gutter mt-6 shrink-0">
+    <div className="rail-gutter mt-4 shrink-0">
       <div className="flex items-center gap-5">
         <span className="label shrink-0 tabular-nums" data-rail-readout>
           <span ref={readoutRef}>01</span>
@@ -346,7 +390,7 @@ function RailControls({
       </div>
 
       <div className="mt-4 flex min-h-8 items-center justify-between gap-4">
-        <p className="label">{hint}</p>
+        <p className="label min-w-0">{hint}</p>
 
         {/* Raised only once there is nothing left to the right. */}
         <button
@@ -464,7 +508,7 @@ const ReelCard = memo(function ReelCard({
           <TechIconRow labels={meta.tags} className="mt-3.5 text-white/85" max={4} />
 
           <span className="label mt-3.5 flex items-center gap-2 text-white/70 transition-colors duration-200 group-hover:text-white">
-            Open case study
+            Explore project
             <span
               aria-hidden="true"
               className="transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1"

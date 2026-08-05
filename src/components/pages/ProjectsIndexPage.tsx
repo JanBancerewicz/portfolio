@@ -14,10 +14,10 @@ import { ProjectRail } from "../ui/ProjectRail";
  */
 export function ProjectsIndexPage() {
   return (
-    <main>
+    <div>
       <Container>
         <Reveal
-          className="flex items-baseline justify-between gap-6 border-b border-rule pb-4 pt-28 md:pt-32"
+          className="flex items-baseline justify-between gap-6 border-b border-rule pb-4 pt-20 md:pt-24"
           duration={480}
         >
           <Link to="/" className="label text-ink">
@@ -31,8 +31,15 @@ export function ProjectsIndexPage() {
           delay={100}
           step={70}
         >
-          Everything I have <em>actually shipped</em>.
+          Showcase of <em>selected projects</em>.
         </SplitLines>
+
+        <Reveal className="mt-5 max-w-3xl" delay={280}>
+          <p className="text-[1.0625rem] leading-relaxed text-ink-muted md:text-[1.125rem]">
+            Full-stack applications and research projects and that show my passion for software engineering.
+            Built to deliver value and learn from each project.
+          </p>
+        </Reveal>
       </Container>
 
       {/*
@@ -40,9 +47,9 @@ export function ProjectsIndexPage() {
         the wrapper, which creates a containing block and breaks the sticky
         positioning the pinned rail depends on.
       */}
-      <div className="mt-6 md:mt-8">
+      <div className="mt-4 md:mt-5">
         <ProjectRail entries={projectEntries} />
       </div>
-    </main>
+    </div>
   );
 }

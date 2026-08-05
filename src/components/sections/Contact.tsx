@@ -34,7 +34,7 @@ export function Contact({ index = "06" }: { index?: string }) {
 
             <Reveal className="mt-8 max-w-lg" delay={160}>
               <p className="text-[1.125rem] leading-relaxed text-ink-muted">
-                The fastest way to reach me is LinkedIn or Mail — I read every message and
+                LinkedIn or email, whichever you prefer — I read everything and
                 reply within a day or two. Tell me what you are building and I
                 will tell you honestly whether I am the right person for it.
               </p>
@@ -63,7 +63,7 @@ export function Contact({ index = "06" }: { index?: string }) {
               </a>
               <a
                 href={`mailto:${site.email}`}
-                className="press group inline-flex items-center justify-between gap-8 rounded-full border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
+                className="press group inline-flex items-center justify-between gap-8 rounded-sm border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
               >
                 Email instead
                 <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">

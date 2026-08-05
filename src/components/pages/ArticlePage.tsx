@@ -23,7 +23,7 @@ export function ArticlePage({ kind }: { kind: ContentKind }) {
   const basePath = kind === "project" ? "/projects" : "/blog";
 
   return (
-    <main>
+    <div>
       <PageIntro
         eyebrow={kind === "project" ? "Case study" : "Post"}
         title={meta.title}
@@ -62,7 +62,7 @@ export function ArticlePage({ kind }: { kind: ContentKind }) {
                 href={link.href}
                 target="_blank"
                 rel="noreferrer noopener"
-                className="press group inline-flex items-center gap-3 rounded-full border border-rule-strong px-5 py-2.5 text-[0.9375rem] font-medium transition-colors duration-200 hover:border-ink"
+                className="press group inline-flex items-center gap-3 rounded-sm border border-rule-strong px-5 py-2.5 text-[0.9375rem] font-medium transition-colors duration-200 hover:border-ink"
               >
                 {link.label}
                 <span className="text-accent transition-transform duration-200 ease-out group-hover:translate-x-0.5">
@@ -96,7 +96,7 @@ export function ArticlePage({ kind }: { kind: ContentKind }) {
       </Container>
 
       <CallToAction />
-    </main>
+    </div>
   );
 }
 

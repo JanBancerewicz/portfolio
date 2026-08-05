@@ -23,27 +23,48 @@ const root = join(here, "..");
  * plus a re-run.
  */
 const MAP = {
+  // Languages
   Python: "siPython",
-  "C++": "siCplusplus",
   TypeScript: "siTypescript",
+  "C++": "siCplusplus",
+  Java: "siOpenjdk",
   Kotlin: "siKotlin",
+
+  // Core AI / ML frameworks
   PyTorch: "siPytorch",
+  "Hugging Face": "siHuggingface",
   Transformers: "siHuggingface",
   "scikit-learn": "siScikitlearn",
-  NumPy: "siNumpy",
-  Pandas: "siPandas",
   OpenCV: "siOpencv",
-  "NVIDIA Jetson": "siNvidia",
+  "vLLM / Ollama": "siVllm",
+
+  // GenAI & LLM stack
+  "Qdrant / ChromaDB": "siQdrant",
+  "Anthropic/OpenAI API": "siAnthropic",
+
+  // Backend & data
   FastAPI: "siFastapi",
+  Flask: "siFlask",
   PostgreSQL: "siPostgresql",
+  Redis: "siRedis",
+  MongoDB: "siMongodb",
+  Pandas: "siPandas",
+  NumPy: "siNumpy",
+  PyTest: "siPytest",
+
+  // Cloud, web & devops
   Docker: "siDocker",
-  Linux: "siLinux",
-  Git: "siGit",
-  "CI/CD": "siGithubactions",
+  Kubernetes: "siKubernetes",
+  "Azure Databricks": "siDatabricks",
+  "React / Next.js": "siReact",
   React: "siReact",
   Vite: "siVite",
   "Tailwind CSS": "siTailwindcss",
   MDX: "siMdx",
+  Linux: "siLinux",
+  Git: "siGit",
+  "CI/CD": "siGithubactions",
+  "NVIDIA Jetson": "siNvidia",
 };
 
 const icons = {};

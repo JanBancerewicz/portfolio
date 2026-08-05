@@ -11,7 +11,7 @@ export function BlogIndexPage() {
   const [lead, ...rest] = postEntries;
 
   return (
-    <main>
+    <div>
       <PageIntro
         eyebrow={`${postEntries.length} posts`}
         title={
@@ -102,6 +102,6 @@ export function BlogIndexPage() {
         headline="Rather talk than read?"
         body="I am always up for a conversation about LLMs, applied ML or getting a model into production. LinkedIn is the fastest way to reach me."
       />
-    </main>
+    </div>
   );
 }

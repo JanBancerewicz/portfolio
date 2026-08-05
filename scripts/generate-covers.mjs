@@ -15,13 +15,13 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
 
-let PAPER = "#efeee8";
-let INK = "#16150f";
+let PAPER = "#e6eaed";
+let INK = "#10161c";
 const ACCENT = "#0073ff";
 
 /** Vertical posters are drawn dark, so overlaid white reel text reads cleanly. */
-const POSTER_PAPER = "#131319";
-const POSTER_INK = "#e8e7e0";
+const POSTER_PAPER = "#0f141b";
+const POSTER_INK = "#e2e7ec";
 
 const W = 1200;
 const H = 800;

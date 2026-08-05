@@ -27,14 +27,19 @@ export default function App() {
     <>
       <ScrollBehaviour />
       <Header />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/projects" element={<ProjectsIndexPage />} />
-        <Route path="/projects/:slug" element={<ArticlePage kind="project" />} />
-        <Route path="/blog" element={<BlogIndexPage />} />
-        <Route path="/blog/:slug" element={<ArticlePage kind="post" />} />
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
+      <main id="main">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/projects" element={<ProjectsIndexPage />} />
+          <Route
+            path="/projects/:slug"
+            element={<ArticlePage kind="project" />}
+          />
+          <Route path="/blog" element={<BlogIndexPage />} />
+          <Route path="/blog/:slug" element={<ArticlePage kind="post" />} />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </main>
       {showFooter ? <Footer /> : null}
     </>
   );

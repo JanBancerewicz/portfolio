@@ -1,5 +1,6 @@
 import { hackathons } from "../../data/hackathons";
 import { Reveal } from "../motion/Reveal";
+import { ContourField } from "../ui/ContourField";
 import { Container } from "../ui/Container";
 import { SectionHeader } from "../ui/SectionHeader";
 
@@ -7,15 +8,20 @@ export function Hackathons() {
   const wins = hackathons.filter((entry) => entry.highlight).length;
 
   return (
-    <section id="hackathons" className="scroll-mt-24 pt-28 md:pt-40">
+    <section
+      id="hackathons"
+      className="relative isolate mt-24 scroll-mt-24 pb-20 pt-24 md:mt-32 md:pb-28 md:pt-32"
+    >
+      {/* Edge-to-edge tonal band: this section reads as its own chapter. */}
+      <div aria-hidden="true" className="absolute inset-0 -z-20 bg-paper-sunken" />
+      <ContourField seed={11} levels={14} intensity={0.035} />
       <Container>
         <SectionHeader
           index="02"
           title="Hackathons & competitions"
           lede={
             <>
-              Where most of my applied AI work starts: a weekend, a hard problem
-              and no time to be precious about the approach.
+              How I enjoy spending my weekends: <br/>a complex problem, something impactful to build <br/>and zero time for overthinking.
             </>
           }
           aside={`${wins} podium ${wins === 1 ? "finish" : "finishes"}`}
@@ -69,7 +75,7 @@ export function Hackathons() {
               <div className="md:col-span-4 md:pt-1 md:text-right">
                 <div
                   className={`text-lg font-medium tracking-[-0.02em] md:text-xl ${
-                    entry.highlight ? "text-accent" : "text-ink"
+                    entry.highlight ? "text-accent-text" : "text-ink"
                   }`}
                 >
                   {entry.result}

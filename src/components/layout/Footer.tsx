@@ -4,7 +4,7 @@ import { Container } from "../ui/Container";
 
 export function Footer() {
   return (
-    <footer className="mt-32 border-t border-rule pb-10 pt-10 md:mt-44">
+    <footer className="mt-16 border-t border-rule pb-10 pt-10 md:mt-24">
       <Container>
         <div className="grid gap-8 md:grid-cols-12">
           <div className="md:col-span-5">

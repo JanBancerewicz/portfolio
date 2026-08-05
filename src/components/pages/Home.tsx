@@ -9,7 +9,7 @@ import { Writing } from "../sections/Writing";
 
 export function Home() {
   return (
-    <main>
+    <div>
       <Hero />
       <TechRibbon />
       <Work />
@@ -18,6 +18,6 @@ export function Home() {
       <Writing />
       <Stack />
       <Contact />
-    </main>
+    </div>
   );
 }

@@ -38,7 +38,7 @@ export function CallToAction({
             </a>
             <a
               href={`mailto:${site.email}`}
-              className="press group inline-flex items-center justify-between gap-8 rounded-full border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
+              className="press group inline-flex items-center justify-between gap-8 rounded-sm border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
             >
               {site.email}
               <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">

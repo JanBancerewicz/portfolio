@@ -20,9 +20,8 @@ export function Work() {
           title="Selected work"
           lede={
             <>
-              Research, production systems and things built against a clock. Each
-              has a write-up with the decisions, the numbers, and the parts that
-              did not work.
+              My flagship research and full-stack projects.
+              Each breakdown highlights architectural decisions, real-world metrics, and key takeaways.
             </>
           }
           aside={
@@ -34,10 +33,29 @@ export function Work() {
 
         <LeadProject entry={lead} />
 
-        <div className="mt-16 grid gap-x-8 gap-y-14 md:mt-24 md:grid-cols-2 lg:gap-x-12">
-          {rest.map((entry, index) => (
-            <ProjectCard key={entry.meta.slug} entry={entry} index={index + 2} />
-          ))}
+        {/*
+          Not a symmetric two-up. The order of `featuredProjects` is a ranking,
+          so the columns are weighted 7/5 to say so, and the narrower card drops
+          half a step to break the shared baseline. Odd cards past the first
+          pair fall back to the wider slot.
+        */}
+        <div className="mt-16 grid gap-x-8 gap-y-14 md:mt-24 md:grid-cols-12 lg:gap-x-12">
+          {rest.map((entry, index) => {
+            const narrow = index % 2 === 1;
+            return (
+              <ProjectCard
+                key={entry.meta.slug}
+                entry={entry}
+                index={index + 2}
+                ratio={narrow ? "4 / 3" : "16 / 10"}
+                className={
+                  narrow
+                    ? "md:col-span-5 md:mt-14"
+                    : "md:col-span-7"
+                }
+              />
+            );
+          })}
         </div>
       </Container>
     </section>
@@ -83,12 +101,22 @@ function LeadProject({ entry }: { entry: ContentEntry }) {
   );
 }
 
-function ProjectCard({ entry, index }: { entry: ContentEntry; index: number }) {
+function ProjectCard({
+  entry,
+  index,
+  ratio,
+  className = "",
+}: {
+  entry: ContentEntry;
+  index: number;
+  ratio: string;
+  className?: string;
+}) {
   const { meta } = entry;
 
   return (
-    <Link to={`/projects/${meta.slug}`} className="group block">
-      <CoverReveal src={meta.cover} alt="" ratio="4 / 3" className="rounded-sm" />
+    <Link to={`/projects/${meta.slug}`} className={`group block ${className}`}>
+      <CoverReveal src={meta.cover} alt="" ratio={ratio} className="rounded-sm" />
 
       <Reveal className="mt-5" delay={80}>
         <div className="label mb-2.5">

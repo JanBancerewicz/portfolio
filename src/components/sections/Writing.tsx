@@ -17,8 +17,7 @@ export function Writing() {
           title="Writing"
           lede={
             <>
-              Notes on the things that took me longest to figure out. Mostly
-              LLMs, computer vision and how to evaluate either one honestly.
+              Notes on the technical topics that might interest you.
             </>
           }
           aside={

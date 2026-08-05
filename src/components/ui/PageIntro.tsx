@@ -16,7 +16,8 @@ export function PageIntro({ eyebrow, title, lede, meta }: PageIntroProps) {
   return (
     <Container>
       <Reveal
-        className="flex items-baseline justify-between gap-6 border-b border-rule pb-4 pt-32 md:pt-40"
+        // className="flex items-baseline justify-between gap-6 border-b border-rule pb-4 pt-32 md:pt-40"
+        className="flex items-baseline justify-between gap-6 border-b border-rule pb-4 pt-20 md:pt-24"
         duration={480}
       >
         <Link to="/" className="label text-ink">

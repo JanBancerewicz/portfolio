@@ -11,22 +11,37 @@
 :root {
   color-scheme: light;
 
-  --paper: #f2f1ec;
-  --paper-raised: #fbfaf7;
-  --paper-sunken: #e7e5dd;
-  --ink: #16150f;
-  --ink-muted: #57544a;
-  --ink-faint: #8b887b;
-  --rule: rgba(22, 21, 15, 0.14);
-  --rule-strong: rgba(22, 21, 15, 0.28);
+  /*
+   * Chart paper, not cream. The old #f2f1ec sat three hex off the warm cream
+   * that AI-generated design defaults to, and it fought the blue accent. This
+   * is a cool grey keyed to the contour surface behind the page — closer to a
+   * topographic chart, which is what the background actually is.
+   */
+  --paper: #eceef0;
+  --paper-raised: #f7f8f9;
+  --paper-sunken: #dfe3e6;
+  --ink: #10161c;
+  --ink-muted: #4c565f;
+  /* Was #8b887b — 2.9:1 on paper, under the 4.5:1 floor for label text. */
+  --ink-faint: #5c656e;
+  --rule: rgba(16, 22, 28, 0.14);
+  --rule-strong: rgba(16, 22, 28, 0.3);
   /* --accent: #d93f1c; */
   --accent: #0073ff;
-  --accent-ink: #fbfaf7;
+  /*
+   * The brand blue is 3.69:1 on paper — fine as a fill, a rule or a mark, and
+   * fine for display type at the large-text threshold, but under AA for
+   * anything read at body or label size. Words get this darkened variant of the
+   * same hue instead of the accent losing its identity: 5.31:1 on paper,
+   * 4.78:1 on the sunken band.
+   */
+  --accent-text: #005ccc;
+  --accent-ink: #f7f8f9;
   --accent-wash: color-mix(in srgb, var(--accent) 9%, transparent);
-  --shadow-card: 0 1px 2px rgba(22, 21, 15, 0.05),
-    0 14px 34px -20px rgba(22, 21, 15, 0.4);
-  --selection-bg: #16150f;
-  --selection-fg: #f2f1ec;
+  --shadow-card: 0 1px 2px rgba(16, 22, 28, 0.05),
+    0 14px 34px -20px rgba(16, 22, 28, 0.4);
+  --selection-bg: #10161c;
+  --selection-fg: #eceef0;
 
   /* Strong custom curves — built-in CSS easings are too weak. */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
@@ -44,22 +59,25 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
-  --paper: #0e0e0b;
-  --paper-raised: #18170f;
-  --paper-sunken: #070706;
-  --ink: #ecebe3;
-  --ink-muted: #9c998e;
-  --ink-faint: #6b685f;
-  --rule: rgba(236, 235, 227, 0.16);
-  --rule-strong: rgba(236, 235, 227, 0.32);
+  --paper: #0a0d11;
+  --paper-raised: #121720;
+  --paper-sunken: #05070a;
+  --ink: #e7ebf0;
+  --ink-muted: #98a2ad;
+  /* Was #6b685f — 3.8:1 on paper. */
+  --ink-faint: #7b8592;
+  --rule: rgba(231, 235, 240, 0.16);
+  --rule-strong: rgba(231, 235, 240, 0.32);
   /* --accent: #ff6a4d; */
   --accent: #0b83fa;
-  --accent-ink: #16150f;
+  /* On dark paper the accent already clears AA at 5.23:1, so no split needed. */
+  --accent-text: #0b83fa;
+  --accent-ink: #0a0d11;
   --accent-wash: color-mix(in srgb, var(--accent) 14%, transparent);
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 44px -22px rgba(0, 0, 0, 0.85);
   /* --selection-bg: #ff6a4d; */
   --selection-bg: #0b83fa;
-  --selection-fg: #16150f;
+  --selection-fg: #0a0d11;
 }
 
 @theme inline {
@@ -72,6 +90,7 @@
   --color-rule: var(--rule);
   --color-rule-strong: var(--rule-strong);
   --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
   --color-accent-ink: var(--accent-ink);
   --color-accent-wash: var(--accent-wash);
 
@@ -152,7 +171,7 @@ body {
 }
 
 .section-eyebrow-index {
-  color: var(--accent);
+  color: var(--accent-text);
 }
 
 @media (min-width: 768px) {
@@ -369,7 +388,53 @@ html.js [data-split][data-split-ready] {
  */
 .reel-card {
   aspect-ratio: 9 / 13;
-  height: max(19rem, min(64vh, 36rem, 74vw * 1.4444));
+  /* Cap against the pinned chrome (header pad + controls) so zoomed viewports
+     do not push Back to start below the clip edge. */
+  height: max(
+    16rem,
+    min(64vh, 36rem, 74vw * 1.4444, calc(100svh - 14rem))
+  );
+}
+
+/* Section backdrops fade out at their edges so neighbouring sections blend
+   instead of butting up against a hard rectangle of lines. */
+/* Off-screen until focused, then it lands over the masthead. */
+.skip-link {
+  position: absolute;
+  top: 0.5rem;
+  left: 0.75rem;
+  z-index: 60;
+  transform: translateY(-160%);
+  border-radius: 9999px;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0.625rem 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: transform 200ms var(--ease-out);
+}
+
+/* `:focus`, not `:focus-visible` — the link is unreachable by pointer, so any
+   focus at all is keyboard focus and must reveal it. */
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.contour-field {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 18%,
+    #000 82%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    #000 18%,
+    #000 82%,
+    transparent
+  );
 }
 
 /* ---------------------------------------------------------------------------
@@ -462,13 +527,10 @@ html.js [data-split][data-split-ready] {
   color: rgba(255, 255, 255, 0.22);
 }
 
-/* Brand marks sit monochrome until hovered. */
-.tech-mark svg {
-  color: inherit;
-}
-
+/* Brand marks sit monochrome until hovered, then take their own colour.
+   Concept glyphs have no `--brand`, so they simply stay on `currentColor`. */
 @media (hover: hover) and (pointer: fine) {
-  .tech-mark:hover svg {
+  .tech-mark:hover svg[style*="--brand"] {
     color: var(--brand);
   }
 }

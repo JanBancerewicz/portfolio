@@ -5,7 +5,7 @@ import { Container } from "../ui/Container";
 
 export function NotFoundPage() {
   return (
-    <main className="flex min-h-[70vh] items-center">
+    <div className="flex min-h-[70vh] items-center">
       <Container>
         <span className="label">Error 404</span>
         <SplitLines className="display mt-6 text-[clamp(2.5rem,8vw,6rem)]">
@@ -23,12 +23,12 @@ export function NotFoundPage() {
           </Link>
           <Link
             to="/projects"
-            className="press rounded-full border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
+            className="press rounded-sm border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
           >
             See the projects
           </Link>
         </Reveal>
       </Container>
-    </main>
+    </div>
   );
 }

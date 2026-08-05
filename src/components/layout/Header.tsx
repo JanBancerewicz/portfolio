@@ -38,6 +38,11 @@ export function Header() {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50">
+        {/* First thing in the tab order: the nav is six links deep and the page
+            body is the only reason anyone is here. */}
+        <a href="#main" className="skip-link">
+          Skip to content
+        </a>
         <div
           className="relative border-b transition-[background-color,border-color,backdrop-filter] duration-300 ease-out"
           style={{
@@ -62,7 +67,7 @@ export function Header() {
                 <span className="text-[1rem] font-semibold tracking-[-0.02em]">
                   {site.name}
                 </span>
-                <span className="label hidden lg:inline">{site.role}</span>
+                <span className="label hidden lg:inline">{' | my portfolio'}</span>
               </Link>
 
               <nav className="hidden items-center gap-7 md:flex">
@@ -186,7 +191,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
           </a>
           <a
             href={`mailto:${site.email}`}
-            className="press rounded-full border border-rule-strong px-5 py-3.5 text-center text-[1rem] font-medium"
+            className="press rounded-sm border border-rule-strong px-5 py-3.5 text-center text-[1rem] font-medium"
           >
             {site.email}
           </a>

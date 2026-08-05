@@ -377,7 +377,7 @@ export function HeroMosaic({ className = "" }: { className?: string }) {
         >
           {active
             ? `${detections.length} objects detected`
-            : "Point to run detection"}
+            : "Hover: run detection"}
         </span>
       </figcaption>
     </figure>
