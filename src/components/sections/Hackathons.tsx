@@ -5,7 +5,7 @@ import { Container } from "../ui/Container";
 import { SectionHeader } from "../ui/SectionHeader";
 
 export function Hackathons() {
-  const wins = hackathons.filter((entry) => entry.highlight).length;
+  const wins = hackathons.filter((entry) => entry.win).length;
 
   return (
     <section
@@ -42,15 +42,18 @@ export function Hackathons() {
               <div className="label md:col-span-2 md:pt-1.5">{entry.date}</div>
 
               <div className="md:col-span-6">
-                <h3 className="text-xl font-medium tracking-[-0.03em] md:text-[1.625rem]">
+                <h3 className="flex items-start gap-2 text-xl font-medium tracking-[-0.03em] md:text-[1.625rem]">
                   {entry.href ? (
                     <a
                       href={entry.href}
                       target="_blank"
                       rel="noreferrer noopener"
-                      className="link-wipe"
+                      className="group/link flex items-start gap-2"
                     >
-                      {entry.name}
+                      <span className="link-wipe">{entry.name}</span>
+                      <span className="mt-1 shrink-0 text-sm text-accent transition-transform duration-300 ease-out group-hover/link:translate-x-1 group-hover/link:-translate-y-1">
+                        ↗
+                      </span>
                     </a>
                   ) : (
                     entry.name

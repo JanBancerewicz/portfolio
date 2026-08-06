@@ -26,8 +26,7 @@ export function Stack() {
           title="Stack"
           lede={
             <>
-              What I reach for by default — things I have actually trained,
-              shipped or deployed with, not everything I have opened once.
+              Technologies I reach for by default — tools I’ve trained models with, built pipelines around, and shipped to production.
             </>
           }
           aside={`${total} tools`}

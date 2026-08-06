@@ -37,7 +37,7 @@ export function ProjectsIndexPage() {
         <Reveal className="mt-5 max-w-3xl" delay={280}>
           <p className="text-[1.0625rem] leading-relaxed text-ink-muted md:text-[1.125rem]">
             Full-stack applications and research projects and that show my passion for software engineering.
-            Built to deliver value and learn from each project.
+            Built to deliver real value and learn from each project.
           </p>
         </Reveal>
       </Container>

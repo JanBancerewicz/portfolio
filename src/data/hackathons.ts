@@ -4,7 +4,9 @@ export type Hackathon = {
   date: string;
   /** Short enough to sit on one line — "1st place", "Finalist", "Top 10". */
   result: string;
-  /** Set on genuine wins; drives the accent treatment in the list. */
+  /** Podium / win — drives the section aside count, not styling. */
+  win?: boolean;
+  /** Accent treatment on the result line; independent of whether it was a win. */
   highlight?: boolean;
   role: string;
   what: string;
@@ -14,51 +16,61 @@ export type Hackathon = {
 
 export const hackathons: Hackathon[] = [
   {
-    name: "EU Critical Infrastructure Hackathon",
-    organiser: "Gdańsk",
-    date: "Jan 2026",
-    result: "1st place — Energy & Offshore",
+    name: "AMPPZ – Polish Collegiate Programming Contest (2x)",
+    organiser: "Warsaw – University of Warsaw",
+    date: "Nov 2024 & 2025",
+    result: "34th nationally in 2024",
+    win: false,
     highlight: true,
-    role: "ML & backend",
-    what: "We added a security layer over telemetry from PV inverters, flagging manipulated readings before they reach the operator. Judged by an international panel of industry experts and investors, and we are still developing it.",
-    tags: ["Anomaly detection", "Energy", "Python"],
+    role: "Representing Gdańsk University of Technology",
+    // what: "Representing Gdańsk Tech at Poland’s collegiate programming contest (ICPC) since 2024, placing #34 nationally in 2024 and #55 in 2025. As President of the Sfera PG Algorithmic Club, I lead team training in advanced algorithms, complex data structures, and high-pressure problem-solving in C++.",
+    what: "Representing my university in the Polish collegiate programming contest (ICPC) since 2024, placing #34 nationally in 2024 and #55 in 2025. As President of the Sfera PG Algorithmic Club, I lead team training in advanced algorithms, complex data structures, and high-pressure problem-solving in C++.",
+    tags: ["Algorithms & Data Structures", "ICPC","C++"],
+    href: "https://amppz.edu.pl/"
   },
   {
-    name: "Neurohackathon HoTB",
-    organiser: "Wrocław — the largest neuroscience hackathon in Poland",
+    name: "EU Critical Infrastructure Hackathon",
+    organiser: "Gdańsk – Gdańsk Science and Technology Park",
+    date: "Jan 2026",
+    result: "1st place",
+    win: true,
+    highlight: true,
+    role: "Energy & Offshore category",
+    what: "Engineered a security layer for PV inverters, insulating critical grid infrastructure from remote cyberattacks through real-time anomaly detection for remote control. Evaluated and awarded 1st place by an international jury of industry experts.",
+    tags: ["Cybersecurity", "Energy", "Modbus32", "Embedded", "React Native"],
+    href: "https://criticalhackathon.com/"
+  },
+  {
+    name: "Heroes of the Brain – Neurohackathon",
+    organiser: "Wrocław – Wrocław University of Science and Technology",
     date: "Nov 2025",
     result: "2nd place",
+    win: true,
     highlight: true,
     role: "Signal processing & modelling",
-    what: "Raw EEG from an 8-channel headband, per-channel frequency and brain-activity features, and a classifier that read emotional state in real time — end to end inside the event.",
-    tags: ["EEG", "Realtime ML", "Feature engineering"],
+    what: "Developed AuraCloud: a closed-loop Brain-Computer Interface translating 8-channel raw EEG into a continuous three-dimensional emotional space (PAD model) and an automated stimulus path using OASIS dataset to actively guide user mood.",
+    tags: ["BCI", "EEG", "Signal Processing", "Dash", "Python"],
+    href: "https://heroesofthebrain.pwr.edu.pl/"
   },
   {
-    name: "AMPPZ — Polish Collegiate Programming Contest",
-    organiser: "Representing Gdańsk University of Technology",
-    date: "2024 & 2025",
-    result: "#1 in Pomerania, #3 in 2025",
-    highlight: true,
-    role: "Team contestant",
-    what: "#1 regionally and #34 nationally in 2024, then #3 regionally and #55 nationally in 2025. Competitive programming is where the rest of this got its speed; the next edition is November 2026.",
-    tags: ["C++", "Algorithms", "Team of 3"],
-  },
-  {
-    name: "Hackology II",
-    organiser: "Lublin",
+    name: "Hackology II – AI Hackathon",
+    organiser: "Lublin – Lublin University of Technology",
     date: "May 2026",
     result: "Shipped a full pipeline",
-    role: "Computer vision",
-    what: "A four-stage pipeline for retail shelf product recognition: YOLO detection, embedding-based retrieval, heuristic reranking, then contextual reranking — scored on COCO-format boxes at mAP@0.5.",
-    tags: ["YOLO", "Embeddings", "Reranking"],
+    role: "Computer vision & Object Detection",
+    what: "Built a 369-class retail product detection pipeline evaluated on mAP@0.5. Combined YOLO and RF-DETR detection with embedding-based retrieval and multi-step reranking to identify products on dense store shelves.",
+    tags: ["Computer Vision", "YOLO", "RF-DETR", "Machine Learning","Python"],
+    href: "https://hackology.com.pl/"
   },
   {
     name: "HackYeah",
-    organiser: "Poland's largest stationary hackathon",
+    organiser: "Kraków – Tauron Arena",
     date: "2025",
     result: "Solo debut, high score",
-    role: "Solo",
-    what: "My first hackathon, entered alone and scored well enough to be worth doing again. Everything above followed from it.",
-    tags: ["Solo", "24h"],
+    role: "Biohacking Category",
+    // what: "My first hackathon! I built StressLess – a real-time mobile biofeedback app measuring heart rate and HRV metrics (RMSSD, SDNN, pNN20) directly via smartphone camera PPG. Integrated an LLM pipeline to analyze physiological signals alongside user context, delivering personal stress analysis and biohacking insights.",
+    what: "My first hackathon! I built StressLess – a mobile biofeedback app measuring heart rate and HRV via smartphone camera PPG. Combined biometric signals with an LLM pipeline to deliver real-time stress analysis and biohacking insights.",
+    tags: ["Android", "Signal Processing", "LLM API", "Java"],
+    href: "https://hackyeah.pl/pl/"
   },
 ];

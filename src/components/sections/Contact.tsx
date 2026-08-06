@@ -12,10 +12,12 @@ export function Contact({ index = "06" }: { index?: string }) {
   return (
     <section id="contact" className="scroll-mt-24 pt-28 md:pt-40">
       <Container>
-        <div className="border-t border-rule-strong pt-3">
-          <span className="label">
-            {index} <span className="mx-1 text-rule-strong">/</span> Contact
-          </span>
+        <div className="border-t-2 border-ink pt-4">
+          <h2 className="section-eyebrow">
+            <span className="section-eyebrow-index">{index}</span>
+            <span className="mx-2 text-rule-strong">/</span>
+            Contact
+          </h2>
         </div>
 
         <div className="mt-12 grid gap-14 md:mt-16 md:grid-cols-12 md:gap-10">
@@ -25,16 +27,16 @@ export function Contact({ index = "06" }: { index?: string }) {
               className="display text-[clamp(2.5rem,7vw,5.5rem)]"
               step={80}
             >
-              If any of this looks
+              If this matches what
               <br />
-              like <em>your problem</em> —
+              you are <em>looking for</em>
               <br />
-              say hello.
+              – say hello.
             </SplitLines>
 
             <Reveal className="mt-8 max-w-lg" delay={160}>
               <p className="text-[1.125rem] leading-relaxed text-ink-muted">
-                LinkedIn or email, whichever you prefer — I read everything and
+                LinkedIn or email, whichever you prefer – I read everything and
                 reply within a day or two. Tell me what you are building and I
                 will tell you honestly whether I am the right person for it.
               </p>
