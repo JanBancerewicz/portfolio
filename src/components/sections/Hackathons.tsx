@@ -6,6 +6,7 @@ import { SectionHeader } from "../ui/SectionHeader";
 
 export function Hackathons() {
   const wins = hackathons.filter((entry) => entry.win).length;
+  const comps = hackathons.length + 1;
 
   return (
     <section
@@ -24,7 +25,13 @@ export function Hackathons() {
               How I enjoy spending my weekends: <br/>a complex problem, something impactful to build <br/>and zero time for overthinking.
             </>
           }
-          aside={`${wins} podium ${wins === 1 ? "finish" : "finishes"}`}
+          aside={
+            <>
+              {comps} programming challenges
+              <br />
+              {wins} podium {wins === 1 ? "finish" : "finishes"}
+            </>
+          }
         />
 
         <Reveal className="border-t border-rule" stagger={70}>

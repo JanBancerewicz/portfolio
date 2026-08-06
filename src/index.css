@@ -490,6 +490,10 @@ html.js [data-split][data-split-ready] {
   color: var(--term-dim);
 }
 
+.terminal-accent {
+  color: var(--term-accent);
+}
+
 .terminal-error {
   color: #ff8a6d;
 }

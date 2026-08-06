@@ -12,8 +12,13 @@ import { site } from "../../data/site";
  * command answers in one frame.
  */
 
-/** A run of output text, optionally a link. */
-type Segment = { text: string; href?: string; internal?: boolean };
+/** A run of output text, optionally a link or tonal cue. */
+type Segment = {
+  text: string;
+  href?: string;
+  internal?: boolean;
+  tone?: "dim" | "accent";
+};
 type Line = { kind: "prompt" | "out" | "dim" | "error"; segments: Segment[] };
 
 const HOST = "jan@portfolio";
@@ -22,6 +27,21 @@ const CWD = "~";
 const text = (value: string): Line => ({ kind: "out", segments: [{ text: value }] });
 const dim = (value: string): Line => ({ kind: "dim", segments: [{ text: value }] });
 const fail = (value: string): Line => ({ kind: "error", segments: [{ text: value }] });
+/** Empty visual gap between blocks — terminals read better with air. */
+const blank = (): Line => ({ kind: "out", segments: [{ text: "\u00A0" }] });
+/** Accent marker + body on one line (e.g. `◆  fact…`). */
+const fact = (body: string): Line => ({
+  kind: "out",
+  segments: [
+    { text: "◆  ", tone: "accent" },
+    { text: body },
+  ],
+});
+/** Indented continuation under a fact (parentheticals, second clause). */
+const factCont = (body: string): Line => ({
+  kind: "dim",
+  segments: [{ text: `   ${body}` }],
+});
 
 const link = (label: string, href: string, internal = false): Line => ({
   kind: "out",
@@ -78,8 +98,26 @@ const commands: Record<string, Command> = {
     describe: "who is this",
     suggest: true,
     run: () => [
-      text(`${site.name} — ${site.role}`),
-      dim(site.tagline),
+      {
+        kind: "out" as const,
+        segments: [
+          { text: site.name, tone: "accent" as const },
+          { text: ` — ${site.role}` },
+        ],
+      },
+      dim(`${site.location}  ·  ${site.availability.label}`),
+      blank(),
+      fact("Final-year CS student at Gdańsk University of Technology"),
+      factCont("(B.Sc. expected Feb 2027)"),
+      blank(),
+      fact("Over 1 year of commercial IT experience across 2 internships"),
+      factCont("(DevOps, Data & Software Engineering)"),
+      blank(),
+      fact("Personally specializing in LLMs, GenAI architectures, and AI engineering"),
+      factCont("— seeking roles in this stack"),
+      blank(),
+      fact("Hackathons, tech industry events, and scientific clubs are my hobbies"),
+      factCont("— always excited to be there"),
     ],
   },
 
@@ -430,7 +468,12 @@ function TerminalLine({ line }: { line: Line }) {
             {segment.text}
           </a>
         ) : (
-          <span key={index}>{segment.text}</span>
+          <span
+            key={index}
+            className={segment.tone ? `terminal-${segment.tone}` : undefined}
+          >
+            {segment.text}
+          </span>
         ),
       )}
     </p>

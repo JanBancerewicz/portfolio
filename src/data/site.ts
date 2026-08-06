@@ -9,7 +9,7 @@ export const site = {
   role: "AI & software developer",
   tagline:
     // "I work on applied machine learning — LLM interpretability, computer vision and biosignal models — and on the software that has to carry them in production.",
-    "I work on applied machine learning — LLM interpretability, computer vision, and model optimization — as well as the software systems needed to carry them in production. Final-year CS student at Gdańsk Tech, spending my free time competing at hackathons and conducting AI research.",
+    "I work on applied machine learning: LLM interpretability, computer vision, and model optimization – as well as the full-stack systems needed to carry them in production. Final-year CS student at Gdańsk Tech with over 1 year of commercial experience in IT, spending my free time competing at hackathons and conducting AI research.",
   location: "Gdańsk, Poland",
   timezone: "Europe/Warsaw",
   availability: {
@@ -40,4 +40,6 @@ export const stats = [
   { value: 23, suffix: "+", label: "Projects shipped" },
   { value: 6, suffix: "", label: "Hackathons entered" },
   { value: 8, suffix: "+", label: "Certifications earned" },
+  { value: 1, suffix: "+", label: "Years of commercial xp" },
+  // { value: 1, suffix: "+", label: "Years of commercial experience" },
 ] as const;

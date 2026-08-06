@@ -24,7 +24,7 @@ export const hackathons: Hackathon[] = [
     highlight: true,
     role: "Representing Gdańsk University of Technology",
     // what: "Representing Gdańsk Tech at Poland’s collegiate programming contest (ICPC) since 2024, placing #34 nationally in 2024 and #55 in 2025. As President of the Sfera PG Algorithmic Club, I lead team training in advanced algorithms, complex data structures, and high-pressure problem-solving in C++.",
-    what: "Representing my university in the Polish collegiate programming contest (ICPC) since 2024, placing #34 nationally in 2024 and #55 in 2025. As President of the Sfera PG Algorithmic Club, I lead team training in advanced algorithms, complex data structures, and high-pressure problem-solving in C++.",
+    what: "Representing my university in the Polish collegiate programming contest (ICPC) since 2024, placing #34 nationally in 2024 and #55 in 2025 (out of ~80 teams). \u00A0 As President of the Sfera PG Algorithmic Club, I lead team training in advanced algorithms, complex data structures, and high-pressure problem-solving in C++.",
     tags: ["Algorithms & Data Structures", "ICPC","C++"],
     href: "https://amppz.edu.pl/"
   },
@@ -48,7 +48,7 @@ export const hackathons: Hackathon[] = [
     win: true,
     highlight: true,
     role: "Signal processing & modelling",
-    what: "Developed AuraCloud: a closed-loop Brain-Computer Interface translating 8-channel raw EEG into a continuous three-dimensional emotional space (PAD model) and an automated stimulus path using OASIS dataset to actively guide user mood.",
+    what: "Developed AuraCloud, a Brain-Computer Interface translating raw 8-channel EEG into a continuous three-dimensional emotional space (PAD model) and an automated stimulus path using OASIS dataset to actively guide user mood.",
     tags: ["BCI", "EEG", "Signal Processing", "Dash", "Python"],
     href: "https://heroesofthebrain.pwr.edu.pl/"
   },
@@ -65,7 +65,7 @@ export const hackathons: Hackathon[] = [
   {
     name: "HackYeah",
     organiser: "Kraków – Tauron Arena",
-    date: "2025",
+    date: "Oct 2025",
     result: "Solo debut, high score",
     role: "Biohacking Category",
     // what: "My first hackathon! I built StressLess – a real-time mobile biofeedback app measuring heart rate and HRV metrics (RMSSD, SDNN, pNN20) directly via smartphone camera PPG. Integrated an LLM pipeline to analyze physiological signals alongside user context, delivering personal stress analysis and biohacking insights.",

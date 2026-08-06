@@ -6,16 +6,16 @@ export function Footer() {
   return (
     <footer className="mt-16 border-t border-rule pb-10 pt-10 md:mt-24">
       <Container>
-        <div className="grid gap-8 md:grid-cols-12">
-          <div className="md:col-span-5">
+        <div className="grid gap-8 md:grid-cols-12 items-end">
+          <div className="md:col-span-3">
             <p className="text-[1rem] font-medium">{site.name}</p>
             <p className="label mt-1.5">
-              {site.role} <span className="mx-1 text-rule-strong">/</span>{" "}
-              {site.location}
+              {site.role} <span className="mx-1 text-rule-strong"></span>{" "}
+              {/* {site.location} */}
             </p>
           </div>
 
-          <nav className="flex flex-wrap gap-x-6 gap-y-2 md:col-span-4">
+          <nav className="flex flex-wrap gap-x-6 gap-y-2 md:col-span-7">
             {navigation.map((item) => (
               <Link
                 key={item.href}
@@ -27,7 +27,7 @@ export function Footer() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3 md:col-span-3 md:justify-end">
+          <div className="flex items-center gap-3 md:col-span-2 md:justify-end">
             <a
               href={site.links.linkedin}
               target="_blank"

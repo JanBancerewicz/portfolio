@@ -107,29 +107,41 @@ export function Hero() {
         </div>
 
         {/*
-          A readout, not a stat block. Three giant numbers with small labels is
-          the template answer for a hero closer; setting the same figures in
-          mono at instrument scale keeps the information and drops the cliché.
+          A readout, not a stat block. Stats wrap in their own cluster so a
+          fourth long label cannot get clipped against the location/status
+          group that sits on the right.
         */}
         <Reveal
-          className="mt-16 flex flex-wrap items-baseline gap-x-9 gap-y-3 border-y border-rule py-4 md:mt-20"
-          stagger={60}
+          className="mt-16 flex flex-col gap-4 border-y border-rule py-4 md:mt-20 md:flex-row md:items-baseline md:justify-between md:gap-8"
           delay={760}
         >
-          {stats.map((stat) => (
-            <div key={stat.label} className="flex items-baseline gap-2.5">
-              <span className="font-mono text-[1.375rem] font-medium tracking-[-0.02em] text-ink md:text-[1.5rem]">
-                <Ticker value={stat.value} suffix={stat.suffix} />
-              </span>
-              <span className="label">{stat.label}</span>
-            </div>
-          ))}
+          <div className="flex min-w-0 flex-wrap items-baseline gap-x-7 gap-y-3 md:gap-x-8">
+            {stats.map((stat) => (
+              <div key={stat.label} className="flex items-baseline gap-2.5">
+                <span className="font-mono text-[1.375rem] font-medium tracking-[-0.02em] text-ink md:text-[1.5rem]">
+                  <Ticker value={stat.value} suffix={stat.suffix} />
+                </span>
+                <span className="label">{stat.label}</span>
+              </div>
+            ))}
+          </div>
 
-          <div className="flex items-baseline gap-2.5 md:ml-auto">
-            <span aria-hidden="true" className="text-accent">
-              ◆
-            </span>
-            <span className="label">{site.location}</span>
+          <div className="flex shrink-0 flex-wrap items-baseline gap-x-5 gap-y-2">
+            <div className="flex items-baseline gap-2.5">
+              <span aria-hidden="true" className="text-accent">
+                ◆
+              </span>
+              <span className="label whitespace-nowrap">{site.location}</span>
+            </div>
+            {/* {site.availability.open ? (
+              <div className="flex items-baseline gap-2.5">
+                <span className="relative flex size-1.5 translate-y-[-1px]">
+                  <span className="absolute inset-0 animate-ping rounded-full bg-accent opacity-70" />
+                  <span className="relative size-1.5 rounded-full bg-accent" />
+                </span>
+                <span className="label text-ink">{site.availability.label}</span>
+              </div>
+            ) : null} */}
           </div>
         </Reveal>
 

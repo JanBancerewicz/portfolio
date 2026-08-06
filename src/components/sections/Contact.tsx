@@ -74,15 +74,25 @@ export function Contact({ index = "06" }: { index?: string }) {
               </a>
             </Reveal>
 
+            {/*
+              Content-width strip: equal `lg:grid-cols-4` left a hole between the
+              short CV label and the long ORCID id. Auto columns + `w-fit` pack
+              the four cells and shrink the top rule to match.
+            */}
             <Reveal
-              className="mt-12 grid gap-x-6 gap-y-px border-t border-rule sm:grid-cols-2 lg:grid-cols-4"
+              className="mt-12 grid w-fit max-w-full gap-x-8 gap-y-px border-t border-rule sm:grid-cols-2 lg:grid-cols-[repeat(4,auto)]"
               stagger={60}
             >
               <ContactRow label="LinkedIn" value="jan-bancerewicz" href={site.links.linkedin} />
               <ContactRow label="GitHub" value="JanBancerewicz" href={site.links.github} />
-              <ContactRow label="ORCID" value="0009-0001-3898-5576" href={site.links.orcid} />
               <ContactRow label="CV" value="Download PDF" href={site.links.cv} />
-            </Reveal>
+              <ContactRow
+                label="ORCID"
+                value="0009-0001-3898-5576"
+                href={site.links.orcid}
+                mono
+              />
+            </Reveal> 
           </div>
 
           <div className="md:col-span-5">
@@ -98,10 +108,13 @@ function ContactRow({
   label,
   value,
   href,
+  mono = false,
 }: {
   label: string;
   value: string;
   href: string;
+  /** Set an identifier rather than a name — mono, tabular, never broken. */
+  mono?: boolean;
 }) {
   const external = href.startsWith("http");
 
@@ -112,7 +125,13 @@ function ContactRow({
       className="group flex items-baseline justify-between gap-3 border-b border-rule py-4 sm:flex-col sm:items-start sm:gap-2 sm:border-b-0"
     >
       <span className="label">{label}</span>
-      <span className="text-[1rem] text-ink-muted transition-colors duration-200 group-hover:text-ink">
+      <span
+        className={`whitespace-nowrap text-ink-muted transition-colors duration-200 group-hover:text-ink ${
+          mono
+            ? "font-mono text-[0.875rem] tabular-nums"
+            : "text-[1rem]"
+        }`}
+      >
         <span className="link-wipe">{value}</span>
       </span>
     </a>
