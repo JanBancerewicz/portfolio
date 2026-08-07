@@ -8,7 +8,7 @@ import { Terminal } from "../ui/Terminal";
  * Shared by the homepage and every index page, so there is one contact block
  * in the repo rather than a copy per route. Only its section number changes.
  */
-export function Contact({ index = "06" }: { index?: string }) {
+export function Contact({ index = "07" }: { index?: string }) {
   return (
     <section id="contact" className="scroll-mt-24 pt-28 md:pt-40">
       <Container>

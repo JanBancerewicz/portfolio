@@ -1,5 +1,6 @@
 import { Certificates } from "../sections/Certificates";
 import { Contact } from "../sections/Contact";
+import { Experience } from "../sections/Experience";
 import { Hackathons } from "../sections/Hackathons";
 import { Hero } from "../sections/Hero";
 import { Stack } from "../sections/Stack";
@@ -14,6 +15,7 @@ export function Home() {
       <TechRibbon />
       <Work />
       <Hackathons />
+      <Experience />
       <Certificates />
       <Writing />
       <Stack />

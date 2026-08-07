@@ -1,0 +1,196 @@
+import cover from "./cover.svg";
+
+export const meta = {
+  slug: "reduce-claude-code-token-usage",
+  title: "How to cut your Claude Code token usage by 20x",
+  date: "2026-08-07",
+  category: "LLM tooling",
+  readingTime: "5 min",
+  summary:
+    "Claude bills a cached token at 0.1x and a cache write at 2x — a 20x spread on identical content. How context and prompt caching work in Claude Code, and the changes that stop you paying the high side.",
+  cover,
+  tags: ["Claude", "LLMs", "Tooling", "Prompt caching"],
+};
+
+The 20x is one specific number: Anthropic bills a token read from the prompt
+cache at **0.1x** the input rate, and a token written into the cache at **2x**.
+Same content, twenty times the price, decided by whether the cache was warm
+when you hit enter.
+
+Prompt length has almost nothing to do with your bill. Context size multiplied
+by cache temperature is your bill.
+
+## Why a one-line question can be expensive
+
+The Messages API is stateless. A conversation only exists because the client
+resends the entire history every turn — system prompt, tool definitions,
+instruction files, every previous message, every file read, every tool result.
+
+The cost of turn N is the size of turns 1 to N−1. A short question at the end
+of a long session drags everything before it along.
+
+## What is already in context before you type
+
+- **Harness system prompt** — tool-use rules, environment, git instructions.
+- **Tool definitions** — full JSON schema per tool. MCP servers add theirs.
+  Deferred tools cost only their name until used.
+- **Instruction files** — `~/.claude/CLAUDE.md`, the project `CLAUDE.md`, and
+  everything under `~/.claude/rules/`. Re-read every turn.
+- **Skill catalogue** — each skill's name and one-line description. Bodies load
+  only on invocation.
+
+Instruction files are the ones to audit: paid on every turn of every session,
+and entirely under your control.
+
+## How the caching actually prices out
+
+Anthropic caches a prefix of the request. Next turn, if the first N tokens are
+byte-identical, they bill as a cache read. Reads are 0.1x, writes are 1.25x for
+the 5-minute TTL and 2x for the 1-hour one. Every hit resets the TTL, so an
+active session stays warm indefinitely.
+
+Expiry is where it bites:
+
+```
+240,000-token conversation
+
+warm    240,000 × 0.1  =   24,000
+expired 240,000 × 2    =  480,000
+```
+
+The mechanism is not Claude-specific — every stateless chat API resends
+context, and OpenAI and Google cache too. The numbers above are Anthropic's,
+and the tooling below is Claude Code's.
+
+## Fix 1: scope your instruction files
+
+Any markdown file under `~/.claude/rules/` can declare what it applies to:
+
+```markdown
+---
+paths:
+  - "**/*.kt"
+  - "**/*.sql"
+  - "**/migrations/**"
+---
+
+# Database conventions
+```
+
+It then loads only once a matching file enters the conversation. Without the
+header, your Postgres conventions load while you edit a React component, and
+again next turn, forever.
+
+Find the unscoped ones:
+
+```bash
+grep -L '^---' ~/.claude/rules/**/*.md
+wc -c ~/.claude/CLAUDE.md ~/.claude/rules/**/*.md | tail -1
+```
+
+Bytes divided by four is a rough token count. The same applies to `CLAUDE.md`
+itself — it should hold routing and behaviour, not inlined config samples that
+belong in a scoped rule.
+
+## Fix 2: one conversation per task
+
+If a question does not need the history, `/clear` first. A new session carries
+the system prompt and nothing else, and that prefix is identical between
+sessions so it usually hits cache anyway.
+
+## Fix 3: watch the clock, not the size
+
+A 300,000-token conversation you are actively working in is cheap — every turn
+lands inside the TTL and refreshes it. The same conversation after lunch costs
+2x on all 300,000 tokens.
+
+Closing the app flushes nothing; the cache is server-side on a timer. Starting
+a new session is not what costs — resuming a large old one is. Note that any
+system-prompt change invalidates the cached prefix, so editing `CLAUDE.md` or
+installing a plugin buys you one rebuild on the next session.
+
+## Fix 4: keep long sessions light
+
+Anything entering context stays for the session and is resent every turn.
+Screenshots are the usual offender, along with large file reads and full test
+logs. Need a big artifact for one decision? Make the decision, then `/clear`.
+
+Compact when a task ends rather than waiting for auto-compact at the limit —
+every turn before that fires was paid at near-maximum context.
+
+## Measure your own usage
+
+Claude Code writes a JSONL transcript per session under
+`~/.claude/projects/<project>/`, and every assistant record carries its usage:
+
+```python
+import json, glob, os, collections
+
+WEIGHTS = {"input": 1, "read": 0.1, "write": 2, "output": 5}
+seen, cost = set(), collections.Counter()
+
+for path in glob.glob(os.path.expanduser("~/.claude/projects/*/*.jsonl")):
+    for line in open(path, encoding="utf-8", errors="replace"):
+        try:
+            msg = json.loads(line).get("message") or {}
+        except ValueError:
+            continue
+        usage, mid = msg.get("usage"), msg.get("id")
+        if not usage or mid in seen:      # records repeat; dedupe by message id
+            continue
+        seen.add(mid)
+        cost["input"]  += usage.get("input_tokens", 0)
+        cost["read"]   += usage.get("cache_read_input_tokens", 0)
+        cost["write"]  += usage.get("cache_creation_input_tokens", 0)
+        cost["output"] += usage.get("output_tokens", 0)
+
+total = sum(cost[k] * w for k, w in WEIGHTS.items())
+for k, w in WEIGHTS.items():
+    print(f"{k:7} {cost[k]:>12,}  ×{w:<4} = {cost[k]*w:>12,.0f}  {100*cost[k]*w/total:5.1f}%")
+```
+
+The `write` row is the share of your bill spent rebuilding caches instead of
+doing work. Above roughly 15%, your problem is session hygiene.
+
+Summing `input_tokens`, `cache_read_input_tokens` and
+`cache_creation_input_tokens` on any single record gives that call's context
+size. Check the first call of a session — that is your floor.
+
+## Block the expensive turn automatically
+
+A `UserPromptSubmit` hook runs before the request goes out, so it can stop the
+turn rather than report on it afterwards:
+
+```python
+IDLE_MINUTES = 55      # TTL is an hour; warn just under it
+BIG_CONTEXT  = 60_000  # below this a rebuild is cheap enough to ignore
+
+context, stamp = read_transcript(payload["transcript_path"])
+if context < BIG_CONTEXT or idle_minutes(stamp) < IDLE_MINUTES:
+    return                       # silent: this turn is fine
+
+print(json.dumps({"decision": "block", "reason": warning(context, idle)}))
+```
+
+Requiring both conditions keeps it quiet during normal work. Record a short
+snooze after firing so re-sending the same prompt always goes through.
+
+## Numbers from one session
+
+```
+first API call, before any work     109,618 tokens of context
+context by end of session           274,376 tokens
+average context re-read per call    187,867 tokens
+
+most expensive single turn — a two-line question, no tools:
+  cache rebuild   475,888   97.8%
+  cache read        2,222    0.5%
+  the answer        8,335    1.7%
+```
+
+That turn's answer was 1,667 output tokens. The rest was a conversation being
+written back into a cache that had expired 34 minutes earlier.
+
+Scoping the instruction files in that setup took 155,875 bytes of always-on
+context — about 39,000 tokens per turn — down to 6,925. Nothing was deleted;
+the rules still load when they are relevant.

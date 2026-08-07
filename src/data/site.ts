@@ -14,7 +14,7 @@ export const site = {
   timezone: "Europe/Warsaw",
   availability: {
     open: true,
-    label: "Open to AI/ML roles & internships",
+    label: "Open to AI/ML / full-stack roles",
     detail: "Available for full-time roles",
   },
   email: "bancerewiczj@gmail.com",
@@ -30,6 +30,7 @@ export const navigation = [
   { label: "Home", href: "/" },
   { label: "Projects", href: "/projects" },
   { label: "Hackathons", href: "/#hackathons" },
+  { label: "Experience", href: "/#experience" },
   { label: "Certifications", href: "/#certifications" },
   { label: "Blog", href: "/blog" },
   { label: "Contact", href: "/#contact" },

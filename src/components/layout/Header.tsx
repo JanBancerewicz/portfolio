@@ -67,10 +67,10 @@ export function Header() {
                 <span className="text-[1rem] font-semibold tracking-[-0.02em]">
                   {site.name}
                 </span>
-                <span className="label hidden lg:inline">{' | my portfolio'}</span>
+                <span className="label hidden xl:inline">{' | my portfolio'}</span>
               </Link>
 
-              <nav className="hidden items-center gap-7 md:flex">
+              <nav className="hidden items-center gap-5 lg:flex xl:gap-7">
                 {navigation.map((item) => (
                   <NavLink key={item.href} to={item.href} label={item.label} />
                 ))}
@@ -91,7 +91,7 @@ export function Header() {
                   onClick={() => setMenuOpen((open) => !open)}
                   aria-label={menuOpen ? "Close menu" : "Open menu"}
                   aria-expanded={menuOpen}
-                  className="press grid size-9 place-items-center rounded-full border border-rule md:hidden"
+                  className="press grid size-9 place-items-center rounded-full border border-rule lg:hidden"
                 >
                   <MenuGlyph open={menuOpen} />
                 </button>
@@ -158,7 +158,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
   return (
     <div
       ref={ref}
-      className="fixed inset-0 z-40 flex flex-col justify-between bg-paper pt-24 pb-10 md:hidden"
+      className="fixed inset-0 z-40 flex flex-col justify-between bg-paper pt-24 pb-10 lg:hidden"
     >
       <Container>
         <nav className="flex flex-col">

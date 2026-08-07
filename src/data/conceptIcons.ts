@@ -136,4 +136,16 @@ export const conceptIcons: Record<string, ConceptIcon> = {
       "M6 17v-3h12v3",
     ],
   },
+
+  "REST API": {
+    title: "REST API — expose / share",
+    paths: [
+      // Classic share network: three nodes, zig-zag links (the USB-ish mark).
+      "M18 5.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
+      "M8.5 12a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
+      "M18 18.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
+      "M8.9 10.7 14.1 6.7",
+      "M8.9 13.3 14.1 17.3",
+    ],
+  },
 };

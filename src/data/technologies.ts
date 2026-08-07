@@ -7,15 +7,15 @@ export type TechGroup = {
 export const techGroups: TechGroup[] = [
   {
     label: "Languages",
-    items: ["Python", "SQL", "TypeScript", "C++", "Java"],
+    items: ["Python", "SQL", "TypeScript", "C++", "Java / Spring"],
   },
   {
     label: "Core AI / ML Frameworks",
-    items: ["PyTorch", "Hugging Face", "scikit-learn", "YOLO", "OpenCV", "vLLM / Ollama"],
+    items: ["PyTorch", "Hugging Face", "scikit-learn", "YOLO", "OpenCV", "vLLM / Ollama", "MLflow"],
   },
   {
     label: "GenAI & LLM Stack",
-    items: ["Qdrant / ChromaDB", "LlamaIndex", "LoRA/PEFT", "Quantization", "RAG Systems", "Anthropic/OpenAI API"],
+    items: ["Qdrant / ChromaDB", "LlamaIndex", "LoRA/PEFT", "Quantization", "RAG Systems", "Anthropic/OpenAI API", "Google ADK"],
   },
   {
     label: "AI Domains & Architectures",
@@ -23,11 +23,16 @@ export const techGroups: TechGroup[] = [
   },
   {
     label: "Backend & Data Engineering",
-    items: ["FastAPI", "Flask", "PostgreSQL", "Redis", "MongoDB", "Pandas", "NumPy", "PyTest"],
+    items: ["FastAPI", "Android", "PostgreSQL", "Redis", "MongoDB", "REST API", "Numpy / Pandas", "PyTest"],
   },
   {
     label: "Cloud, Web & DevOps",
-    items: ["Docker", "Kubernetes", "Azure Databricks", "AWS", "React / Next.js", "Linux", "Git", "CI/CD"],
+    items: ["Docker", "Kubernetes", "Azure Databricks", "AWS", "React / Next.js", "Linux", "Tailwind CSS", "CI/CD & GitHub Actions"],
+  },
+  {
+    label: "Tools",
+    items: ["Claude Code", "OpenAI Codex", "Cursor IDE"],
+    //"GitHub Copilot" "OpenCode"
   },
 ];
 

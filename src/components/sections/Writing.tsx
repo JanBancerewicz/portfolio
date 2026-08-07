@@ -13,7 +13,7 @@ export function Writing() {
     <section id="writing" className="scroll-mt-24 pt-28 md:pt-40">
       <Container>
         <SectionHeader
-          index="04"
+          index="05"
           title="Writing"
           lede={
             <>

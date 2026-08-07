@@ -22,7 +22,7 @@ export function Stack() {
       <ContourField seed={23} levels={14} intensity={0.02} />
       <Container>
         <SectionHeader
-          index="05"
+          index="06"
           title="Stack"
           lede={
             <>

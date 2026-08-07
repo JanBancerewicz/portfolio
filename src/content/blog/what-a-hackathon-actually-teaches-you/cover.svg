@@ -1,5 +1,109 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="post-hackathon placeholder cover">
-  <rect width="1200" height="800" fill="#e6eaed"/>
-  <g><path d="M-400 840 L120 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M-316 840 L204 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M-232 840 L288 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M-148 840 L372 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M-64 840 L456 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M20 840 L540 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M104 840 L624 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M188 840 L708 -40" fill="none" stroke="#0073ff" stroke-width="46" opacity="1"/><path d="M272 840 L792 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M356 840 L876 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M440 840 L960 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M524 840 L1044 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M608 840 L1128 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M692 840 L1212 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M776 840 L1296 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M860 840 L1380 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M944 840 L1464 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M1028 840 L1548 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M1112 840 L1632 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M1196 840 L1716 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M1280 840 L1800 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M1364 840 L1884 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M1448 840 L1968 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M1532 840 L2052 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M1616 840 L2136 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/><path d="M1700 840 L2220 -40" fill="none" stroke="#10161c" stroke-width="2" opacity="0.42"/></g>
-  <rect width="1200" height="800" fill="none" stroke="#10161c" stroke-width="2" opacity="0.12"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-label="What Not to Build">
+  <defs>
+    <filter id="mute" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="0.62 0.04 0.04 0 0.05  0.04 0.62 0.04 0 0.05  0.04 0.04 0.62 0 0.05  0 0 0 1 0"/>
+    </filter>
+    
+    <radialGradient id="accentTL" cx="0%" cy="0%" r="85%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#2f6fd4" stop-opacity="0.85"/>
+      <stop offset="35%" stop-color="#2f6fd4" stop-opacity="0.50"/>
+      <stop offset="70%" stop-color="#2f6fd4" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#2f6fd4" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="accentTR" cx="100%" cy="0%" r="75%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#2f6fd4" stop-opacity="0.65"/>
+      <stop offset="40%" stop-color="#2f6fd4" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#2f6fd4" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="accentBL" cx="0%" cy="100%" r="70%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#2f6fd4" stop-opacity="0.60"/>
+      <stop offset="40%" stop-color="#2f6fd4" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#2f6fd4" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="accentBR" cx="100%" cy="100%" r="65%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#2f6fd4" stop-opacity="0.50"/>
+      <stop offset="45%" stop-color="#2f6fd4" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#2f6fd4" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="frost" x1="0" y1="0" x2="0.15" y2="1">
+      <stop offset="0%" stop-color="#f3f6fa" stop-opacity="0.18"/>
+      <stop offset="55%" stop-color="#e8eef8" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#f3f6fa" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+  <g filter="url(#mute)">
+    <defs>
+      <linearGradient id="cogbg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#3d6fa8"/><stop offset="100%" stop-color="#1f4a78"/>
+      </linearGradient>
+      <linearGradient id="cogFill" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#9fd0ff"/><stop offset="100%" stop-color="#4a88c8"/>
+      </linearGradient>
+      <linearGradient id="cogFill2" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#5eead4"/><stop offset="100%" stop-color="#0d9488"/>
+      </linearGradient>
+      <linearGradient id="cogFill3" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#ddd6fe"/><stop offset="100%" stop-color="#7c3aed"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#cogbg)"/>
+    <ellipse cx="700" cy="400" rx="420" ry="300" fill="#0073ff" opacity="0.22"/>
+    <ellipse cx="280" cy="220" rx="200" ry="160" fill="#2dd4bf" opacity="0.2"/>
+    <g opacity="1">
+      <path d="M860.0,258.0 L867.9,148.1 L967.3,172.0 L924.5,273.5 L960.4,299.6 L1043.7,227.5 L1097.1,314.6 L995.1,356.1 L1002.0,400.0 L1111.9,407.9 L1088.0,507.3 L986.5,464.5 L960.4,500.4 L1032.5,583.7 L945.4,637.1 L903.9,535.1 L860.0,542.0 L852.1,651.9 L752.7,628.0 L795.5,526.5 L759.6,500.4 L676.3,572.5 L622.9,485.4 L724.9,443.9 L718.0,400.0 L608.1,392.1 L632.0,292.7 L733.5,335.5 L759.6,299.6 L687.5,216.3 L774.6,162.9 L816.1,264.9 Z" fill="url(#cogFill)" stroke="#d6ecff" stroke-width="3.5" stroke-linejoin="miter"/>
+      <circle cx="860" cy="400" r="82.4" fill="#102038" opacity="0.45"/>
+      <circle cx="860" cy="400" r="52" fill="#0a1420" stroke="#d6ecff" stroke-width="5"/>
+      <circle cx="860" cy="400" r="23.4" fill="#0073ff"/>
+      <circle cx="860" cy="400" r="10.4" fill="#f0f7ff"/>
+    </g>
+    <g opacity="1">
+      <path d="M340.0,168.0 L345.4,88.1 L413.2,104.4 L381.8,178.0 L405.1,194.9 L465.4,142.3 L501.8,201.7 L427.5,231.6 L432.0,260.0 L511.9,265.4 L495.6,333.2 L422.0,301.8 L405.1,325.1 L457.7,385.4 L398.3,421.8 L368.4,347.5 L340.0,352.0 L334.6,431.9 L266.8,415.6 L298.2,342.0 L274.9,325.1 L214.6,377.7 L178.2,318.3 L252.5,288.4 L248.0,260.0 L168.1,254.6 L184.4,186.8 L258.0,218.2 L274.9,194.9 L222.3,134.6 L281.7,98.2 L311.6,172.5 Z" fill="url(#cogFill2)" stroke="#ccfbf1" stroke-width="3.5" stroke-linejoin="miter"/>
+      <circle cx="340" cy="260" r="53.4" fill="#102038" opacity="0.45"/>
+      <circle cx="340" cy="260" r="34" fill="#0a1420" stroke="#ccfbf1" stroke-width="5"/>
+      <circle cx="340" cy="260" r="15.3" fill="#0073ff"/>
+      <circle cx="340" cy="260" r="6.8" fill="#f0f7ff"/>
+    </g>
+    <g opacity="1">
+      <path d="M300.0,520.0 L304.4,458.1 L358.8,473.1 L330.8,528.5 L346.9,542.6 L398.1,507.4 L420.2,559.3 L359.5,571.9 L358.5,593.4 L417.9,611.4 L391.2,661.1 L343.4,621.5 L326.0,634.1 L349.0,691.7 L293.4,701.8 L294.6,639.8 L274.0,634.1 L243.2,687.9 L200.7,650.8 L249.9,613.1 L241.5,593.4 L180.2,602.9 L182.7,546.5 L242.9,561.5 L253.1,542.6 L207.4,500.6 L253.1,467.4 L278.9,523.8 Z" fill="url(#cogFill3)" stroke="#ede9fe" stroke-width="3.5" stroke-linejoin="miter"/>
+      <circle cx="300" cy="580" r="34.8" fill="#102038" opacity="0.45"/>
+      <circle cx="300" cy="580" r="24" fill="#0a1420" stroke="#ede9fe" stroke-width="5"/>
+      <circle cx="300" cy="580" r="10.8" fill="#0073ff"/>
+      <circle cx="300" cy="580" r="4.8" fill="#f0f7ff"/>
+    </g>
+  </g>
+  <rect width="1200" height="800" fill="url(#frost)"/>
+  <rect width="1200" height="800" fill="url(#accentTL)"/>
+  <rect width="1200" height="800" fill="url(#accentTR)"/>
+  <rect width="1200" height="800" fill="url(#accentBL)"/>
+  <rect width="1200" height="800" fill="url(#accentBR)"/>
+
+  <foreignObject x="72" y="72" width="1056" height="67">
+  <div xmlns="http://www.w3.org/1999/xhtml"
+       style="display:flex;justify-content:flex-start;align-items:flex-start;width:100%;height:100%;margin:0;padding:0;">
+    <div style="display:inline-block;box-sizing:border-box;
+      background:#ffffff;border-radius:999px;padding:14px 24px;
+      font-family:'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;font-size:33px;font-weight:700;
+      letter-spacing:0.12em;color:#2f6fd4;line-height:1.1;
+      white-space:nowrap;">NOTES</div>
+  </div>
+</foreignObject>
+
+  <text x="48" y="317" font-family="'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="138"
+        font-weight="700" letter-spacing="-0.045em"
+        paint-order="stroke fill"
+        stroke="#ffffff" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"><tspan x="48" dy="0" fill="#10161c">What Not to</tspan><tspan x="48" dy="141" fill="#2f6fd4">Build</tspan></text>
+
+  <foreignObject x="72" y="661" width="1056" height="67">
+  <div xmlns="http://www.w3.org/1999/xhtml"
+       style="display:flex;justify-content:flex-end;align-items:flex-end;width:100%;height:100%;margin:0;padding:0;">
+    <div style="display:inline-block;box-sizing:border-box;
+      background:#ffffff;border-radius:999px;padding:14px 24px;
+      font-family:'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;font-size:33px;font-weight:700;
+      letter-spacing:0.14em;color:#2f6fd4;line-height:1.1;
+      white-space:nowrap;">BUILD</div>
+  </div>
+</foreignObject>
 </svg>

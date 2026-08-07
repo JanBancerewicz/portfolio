@@ -139,11 +139,22 @@ dist
 .DS_Store
 
 my_assets/*.jpg
+my_assets/hero.mp4
 my_assets/*.gif
 # local dev logs
 .vite-dev.*.log
 dist-ssr
 
 .claude/
+.superpowers/
 # .github
 temp/
+
+HELPERS.md
+
+docs/*
+# Local cover-preview server artifacts (manual QA harness)
+preview.html
+covers-preview.png
+**/cover.preview.png
+.playwright-mcp/

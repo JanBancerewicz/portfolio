@@ -24,7 +24,7 @@ export function Certificates() {
           <Reveal className="md:col-span-4">
             <div className="md:sticky md:top-28">
               <h2 className="section-eyebrow">
-                <span className="section-eyebrow-index">03</span>
+                <span className="section-eyebrow-index">04</span>
                 <span className="mx-2 text-rule-strong">/</span>
                 Certifications &amp; courses
               </h2>

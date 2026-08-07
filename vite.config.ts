@@ -20,5 +20,13 @@ export default defineConfig({
   ],
   build: {
     chunkSizeWarningLimit: 700,
+    /**
+     * Covers and posters must stay real files. Vite inlines assets under 4kB as
+     * `data:` URIs, which is right for the 38 tech icons but wrong for anything
+     * that has to appear in an `og:image` — a social card needs a fetchable
+     * http(s) URL, and a data URI silently breaks link previews.
+     */
+    assetsInlineLimit: (filePath) =>
+      !/\/(cover|poster)\.svg$/.test(filePath),
   },
 });

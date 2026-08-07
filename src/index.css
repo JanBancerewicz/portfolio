@@ -398,6 +398,123 @@ html.js [data-split][data-split-ready] {
 
 /* Section backdrops fade out at their edges so neighbouring sections blend
    instead of butting up against a hard rectangle of lines. */
+/* ---------------------------------------------------------------------------
+   Company plates — Internships & commercial experience
+
+   A light source crosses the plate on hover and the mark's shadow swings the
+   other way, so it reads as a physical object catching the light rather than as
+   two unrelated decorations.
+
+   The obvious implementation is one registered `@property` number driving both.
+   That was the first attempt and it does not hold up here: the `@property` rule
+   survives into the served stylesheet and the same technique interpolates
+   correctly in an isolated test, but on this element the value snaps straight to
+   its target while only `filter` animates — so the light did not actually move.
+   Rather than ship a half-working effect, the two halves are now plain
+   transitions that share a duration and an easing. They stay in lockstep because
+   they are given the same timing, not because they read the same variable.
+
+   Transitions, not a keyframe loop: the light settles where you leave it and
+   reverses cleanly if you pull away mid-sweep, so the motion is interruptible.
+--------------------------------------------------------------------------- */
+
+.logo-plate {
+  position: relative;
+  overflow: hidden;
+  transition: transform 380ms var(--ease-out),
+    border-color 380ms var(--ease-out), box-shadow 380ms var(--ease-out);
+}
+
+.logo-plate:hover,
+.logo-plate:focus-within {
+  transform: translateY(-2px);
+  border-color: var(--rule-strong);
+  box-shadow: var(--shadow-card);
+}
+
+/* The light itself: a soft band raked across the plate, parked off the left. */
+.logo-plate::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    color-mix(in srgb, var(--ink) 8%, transparent) 50%,
+    transparent 62%
+  );
+  transform: translateX(-120%);
+  transition: transform 620ms var(--ease-out);
+}
+
+[data-theme="dark"] .logo-plate::after {
+  background: linear-gradient(
+    105deg,
+    transparent 38%,
+    color-mix(in srgb, var(--ink) 14%, transparent) 50%,
+    transparent 62%
+  );
+}
+
+.logo-plate:hover::after,
+.logo-plate:focus-within::after {
+  transform: translateX(120%);
+}
+
+/* Shadow starts thrown right, because the light starts on the left. */
+.logo-mark {
+  position: relative;
+  filter: drop-shadow(
+    6.5px 4px 6px color-mix(in srgb, var(--ink) 26%, transparent)
+  );
+  transition: filter 620ms var(--ease-out);
+}
+
+/* Light ends on the right, so the shadow ends thrown left. */
+.logo-plate:hover .logo-mark,
+.logo-plate:focus-within .logo-mark {
+  filter: drop-shadow(
+    -6.5px 4px 6px color-mix(in srgb, var(--ink) 26%, transparent)
+  );
+}
+
+/*
+ * Dark theme needs its own shadow colour. `--ink` is near-white there, so the
+ * token-derived value above renders a glow — and a glow would track the light
+ * rather than flee it, which breaks the one idea the effect is built on. Cast
+ * an actual shadow instead; it is subtler on a dark plate, and the sheen
+ * carries more of the effect there.
+ */
+[data-theme="dark"] .logo-mark {
+  filter: drop-shadow(6.5px 4px 7px rgba(0, 0, 0, 0.8));
+}
+
+[data-theme="dark"] .logo-plate:hover .logo-mark,
+[data-theme="dark"] .logo-plate:focus-within .logo-mark {
+  filter: drop-shadow(-6.5px 4px 7px rgba(0, 0, 0, 0.8));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-plate {
+    transition: border-color 200ms linear;
+  }
+
+  .logo-plate:hover,
+  .logo-plate:focus-within {
+    transform: none;
+    box-shadow: none;
+  }
+
+  .logo-plate::after {
+    display: none;
+  }
+
+  .logo-mark {
+    filter: none;
+  }
+}
+
 /* Off-screen until focused, then it lands over the masthead. */
 .skip-link {
   position: absolute;
