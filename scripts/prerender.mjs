@@ -9,6 +9,7 @@
  * Run via `npm run build`, after the client and SSR bundles are built.
  */
 
+import { createHash } from "node:crypto";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -26,6 +27,57 @@ const { render, routes, metaFor } = await import(
 const MARKER = '<div id="root"></div>';
 if (!template.includes(MARKER)) {
   throw new Error(`prerender: could not find ${MARKER} in dist/index.html`);
+}
+
+/**
+ * Content Security Policy, delivered as a `<meta>`.
+ *
+ * GitHub Pages serves files and sets no response headers, so a meta tag is the
+ * only channel available — which rules out `frame-ancestors` and HSTS, but not
+ * the parts that matter for a static site: nothing may load or connect
+ * anywhere we did not name, and no script may run unless it is a build output
+ * or one of the inline blocks hashed below.
+ *
+ * The hashes are computed from the built HTML rather than written by hand, so
+ * the policy cannot go stale when the theme bootstrap in `index.html` changes
+ * or Vite adds an inline block of its own.
+ */
+function cspFor(html) {
+  const inline = [...html.matchAll(/<script(?![^>]*\ssrc=)[^>]*>([\s\S]*?)<\/script>/g)]
+    .map(([, body]) => `'sha256-${createHash("sha256").update(body, "utf8").digest("base64")}'`);
+
+  return [
+    "default-src 'none'",
+    `script-src 'self' ${inline.join(" ")}`.trim(),
+    // Element `style` attributes are what components write for transforms and
+    // aspect ratios; those need 'unsafe-inline' and cannot be hashed.
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src https://fonts.gstatic.com",
+    // `data:` covers the tech icons Vite inlines under its 4kB threshold.
+    "img-src 'self' data:",
+    "connect-src 'self'",
+    "manifest-src 'self'",
+    "base-uri 'none'",
+    "form-action 'none'",
+    "object-src 'none'",
+    "frame-src 'none'",
+    "upgrade-insecure-requests",
+  ].join("; ");
+}
+
+/**
+ * Both policies have to be parsed before anything they govern, so they go
+ * directly after `<meta charset>` rather than at the end of the head.
+ */
+function withSecurityMeta(html) {
+  const anchor = '<meta charset="UTF-8" />';
+  const meta = [
+    `<meta http-equiv="Content-Security-Policy" content="${cspFor(html)}" />`,
+    // Outbound clicks (LinkedIn, ORCID, papers) leak the origin, never the path.
+    '<meta name="referrer" content="strict-origin-when-cross-origin" />',
+  ].join("\n    ");
+
+  return html.replace(anchor, `${anchor}\n    ${meta}`);
 }
 
 /**
@@ -100,10 +152,12 @@ function withHead(html, route, meta) {
 }
 
 for (const route of routes) {
-  const html = withHead(
-    template.replace(MARKER, `<div id="root">${render(route)}</div>`),
-    route,
-    metaFor(route),
+  const html = withSecurityMeta(
+    withHead(
+      template.replace(MARKER, `<div id="root">${render(route)}</div>`),
+      route,
+      metaFor(route),
+    ),
   );
   const outDir = route === "/" ? dist : join(dist, route);
   mkdirSync(outDir, { recursive: true });
@@ -137,7 +191,9 @@ console.log("wrote sitemap.xml + robots.txt");
 // what React hydrates to.
 writeFileSync(
   join(dist, "404.html"),
-  template.replace(MARKER, `<div id="root">${render("/__not-found__")}</div>`),
+  withSecurityMeta(
+    template.replace(MARKER, `<div id="root">${render("/__not-found__")}</div>`),
+  ),
   "utf8",
 );
 

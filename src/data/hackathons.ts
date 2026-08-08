@@ -6,6 +6,12 @@ export type Hackathon = {
   result: string;
   /** Podium / win — drives the section aside count, not styling. */
   win?: boolean;
+  /**
+   * How many times this one was entered. Only ever >1 for a recurring contest
+   * folded into a single row (AMPPZ 2024 + 2025); the section totals these
+   * rather than counting rows, so the headline number cannot drift from the list.
+   */
+  editions?: number;
   /** Accent treatment on the result line; independent of whether it was a win. */
   highlight?: boolean;
   role: string;
@@ -19,11 +25,11 @@ export const hackathons: Hackathon[] = [
     name: "AMPPZ – Polish Collegiate Programming Contest (2x)",
     organiser: "Warsaw – University of Warsaw",
     date: "Nov 2024 & 2025",
+    editions: 2,
     result: "34th nationally in 2024",
     win: false,
     highlight: true,
     role: "Representing Gdańsk University of Technology",
-    // what: "Representing Gdańsk Tech at Poland’s collegiate programming contest (ICPC) since 2024, placing #34 nationally in 2024 and #55 in 2025. As President of the Sfera PG Algorithmic Club, I lead team training in advanced algorithms, complex data structures, and high-pressure problem-solving in C++.",
     what: "Representing my university in the Polish collegiate programming contest (ICPC) since 2024, placing #34 nationally in 2024 and #55 in 2025 (out of ~80 teams). \u00A0 As President of the Sfera PG Algorithmic Club, I lead team training in advanced algorithms, complex data structures, and high-pressure problem-solving in C++.",
     tags: ["Algorithms & Data Structures", "ICPC","C++"],
     href: "https://amppz.edu.pl/"
@@ -68,7 +74,6 @@ export const hackathons: Hackathon[] = [
     date: "Oct 2025",
     result: "Solo debut, high score",
     role: "Biohacking Category",
-    // what: "My first hackathon! I built StressLess – a real-time mobile biofeedback app measuring heart rate and HRV metrics (RMSSD, SDNN, pNN20) directly via smartphone camera PPG. Integrated an LLM pipeline to analyze physiological signals alongside user context, delivering personal stress analysis and biohacking insights.",
     what: "My first hackathon! I built StressLess – a mobile biofeedback app measuring heart rate and HRV via smartphone camera PPG. Combined biometric signals with an LLM pipeline to deliver real-time stress analysis and biohacking insights.",
     tags: ["Android", "Signal Processing", "LLM API", "Java / Spring"],
     href: "https://hackyeah.pl/pl/"

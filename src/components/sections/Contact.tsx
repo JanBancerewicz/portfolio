@@ -1,5 +1,4 @@
 import { site } from "../../data/site";
-import { gmailComposeHref } from "../../lib/mailto";
 import { Reveal } from "../motion/Reveal";
 import { SplitLines } from "../motion/SplitLines";
 import { Container } from "../ui/Container";
@@ -65,11 +64,15 @@ export function Contact({ index = "07" }: { index?: string }) {
                   ↗
                 </span>
               </a>
-              <MailLink className="press group inline-flex items-center justify-between gap-8 rounded-sm border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink">
+              <MailLink
+                className="press group inline-flex items-center justify-between gap-8 rounded-sm border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
+                trailing={
+                  <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">
+                    →
+                  </span>
+                }
+              >
                 Email instead
-                <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">
-                  →
-                </span>
               </MailLink>
             </Reveal>
 
@@ -82,7 +85,6 @@ export function Contact({ index = "07" }: { index?: string }) {
               className="mt-12 grid w-fit max-w-full gap-x-8 gap-y-px border-t border-rule sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)]"
               stagger={60}
             >
-              {/* <ContactRow label="Email" value={site.email} href={gmailComposeHref} /> */}
               <ContactRow label="LinkedIn" value="jan-bancerewicz" href={site.links.linkedin} />
               <ContactRow label="GitHub" value="JanBancerewicz" href={site.links.github} />
               <ContactRow label="CV" value="Download PDF" href={site.links.cv} />

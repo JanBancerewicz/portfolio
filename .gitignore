@@ -138,9 +138,13 @@ dist
 
 .DS_Store
 
+# Source material for the generators — large, local-only. Only the inputs a
+# script actually reads (target_hero.png) belong in the repo.
 my_assets/*.jpg
-my_assets/hero.mp4
 my_assets/*.gif
+my_assets/*.mp4
+my_assets/*.png
+!my_assets/target_hero.png
 # local dev logs
 .vite-dev.*.log
 dist-ssr

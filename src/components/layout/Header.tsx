@@ -210,9 +210,7 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
           >
             Get in touch on LinkedIn
           </a>
-          <MailLink className="press rounded-sm border border-rule-strong px-5 py-3.5 text-center text-[1rem] font-medium">
-            {site.email}
-          </MailLink>
+          <MailLink className="press rounded-sm border border-rule-strong px-5 py-3.5 text-center text-[1rem] font-medium" />
         </div>
       </Container>
     </div>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { site } from "../../data/site";
-import { gmailComposeHref } from "../../lib/mailto";
+import { composeHref, decodeEmail } from "../../lib/mailto";
 
 /**
  * A link tree you can type at.
@@ -49,6 +49,16 @@ const link = (label: string, href: string, internal = false): Line => ({
   segments: [{ text: label, href, internal }],
 });
 
+/**
+ * Built inside a command's `run`, never at module scope: every one of these is
+ * called in response to a keystroke, so the address is assembled in the browser
+ * and never reaches the prerendered HTML. See `src/lib/mailto.ts`.
+ */
+const emailLink = (pad = ""): Line => {
+  const address = decodeEmail();
+  return link(`${pad}${address}`, composeHref(address));
+};
+
 /** `ls` output, and the set `cat` knows how to read. */
 const FILES: Record<string, () => Line[]> = {
   "about.txt": () => [
@@ -56,7 +66,7 @@ const FILES: Record<string, () => Line[]> = {
     text(site.location),
     dim(site.availability.label),
   ],
-  "email.txt": () => [link(site.email, gmailComposeHref)],
+  "email.txt": () => [emailLink()],
   "linkedin.url": () => [link(site.links.linkedin, site.links.linkedin)],
   "orcid.url": () => [link(site.links.orcid, site.links.orcid)],
   "github.url": () => [link(site.links.github, site.links.github)],
@@ -152,7 +162,7 @@ const commands: Record<string, Command> = {
     suggest: true,
     run: () => [
       dim("opens Gmail compose in a new tab"),
-      link(site.email, gmailComposeHref),
+      emailLink(),
     ],
   },
 
@@ -187,7 +197,7 @@ const commands: Record<string, Command> = {
     suggest: true,
     run: () => [
       dim("— the whole tree —"),
-      link(`email     ${site.email}`, gmailComposeHref),
+      emailLink("email     "),
       link(`linkedin  ${site.links.linkedin}`, site.links.linkedin),
       link(`github    ${site.links.github}`, site.links.github),
       link(`orcid     ${site.links.orcid}`, site.links.orcid),

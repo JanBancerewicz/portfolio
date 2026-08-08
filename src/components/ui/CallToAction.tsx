@@ -37,12 +37,15 @@ export function CallToAction({
                 ↗
               </span>
             </a>
-            <MailLink className="press group inline-flex items-center justify-between gap-8 rounded-sm border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink">
-              {site.email}
-              <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">
-                →
-              </span>
-            </MailLink>
+            {/* No children: MailLink supplies the address itself, client-side. */}
+            <MailLink
+              className="press group inline-flex items-center justify-between gap-8 rounded-sm border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
+              trailing={
+                <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">
+                  →
+                </span>
+              }
+            />
           </div>
         </div>
       </Reveal>

@@ -32,7 +32,6 @@ export const techGroups: TechGroup[] = [
   {
     label: "Tools",
     items: ["Claude Code", "OpenAI Codex", "Cursor IDE"],
-    //"GitHub Copilot" "OpenCode"
   },
 ];
 

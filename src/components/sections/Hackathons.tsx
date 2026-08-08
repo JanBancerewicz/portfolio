@@ -6,7 +6,7 @@ import { SectionHeader } from "../ui/SectionHeader";
 
 export function Hackathons() {
   const wins = hackathons.filter((entry) => entry.win).length;
-  const comps = hackathons.length + 1;
+  const comps = hackathons.reduce((n, entry) => n + (entry.editions ?? 1), 0);
 
   return (
     <section

@@ -9,10 +9,7 @@ export function Footer() {
         <div className="grid gap-8 md:grid-cols-12 items-end">
           <div className="md:col-span-3">
             <p className="text-[1rem] font-medium">{site.name}</p>
-            <p className="label mt-1.5">
-              {site.role} <span className="mx-1 text-rule-strong"></span>{" "}
-              {/* {site.location} */}
-            </p>
+            <p className="label mt-1.5">{site.role}</p>
           </div>
 
           <nav className="flex flex-wrap gap-x-6 gap-y-2 md:col-span-7">

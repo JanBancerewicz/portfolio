@@ -15,7 +15,6 @@ const HEADLINE = "display text-[clamp(2.5rem,7.6vw,6.75rem)]";
 
 export function Hero() {
   return (
-    // <section className="relative isolate pt-32 md:pt-40">
     <section className="relative isolate pt-20 md:pt-24">
       <ContourField seed={3} levels={18} intensity={0.08} />
       <Container>

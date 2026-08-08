@@ -9,12 +9,19 @@ type CoverRevealProps = {
   /** Aspect ratio of the frame, e.g. "3 / 2". */
   ratio?: string;
   delay?: number;
+  /** Wipe duration in ms. Default keeps the slower editorial reveal. */
+  duration?: number;
+  /**
+   * Edge the image wipes in from.
+   * `"bottom"` — up (default, Work / blog). `"left"` — left → right.
+   */
+  from?: "bottom" | "left";
 };
 
 /**
- * Image that wipes into view from the bottom edge using `clip-path`, while the
- * image itself settles back from a slight over-scale — so the frame and its
- * contents move at different rates instead of arriving as one flat block.
+ * Image that wipes into view with `clip-path`, while the image itself settles
+ * back from a slight over-scale — so the frame and its contents move at
+ * different rates instead of arriving as one flat block.
  *
  * `clip-path` is driven through a numeric proxy rather than tweened as a
  * string, and both properties are composited, so this stays cheap with several
@@ -26,6 +33,8 @@ export function CoverReveal({
   className = "",
   ratio = "3 / 2",
   delay = 0,
+  duration = 900,
+  from = "bottom",
 }: CoverRevealProps) {
   const frameRef = useRef<HTMLDivElement>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -50,16 +59,21 @@ export function CoverReveal({
       return () => void fade.revert();
     }
 
-    frame.style.clipPath = "inset(0 0 100% 0)";
+    // inset(top right bottom left) — one edge starts fully closed.
+    frame.style.clipPath =
+      from === "left" ? "inset(0 100% 0 0)" : "inset(0 0 100% 0)";
 
     const state = { cut: 100 };
     const wipe = animate(state, {
       cut: 0,
-      duration: 900,
+      duration,
       delay,
       ease: EASE_IN_OUT,
       onUpdate: () => {
-        frame.style.clipPath = `inset(0 0 ${state.cut}% 0)`;
+        frame.style.clipPath =
+          from === "left"
+            ? `inset(0 ${state.cut}% 0 0)`
+            : `inset(0 0 ${state.cut}% 0)`;
       },
       autoplay: onScroll({
         target: frame,
@@ -70,7 +84,7 @@ export function CoverReveal({
 
     const settle = animate(image, {
       scale: [1.12, 1],
-      duration: 1200,
+      duration: Math.round(duration * 1.25),
       delay,
       ease: EASE_IN_OUT,
       autoplay: onScroll({
@@ -85,7 +99,7 @@ export function CoverReveal({
       settle.revert();
       frame.style.clipPath = "";
     };
-  }, [delay]);
+  }, [delay, duration, from]);
 
   return (
     <div
