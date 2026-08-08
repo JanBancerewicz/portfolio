@@ -1,14 +1,51 @@
+/**
+ * Certifications & courses, grouped by issuer.
+ *
+ * `credential` is either an absolute http(s) verification URL, or a bare PDF
+ * filename under `public/pdfs/` (resolved via {@link resolveCredentialHref}).
+ */
+
+import academicPartnersLogo from "../assets/logos/AcademicPartners.png";
+import datacampLogo from "../assets/logos/Datacamp.png";
+import gdanskUniversityLogo from "../assets/logos/GdanskUniversityOfTechnology.png";
+import googleLogo from "../assets/logos/Google.png";
+import nvidiaLogo from "../assets/logos/NVIDIA.png";
+import nvidiaLogoDark from "../assets/logos/NVIDIA-dark.png";
+import researchLogo from "../assets/logos/Research.png";
+
+/** Public path prefix for PDF credentials (`public/pdfs/<filename>`). */
+export const CERT_PDF_PREFIX = `${import.meta.env.BASE_URL}pdfs/`;
+
+/** Resolve a credential string to a usable `href` (external URL or static PDF). */
+export function resolveCredentialHref(credential: string): string {
+  if (/^https?:\/\//i.test(credential)) return credential;
+  return `${CERT_PDF_PREFIX}${credential}`;
+}
+
 export type Certificate = {
   title: string;
   year: string;
-  credentialUrl?: string;
+  /** External verify URL, or bare PDF filename under `public/pdfs/`. */
+  credential?: string;
 };
 
 export type CertificateGroup = {
-  /** The issuing body — certificates are grouped by source. */
+  /** The issuing body – certificates are grouped by source. */
   issuer: string;
   /** Short note on what this issuer's track covers. */
   note: string;
+  /** Issuer mark (Vite-imported PNG). */
+  logo: string;
+  /**
+   * Optional dark-theme mark when invert would break brand colors
+   * (e.g. NVIDIA green + wordmark).
+   */
+  logoDark?: string;
+  /**
+   * Monochrome / dark marks that need invert in dark theme so they stay
+   * readable on `paper-sunken`.
+   */
+  logoTone?: "ink";
   items: Certificate[];
 };
 
@@ -16,62 +53,152 @@ export const certificateGroups: CertificateGroup[] = [
   {
     issuer: "Gdańsk University of Technology",
     note: "BSc Computer Science, final year, 4.41 GPA",
+    logo: gdanskUniversityLogo,
+    logoTone: "ink",
     items: [
-      { title: "Bachelor's thesis — defending 2026", year: "2026" },
-      { title: "Gradient PG - AI & Machine Learning Science Club — Board Member", year: "2025" },
-      { title: "Sfera PG - Algorithmic & Competitive Programming Club — President", year: "2024" },
+      { title: "Bachelor's thesis – defending 2026", year: "2026" },
+      {
+        title: "Gradient PG - AI & Machine Learning Science Club – Board Member",
+        year: "2025",
+      },
+      {
+        title: "Sfera PG - Algorithmic & Competitive Programming Club – President",
+        year: "2024",
+      },
     ],
   },
   {
     issuer: "Research & programmes",
     note: "Published and peer-reviewed work",
+    logo: researchLogo,
+    logoTone: "ink",
     items: [
       {
-        title: "CORE: Comments as a Reasoning — Gradient PG Science Club (Paper in-progress)",
+        title:
+          "CORE: Comments as a Reasoning – Gradient PG Science Club (Paper in-progress)",
         year: "2026",
-        credentialUrl:
+        credential:
           "https://journal.mostwiedzy.pl/TASKQuarterly/article/view/3699",
       },
       {
-        title: "Analysis of HRV Using Mobile Devices and Machine Learning — TASK Quarterly",
+        title:
+          "Analysis of HRV Using Mobile Devices and Machine Learning – TASK Quarterly",
         year: "2026",
-        credentialUrl:
+        credential:
           "https://journal.mostwiedzy.pl/TASKQuarterly/article/view/3699",
       },
-      { title: "Europe AI Summer Research programme - participant (Edition in-progress)", year: "2026" },
+      {
+        title:
+          "Europe AI Summer Research programme - participant (Edition in-progress)",
+        year: "2026",
+      },
     ],
   },
   {
-    issuer: "DeepLearning.AI / Coursera",
-    note: "Deep learning and LLM specialisations",
+    issuer: "Google",
+    note: "AI and cloud infrastracture",
+    logo: googleLogo,
     items: [
-      { title: "PLACEHOLDER — Deep Learning Specialization", year: "2025" },
-      { title: "PLACEHOLDER — Generative AI with LLMs", year: "2025" },
-      { title: "PLACEHOLDER — Machine Learning Specialization", year: "2024" },
+      {
+        title: "Umiejetnosci Jutra AI 3.0",
+        year: "2026",
+        credential:
+          "GOOGLE_Umiejetnosci_Jutra.pdf",
+      },
     ],
   },
   {
     issuer: "NVIDIA Deep Learning Institute",
     note: "Applied deep learning and edge inference",
+    logo: nvidiaLogo,
+    logoDark: nvidiaLogoDark,
     items: [
-      { title: "PLACEHOLDER — Fundamentals of Deep Learning", year: "2025" },
-      { title: "PLACEHOLDER — Getting Started with Jetson Nano", year: "2025" },
+      {
+        title: "Generative AI with Diffusion Models",
+        year: "2026",
+        credential:
+          "https://learn.nvidia.com/certificates?id=ICjjyqpaRv6XVagcjyVEVw",
+      },
+      {
+        title: "Fundamentals of Deep Learning",
+        year: "2026",
+        credential:
+          "https://learn.nvidia.com/certificates?id=NyNmV1uuTFW7pAEHoC0kiA",
+      },
+      {
+        title: "Fundamentals of Accelerated Computing with CUDA Python",
+        year: "2026",
+        credential:
+          "https://learn.nvidia.com/certificates?id=s35qfFZyTj2Bkf9QnbGYrg",
+      },
     ],
   },
   {
-    issuer: "Microsoft",
+    issuer: "DataCamp",
+    note: "Deep learning and LLM specialisations",
+    logo: datacampLogo,
+    items: [
+      {
+        title: "GitHub Foundations",
+        year: "2026",
+        credential: "DC_Github_Foundations.pdf",
+      },
+      {
+        title: "Deep Learning for Images with PyTorch",
+        year: "2025",
+        credential: "DC_Deep_Learning_for_Images_with_PyTorch.pdf",
+      },
+      {
+        title: "Intermediate Deep Learning with PyTorch",
+        year: "2025",
+        credential: "DC_Intermediate_Deep_Learning_with_PyTorch.pdf",
+      },
+      {
+        title: "Introduction to Deep Learning with PyTorch",
+        year: "2025",
+        credential: "DC_Introduction_to_Deep_Learning_with_PyTorch.pdf",
+      },
+    ],
+  },
+  {
+    issuer: "Academic Partners",
     note: "Cloud and AI platform fundamentals",
+    logo: academicPartnersLogo,
+    logoTone: "ink",
     items: [
-      { title: "PLACEHOLDER — Azure AI Fundamentals (AI-900)", year: "2025" },
-      { title: "PLACEHOLDER — Azure Fundamentals (AZ-900)", year: "2024" },
-    ],
-  },
-  {
-    issuer: "Cisco Networking Academy",
-    note: "Systems and Python foundations",
-    items: [
-      { title: "PLACEHOLDER — Python Essentials 1 & 2", year: "2023" },
-      { title: "PLACEHOLDER — CCNA: Introduction to Networks", year: "2023" },
+      // {
+      //   title: "Hacked Yourself with WebGoat & Copilot",
+      //   year: "2026",
+      //   credential: "Jan_Bancerewicz_HACK.pdf",
+      // },
+      {
+        title: "Empowering Developers with Next-Gen AI",
+        year: "2026",
+        credential: "Jan_Bancerewicz_EMPO.pdf",
+      },
+      {
+        title: "RAG Applications in Microsoft Fabric",
+        year: "2026",
+        credential: "Jan_Bancerewicz_APLI.pdf",
+      },
+      {
+        title:
+          "Introducing AI in micro-frontend architectures with Web Fragments",
+        year: "2026",
+        credential: "Jan_Bancerewicz_MICR.pdf",
+      },
+      {
+        title:
+          "The impact of artificial intelligence on software engineering",
+        year: "2026",
+        credential: "Jan_Bancerewicz_THEI.pdf",
+      },
+      {
+        title:
+          "Develop and Deploy AI Agents with AI Toolkit & Azure AI Foundry",
+        year: "2026",
+        credential: "Jan_Bancerewicz_TOOL.pdf",
+      },
     ],
   },
 ];

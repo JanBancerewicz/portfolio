@@ -1,4 +1,9 @@
-import { certificateGroups } from "../../data/certificates";
+import {
+  certificateGroups,
+  resolveCredentialHref,
+  type Certificate,
+  type CertificateGroup,
+} from "../../data/certificates";
 import { Reveal } from "../motion/Reveal";
 import { ContourField } from "../ui/ContourField";
 import { Container } from "../ui/Container";
@@ -57,10 +62,7 @@ export function Certificates() {
                 className="border-b border-rule pb-6 pt-6 first:pt-0"
                 y={14}
               >
-                <h3 className="text-[1.25rem] font-medium tracking-[-0.025em]">
-                  {group.issuer}
-                </h3>
-                <p className="label mt-1.5">{group.note}</p>
+                <GroupHeader group={group} />
 
                 <ul className="mt-4 grid gap-x-8 sm:grid-cols-2">
                   {group.items.map((item) => (
@@ -78,43 +80,73 @@ export function Certificates() {
   );
 }
 
-function CertificateRow({
-  title,
-  year,
-  credentialUrl,
-}: {
-  title: string;
-  year: string;
-  credentialUrl?: string;
-}) {
-  const content = (
-    <>
-      <span className="text-[1rem] leading-snug text-ink-muted transition-colors duration-200 group-hover:text-ink">
-        {title}
-      </span>
-      <span className="label shrink-0 pt-0.5">{year}</span>
-    </>
-  );
+function GroupHeader({ group }: { group: CertificateGroup }) {
+  const logoClass =
+    group.logoTone === "ink"
+      ? "cert-logo cert-logo--ink"
+      : "cert-logo";
 
-  if (!credentialUrl) {
+  return (
+    <div className="flex items-start gap-3.5">
+      {group.logoDark ? (
+        <>
+          <img
+            src={group.logo}
+            alt=""
+            aria-hidden="true"
+            className={`${logoClass} cert-logo--theme-light`}
+          />
+          <img
+            src={group.logoDark}
+            alt=""
+            aria-hidden="true"
+            className={`${logoClass} cert-logo--theme-dark`}
+          />
+        </>
+      ) : (
+        <img
+          src={group.logo}
+          alt=""
+          aria-hidden="true"
+          className={logoClass}
+        />
+      )}
+      <div className="min-w-0">
+        <h3 className="text-[1.25rem] font-medium tracking-[-0.025em]">
+          {group.issuer}
+        </h3>
+        <p className="label mt-1.5">{group.note}</p>
+      </div>
+    </div>
+  );
+}
+
+function CertificateRow({ title, credential }: Certificate) {
+  if (!credential) {
     return (
-      <div className="group flex items-start justify-between gap-4 py-3">
-        {content}
+      <div className="group flex items-start gap-4 py-3">
+        <span className="text-[1rem] leading-snug text-ink-muted">{title}</span>
       </div>
     );
   }
 
   return (
     <a
-      href={credentialUrl}
+      href={resolveCredentialHref(credential)}
       target="_blank"
       rel="noreferrer noopener"
-      className="group flex items-start justify-between gap-4 py-3"
+      className="group flex items-start gap-2 py-3"
     >
-      {content}
-      <span aria-hidden="true" className="sr-only">
-        opens in a new tab
+      <span className="text-[1rem] leading-snug text-ink-muted transition-colors duration-200 group-hover:text-ink">
+        {title}
       </span>
+      <span
+        aria-hidden="true"
+        className="mt-0.5 shrink-0 text-sm text-accent transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1"
+      >
+        ↗
+      </span>
+      <span className="sr-only">opens in a new tab</span>
     </a>
   );
 }

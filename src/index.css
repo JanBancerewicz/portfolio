@@ -463,6 +463,33 @@ html.js [data-split][data-split-ready] {
 }
 
 /* Shadow starts thrown right, because the light starts on the left. */
+/* Compact issuer marks in Certificates — not the Experience logo-plate. */
+.cert-logo {
+  height: 3.25rem;
+  width: auto;
+  max-width: 5.5rem;
+  flex-shrink: 0;
+  object-fit: contain;
+  margin-top: 0.05rem;
+}
+
+[data-theme="dark"] .cert-logo--ink {
+  filter: invert(1) brightness(1.08);
+}
+
+/* Dual-asset marks (e.g. NVIDIA): swap wordmark color without inverting green. */
+.cert-logo--theme-dark {
+  display: none;
+}
+
+[data-theme="dark"] .cert-logo--theme-light {
+  display: none;
+}
+
+[data-theme="dark"] .cert-logo--theme-dark {
+  display: block;
+}
+
 .logo-mark {
   position: relative;
   filter: drop-shadow(
