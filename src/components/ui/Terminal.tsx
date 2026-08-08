@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { site } from "../../data/site";
+import { gmailComposeHref } from "../../lib/mailto";
 
 /**
  * A link tree you can type at.
@@ -55,7 +56,7 @@ const FILES: Record<string, () => Line[]> = {
     text(site.location),
     dim(site.availability.label),
   ],
-  "email.txt": () => [link(site.email, `mailto:${site.email}`)],
+  "email.txt": () => [link(site.email, gmailComposeHref)],
   "linkedin.url": () => [link(site.links.linkedin, site.links.linkedin)],
   "orcid.url": () => [link(site.links.orcid, site.links.orcid)],
   "github.url": () => [link(site.links.github, site.links.github)],
@@ -150,8 +151,8 @@ const commands: Record<string, Command> = {
     describe: "my email address",
     suggest: true,
     run: () => [
-      dim("mailto ready — click to open your client"),
-      link(site.email, `mailto:${site.email}`),
+      dim("opens Gmail compose in a new tab"),
+      link(site.email, gmailComposeHref),
     ],
   },
 
@@ -186,7 +187,7 @@ const commands: Record<string, Command> = {
     suggest: true,
     run: () => [
       dim("— the whole tree —"),
-      link(`email     ${site.email}`, `mailto:${site.email}`),
+      link(`email     ${site.email}`, gmailComposeHref),
       link(`linkedin  ${site.links.linkedin}`, site.links.linkedin),
       link(`github    ${site.links.github}`, site.links.github),
       link(`orcid     ${site.links.orcid}`, site.links.orcid),
@@ -378,10 +379,14 @@ export function Terminal() {
           </span>
         </div>
 
-        {/* Clicking anywhere on the screen should put the caret where you expect. */}
+        {/* Clicking anywhere on the screen should put the caret where you expect —
+            except on links, where focus-stealing can cancel mailto / downloads. */}
         <div
           ref={screenRef}
-          onClick={() => inputRef.current?.focus()}
+          onClick={(event) => {
+            if ((event.target as HTMLElement).closest("a[href]")) return;
+            inputRef.current?.focus();
+          }}
           className="terminal-screen h-[19rem] overflow-y-auto px-4 py-3.5"
         >
           <div role="log" aria-live="polite" aria-label="Terminal output">
@@ -464,6 +469,7 @@ function TerminalLine({ line }: { line: Line }) {
             target={segment.href.startsWith("http") ? "_blank" : undefined}
             rel={segment.href.startsWith("http") ? "noreferrer noopener" : undefined}
             className="terminal-link"
+            onClick={(event) => event.stopPropagation()}
           >
             {segment.text}
           </a>

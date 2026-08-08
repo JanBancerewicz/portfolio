@@ -384,15 +384,15 @@ html.js [data-split][data-split-ready] {
  * Reel card size. Driven by height so a card always fits a pinned viewport
  * alongside the controls, but also bounded by viewport width — otherwise a tall
  * phone produces a card wider than the screen and the next one stops peeking.
- * The 9:13 frame is a crop of the 9:16 reel; `object-cover` handles it.
+ * Near-9:16 so editorial posters (900×1600) lose less to object-cover crop.
  */
 .reel-card {
-  aspect-ratio: 9 / 13;
+  aspect-ratio: 9 / 16;
   /* Cap against the pinned chrome (header pad + controls) so zoomed viewports
      do not push Back to start below the clip edge. */
   height: max(
-    16rem,
-    min(64vh, 36rem, 74vw * 1.4444, calc(100svh - 14rem))
+    18rem,
+    min(72vh, 42rem, 78vw * 1.7778, calc(100svh - 11rem))
   );
 }
 

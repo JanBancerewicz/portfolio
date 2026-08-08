@@ -29,6 +29,16 @@ export type ContentMeta = {
    */
   poster?: string;
   /**
+   * Projects only — 2:1 editorial cover for the homepage #work lead slot.
+   * Generated as `cover-featured.svg` when extras includes "featured".
+   */
+  coverFeatured?: string;
+  /**
+   * Posts only — ~7:3 editorial cover for /blog ladder rows.
+   * Generated as `cover-wide.svg` (1350×555). Falls back to `cover`.
+   */
+  coverWide?: string;
+  /**
    * Projects only — an ~8s vertical clip that autoplays, loops and is muted
    * on the carousel. Drop an `.mp4` next to `index.mdx`, import it, and set
    * this; the poster shows through until it is set.

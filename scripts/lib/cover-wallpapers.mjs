@@ -22,6 +22,10 @@ export const WALLPAPER_IDS = [
   "mesh",
   "topo",
   "bloom",
+  "graph",
+  "vision",
+  "flowchart",
+  "datacenter",
 ];
 
 const wallpapers = {
@@ -504,21 +508,22 @@ const wallpapers = {
   `,
 
   cogwheel: (w, h) => {
-    /** Spur gear: one trapezoid tooth per step (flat tip, deep root). */
+    /** Rectangular spur gear: radial flanks → right angles at tip/root. */
     const gearPath = (cx, cy, teeth, tipR, rootR) => {
       const step = (Math.PI * 2) / teeth;
+      const tooth = 0.48;
       const pts = [];
       const polar = (ang, r) => [
         (cx + Math.cos(ang) * r).toFixed(1),
         (cy + Math.sin(ang) * r).toFixed(1),
       ];
       for (let i = 0; i < teeth; i += 1) {
-        const a = i * step - Math.PI / 2;
-        // Tip ~52% of pitch, short root gap — reads as thick spur teeth
-        pts.push(polar(a + step * 0.0, rootR).join(","));
-        pts.push(polar(a + step * 0.04, tipR).join(","));
-        pts.push(polar(a + step * 0.56, tipR).join(","));
-        pts.push(polar(a + step * 0.6, rootR).join(","));
+        const a0 = i * step - Math.PI / 2;
+        const a1 = a0 + step * tooth;
+        pts.push(polar(a0, rootR).join(","));
+        pts.push(polar(a0, tipR).join(","));
+        pts.push(polar(a1, tipR).join(","));
+        pts.push(polar(a1, rootR).join(","));
       }
       return `M${pts[0]} L${pts.slice(1).join(" L")} Z`;
     };
@@ -549,9 +554,9 @@ const wallpapers = {
     <rect width="${w}" height="${h}" fill="url(#cogbg)"/>
     <ellipse cx="700" cy="400" rx="420" ry="300" fill="#0073ff" opacity="0.22"/>
     <ellipse cx="280" cy="220" rx="200" ry="160" fill="#2dd4bf" opacity="0.2"/>
-    <g opacity="1">${gear(860, 400, 8, 252, 142, 52, "url(#cogFill)", "#d6ecff")}</g>
-    <g opacity="1">${gear(340, 260, 8, 172, 92, 34, "url(#cogFill2)", "#ccfbf1")}</g>
-    <g opacity="1">${gear(300, 580, 7, 122, 60, 24, "url(#cogFill3)", "#ede9fe")}</g>
+    <g opacity="1">${gear(860, 400, 10, 252, 155, 52, "url(#cogFill)", "#d6ecff")}</g>
+    <g opacity="1">${gear(340, 260, 10, 172, 105, 34, "url(#cogFill2)", "#ccfbf1")}</g>
+    <g opacity="1">${gear(300, 580, 9, 122, 72, 24, "url(#cogFill3)", "#ede9fe")}</g>
   `;
   },
 
@@ -594,6 +599,164 @@ const wallpapers = {
     <circle cx="840" cy="520" r="260" fill="#0073ff" opacity="0.14"/>
     <circle cx="600" cy="800" r="300" fill="#647888" opacity="0.12"/>
   `,
+
+  /** Dense node–edge graph */
+  graph: (w, h) => {
+    const nodes = [
+      [80, 90], [220, 70], [380, 120], [540, 60], [700, 110], [880, 80], [1050, 100], [1140, 180],
+      [120, 220], [300, 250], [480, 200], [650, 260], [820, 210], [980, 250], [1100, 320],
+      [60, 380], [200, 360], [360, 400], [520, 340], [700, 380], [860, 360], [1020, 420], [1160, 400],
+      [140, 520], [320, 500], [480, 560], [640, 510], [800, 540], [960, 500], [1120, 560],
+      [100, 660], [280, 700], [450, 640], [620, 690], [780, 660], [940, 720], [1100, 680],
+      [180, 760], [400, 780], [600, 750], [850, 780], [1050, 760],
+    ];
+    const edges = [
+      [0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],
+      [0,8],[1,9],[2,10],[3,11],[4,12],[5,13],[6,14],
+      [8,9],[9,10],[10,11],[11,12],[12,13],[13,14],
+      [8,15],[9,16],[10,17],[11,18],[12,19],[13,20],[14,21],
+      [15,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],
+      [16,23],[17,24],[18,25],[19,26],[20,27],[21,28],[22,29],
+      [23,24],[24,25],[25,26],[26,27],[27,28],[28,29],
+      [23,30],[24,31],[25,32],[26,33],[27,34],[28,35],[29,36],
+      [30,31],[31,32],[32,33],[33,34],[34,35],[35,36],
+      [31,37],[32,38],[33,39],[34,40],[35,41],
+      [2,9],[11,19],[18,25],[27,34],[10,18],[20,28],
+    ];
+    let lines = "";
+    for (const [a, b] of edges) {
+      const [x1, y1] = nodes[a];
+      const [x2, y2] = nodes[b];
+      const accent = (a + b) % 5 === 0;
+      lines += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${accent ? "#0073ff" : "#8ab0c8"}" stroke-width="${accent ? 2.2 : 1.2}" opacity="${accent ? 0.55 : 0.28}"/>`;
+    }
+    let dots = "";
+    nodes.forEach(([x, y], i) => {
+      const hot = i % 7 === 0;
+      const r = hot ? 7 : 4;
+      dots += `<circle cx="${x}" cy="${y}" r="${r}" fill="${hot ? "#0073ff" : "#d6e8f5"}" opacity="${hot ? 0.85 : 0.55}"/>`;
+      if (hot) dots += `<circle cx="${x}" cy="${y}" r="14" fill="#0073ff" opacity="0.15"/>`;
+    });
+    return `
+    <defs>
+      <linearGradient id="graphbg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#1a3550"/><stop offset="100%" stop-color="#0e2034"/>
+      </linearGradient>
+    </defs>
+    <rect width="${w}" height="${h}" fill="url(#graphbg)"/>
+    <ellipse cx="900" cy="200" rx="380" ry="260" fill="#0073ff" opacity="0.12"/>
+    <ellipse cx="240" cy="600" rx="300" ry="220" fill="#22d3ee" opacity="0.08"/>
+    ${lines}
+    ${dots}
+  `;
+  },
+
+  /** Airy camera / CV motif */
+  vision: (w, h) => `
+    <defs>
+      <linearGradient id="visbg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#243a52"/><stop offset="100%" stop-color="#152636"/>
+      </linearGradient>
+      <radialGradient id="vislens">
+        <stop offset="0%" stop-color="#e8f4ff"/><stop offset="35%" stop-color="#5a9ad0"/>
+        <stop offset="70%" stop-color="#1e4a78"/><stop offset="100%" stop-color="#0a2030"/>
+      </radialGradient>
+    </defs>
+    <rect width="${w}" height="${h}" fill="url(#visbg)"/>
+    <ellipse cx="320" cy="200" rx="280" ry="180" fill="#0073ff" opacity="0.1"/>
+    <ellipse cx="980" cy="560" rx="320" ry="220" fill="#22d3ee" opacity="0.08"/>
+    <!-- Camera body -->
+    <rect x="620" y="220" width="420" height="300" rx="36" fill="#2a4868" stroke="#9ec8e8" stroke-width="3" opacity="0.85"/>
+    <rect x="650" y="250" width="120" height="36" rx="10" fill="#1a3048"/>
+    <circle cx="860" cy="370" r="108" fill="#122030" stroke="#c8e4f8" stroke-width="4"/>
+    <circle cx="860" cy="370" r="78" fill="url(#vislens)"/>
+    <circle cx="860" cy="370" r="28" fill="#0a1828" opacity="0.7"/>
+    <circle cx="830" cy="340" r="14" fill="#fff" opacity="0.35"/>
+    <!-- Viewfinder / corner brackets (detection UI) -->
+    <g fill="none" stroke="#7ec0ff" stroke-width="3" opacity="0.55">
+      <path d="M180,160 L180,120 L240,120"/><path d="M400,120 L460,120 L460,160"/>
+      <path d="M180,320 L180,360 L240,360"/><path d="M400,360 L460,360 L460,320"/>
+    </g>
+    <rect x="200" y="150" width="240" height="190" rx="8" fill="#0073ff" opacity="0.08" stroke="#7ec0ff" stroke-width="1.5"/>
+    <circle cx="320" cy="245" r="6" fill="#22d3ee" opacity="0.8"/>
+    <line x1="200" y1="200" x2="440" y2="200" stroke="#7ec0ff" stroke-width="1" opacity="0.25"/>
+    <line x1="200" y1="290" x2="440" y2="290" stroke="#7ec0ff" stroke-width="1" opacity="0.25"/>
+  `,
+
+  /** Airy simplified flowchart */
+  flowchart: (w, h) => `
+    <defs>
+      <linearGradient id="flowbg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#1e3348"/><stop offset="100%" stop-color="#121f2c"/>
+      </linearGradient>
+    </defs>
+    <rect width="${w}" height="${h}" fill="url(#flowbg)"/>
+    <ellipse cx="700" cy="400" rx="400" ry="280" fill="#0073ff" opacity="0.1"/>
+    <!-- boxes -->
+    <rect x="160" y="100" width="220" height="88" rx="14" fill="#2a5070" stroke="#8ec4e8" stroke-width="2"/>
+    <rect x="480" y="100" width="220" height="88" rx="14" fill="#0073ff" opacity="0.55" stroke="#b8dcff" stroke-width="2"/>
+    <rect x="800" y="100" width="220" height="88" rx="14" fill="#2a5070" stroke="#8ec4e8" stroke-width="2"/>
+    <!-- diamond -->
+    <path d="M590,320 L690,400 L590,480 L490,400 Z" fill="#0d9488" opacity="0.55" stroke="#99f6e4" stroke-width="2"/>
+    <rect x="160" y="540" width="220" height="88" rx="14" fill="#2a5070" stroke="#8ec4e8" stroke-width="2"/>
+    <rect x="480" y="540" width="220" height="88" rx="14" fill="#7c3aed" opacity="0.45" stroke="#ddd6fe" stroke-width="2"/>
+    <rect x="800" y="540" width="220" height="88" rx="14" fill="#2a5070" stroke="#8ec4e8" stroke-width="2"/>
+    <!-- connectors -->
+    <g stroke="#9ec8e8" stroke-width="2.5" fill="none" opacity="0.5">
+      <path d="M270,188 L270,400 L490,400"/>
+      <path d="M590,188 L590,320"/>
+      <path d="M910,188 L910,400 L690,400"/>
+      <path d="M590,480 L590,540"/>
+      <path d="M490,400 L270,400 L270,540"/>
+      <path d="M690,400 L910,400 L910,540"/>
+    </g>
+    <g fill="#c8e0f0" opacity="0.55" font-family="ui-monospace, Menlo, monospace" font-size="18">
+      <text x="220" y="152">input</text>
+      <text x="535" y="152">parse</text>
+      <text x="860" y="152">route</text>
+      <text x="555" y="408">gate</text>
+      <text x="215" y="592">retry</text>
+      <text x="535" y="592">emit</text>
+      <text x="860" y="592">log</text>
+    </g>
+  `,
+
+  /** Dense datacenter / LLM infra indicator */
+  datacenter: (w, h) => {
+    let racks = "";
+    const cols = [80, 220, 360, 500, 640, 780, 920, 1060];
+    cols.forEach((x, ci) => {
+      racks += `<rect x="${x}" y="120" width="100" height="560" rx="8" fill="#1a3048" stroke="#4a7088" stroke-width="1.5" opacity="0.85"/>`;
+      for (let r = 0; r < 14; r += 1) {
+        const y = 140 + r * 38;
+        const lit = (ci + r) % 3 !== 2;
+        const hot = (ci * 3 + r) % 11 === 0;
+        racks += `<rect x="${x + 10}" y="${y}" width="80" height="22" rx="3" fill="${hot ? "#0073ff" : lit ? "#2a5868" : "#152838"}" opacity="${hot ? 0.9 : 0.75}"/>`;
+        if (lit || hot) {
+          racks += `<circle cx="${x + 22}" cy="${y + 11}" r="3" fill="${hot ? "#22d3ee" : "#5eead4"}" opacity="0.85"/>`;
+        }
+      }
+    });
+    return `
+    <defs>
+      <linearGradient id="dcbg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#0c1828"/><stop offset="100%" stop-color="#152a40"/>
+      </linearGradient>
+      <linearGradient id="dcglow" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#0073ff" stop-opacity="0.35"/><stop offset="100%" stop-color="#0073ff" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    <rect width="${w}" height="${h}" fill="url(#dcbg)"/>
+    <rect x="0" y="0" width="${w}" height="180" fill="url(#dcglow)"/>
+    ${racks}
+    <rect x="40" y="40" width="280" height="48" rx="10" fill="#0073ff" opacity="0.35" stroke="#7ec0ff" stroke-width="1.5"/>
+    <text x="60" y="70" fill="#e8f4ff" font-family="ui-monospace, Menlo, monospace" font-size="18" opacity="0.85">cluster · 48 nodes · ok</text>
+    <g opacity="0.4">
+      <path d="M100,700 C300,640 500,760 700,680 S1000,640 1160,720" fill="none" stroke="#22d3ee" stroke-width="2"/>
+      <path d="M80,740 C280,700 520,780 760,720 S1040,700 1180,760" fill="none" stroke="#a78bfa" stroke-width="2"/>
+    </g>
+  `;
+  },
 };
 
 /**

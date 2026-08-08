@@ -15,7 +15,7 @@ export function Hackathons() {
     >
       {/* Edge-to-edge tonal band: this section reads as its own chapter. */}
       <div aria-hidden="true" className="absolute inset-0 -z-20 bg-paper-sunken" />
-      <ContourField seed={11} levels={14} intensity={0.035} />
+      <ContourField seed={11} levels={14} intensity={0.04} />
       <Container>
         <SectionHeader
           index="02"

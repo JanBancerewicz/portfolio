@@ -489,12 +489,13 @@ const ReelCard = memo(function ReelCard({
             bright one once real footage lands here. */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/90 via-black/35 via-45% to-black/5" />
 
-        <span className="absolute left-4 top-3 font-mono text-[2.25rem] font-medium leading-none text-white/85">
-          {String(index).padStart(2, "0")}
-        </span>
-
-        <span className="label absolute right-4 top-4 text-white/70">
-          {meta.date}
+        {/* Project mark: outline cog frames the reel index (same tooth language
+            as cover.svg). */}
+        <span className="pointer-events-none absolute left-2.5 top-2.5 grid size-[4.75rem] place-items-center">
+          <ProjectIndexCog className="absolute inset-0 size-full text-white" />
+          <span className="relative z-10 font-mono text-[1.375rem] font-medium leading-none tracking-tight text-white/90">
+            {String(index).padStart(2, "0")}
+          </span>
         </span>
 
         <div className="absolute inset-x-4 bottom-4 text-white">
@@ -521,3 +522,56 @@ const ReelCard = memo(function ReelCard({
     </Link>
   );
 });
+
+/**
+ * Rectangular-tooth outline cog (matches project cover mark), sized so a
+ * two-digit index sits in the hub.
+ */
+function ProjectIndexCog({ className = "" }: { className?: string }) {
+  const cx = 50;
+  const cy = 50;
+  const teeth = 12;
+  const tipR = 47;
+  const rootR = 34;
+  const step = (Math.PI * 2) / teeth;
+  const tooth = 0.48;
+  const pts: string[] = [];
+  const polar = (ang: number, r: number) => [
+    (cx + Math.cos(ang) * r).toFixed(2),
+    (cy + Math.sin(ang) * r).toFixed(2),
+  ];
+  for (let i = 0; i < teeth; i += 1) {
+    const a0 = i * step - Math.PI / 2;
+    const a1 = a0 + step * tooth;
+    pts.push(polar(a0, rootR).join(","));
+    pts.push(polar(a0, tipR).join(","));
+    pts.push(polar(a1, tipR).join(","));
+    pts.push(polar(a1, rootR).join(","));
+  }
+  const d = `M${pts[0]} L${pts.slice(1).join(" L")} Z`;
+
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      className={className}
+      aria-hidden="true"
+      fill="none"
+    >
+      <path
+        d={d}
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinejoin="miter"
+        opacity="0.88"
+      />
+      <circle
+        cx={cx}
+        cy={cy}
+        r="27"
+        stroke="currentColor"
+        strokeWidth="2.2"
+        opacity="0.72"
+      />
+    </svg>
+  );
+}

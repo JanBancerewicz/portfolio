@@ -19,7 +19,7 @@ export function Stack() {
 
   return (
     <section id="stack" className="relative isolate scroll-mt-24 pt-28 md:pt-40">
-      <ContourField seed={23} levels={14} intensity={0.02} />
+      <ContourField seed={23} levels={14} intensity={0.03} />
       <Container>
         <SectionHeader
           index="06"
@@ -36,13 +36,10 @@ export function Stack() {
           {techGroups.map((group) => (
             <div
               key={group.label}
-              className="grid gap-y-5 border-b border-rule py-7 md:grid-cols-12 md:gap-8 md:py-9"
+              className="grid gap-y-4 border-b border-rule py-5 md:grid-cols-12 md:gap-6 md:py-6"
             >
               <div className="md:col-span-3">
                 <h3 className="label text-ink">{group.label}</h3>
-                <p className="label mt-1.5">
-                  {String(group.items.length).padStart(2, "0")}
-                </p>
               </div>
 
               <Reveal

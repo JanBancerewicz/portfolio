@@ -1,5 +1,6 @@
 import { certificateGroups } from "../../data/certificates";
 import { Reveal } from "../motion/Reveal";
+import { ContourField } from "../ui/ContourField";
 import { Container } from "../ui/Container";
 
 /**
@@ -10,6 +11,9 @@ import { Container } from "../ui/Container";
  * Here the masthead moves into a rail that stays put while the groups stream
  * past it — which also suits the content, since this is a list you scan rather
  * than read.
+ *
+ * Edge-to-edge tonal band (same device as Hackathons): Experience and Writing
+ * sit on paper, so without this the three chapters read as one continuous slab.
  */
 export function Certificates() {
   const total = certificateGroups.reduce(
@@ -18,7 +22,12 @@ export function Certificates() {
   );
 
   return (
-    <section id="certifications" className="scroll-mt-24 pt-28 md:pt-40">
+    <section
+      id="certifications"
+      className="relative isolate mt-24 scroll-mt-24 pb-20 pt-24 md:mt-32 md:pb-28 md:pt-32"
+    >
+      <div aria-hidden="true" className="absolute inset-0 -z-20 bg-paper-sunken" />
+      <ContourField seed={17} levels={13} intensity={0.035} />
       <Container>
         <div className="border-t-2 border-ink pt-4 md:grid md:grid-cols-12 md:gap-10">
           <Reveal className="md:col-span-4">
@@ -48,14 +57,9 @@ export function Certificates() {
                 className="border-b border-rule pb-6 pt-6 first:pt-0"
                 y={14}
               >
-                <div className="flex items-baseline justify-between gap-4">
-                  <h3 className="text-[1.25rem] font-medium tracking-[-0.025em]">
-                    {group.issuer}
-                  </h3>
-                  <span className="label shrink-0">
-                    {String(group.items.length).padStart(2, "0")}
-                  </span>
-                </div>
+                <h3 className="text-[1.25rem] font-medium tracking-[-0.025em]">
+                  {group.issuer}
+                </h3>
                 <p className="label mt-1.5">{group.note}</p>
 
                 <ul className="mt-4 grid gap-x-8 sm:grid-cols-2">

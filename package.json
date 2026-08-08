@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
     "covers": "node scripts/generate-covers.mjs",
     "preview": "vite preview",
+    "brainstorm": "bash scripts/start-brainstorm-companion.sh",
     "hero": "node scripts/generate-hero-mosaic.mjs",
     "icons": "node scripts/generate-tech-icons.mjs"
   },

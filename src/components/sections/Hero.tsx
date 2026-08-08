@@ -17,7 +17,7 @@ export function Hero() {
   return (
     // <section className="relative isolate pt-32 md:pt-40">
     <section className="relative isolate pt-20 md:pt-24">
-      <ContourField seed={3} levels={18} intensity={0.07} />
+      <ContourField seed={3} levels={18} intensity={0.08} />
       <Container>
         <Reveal
           className="flex flex-wrap items-center justify-between gap-4 border-b border-rule pb-4"

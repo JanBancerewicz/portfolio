@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { prefersReducedMotion } from "../../lib/motion";
 
 /**
@@ -60,7 +60,14 @@ function fragmentSource(es3: boolean) {
   return `${
     es3 ? "#version 300 es\n" : "#extension GL_OES_standard_derivatives : enable\n"
   }
+// High precision is only guaranteed in fragment shaders under GLSL ES 3.00.
+// Plenty of mobile GPUs on the WebGL1 path reject it outright, and a shader
+// that fails to compile leaves the canvas blank.
+#ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
+#else
+precision mediump float;
+#endif
 ${es3 ? "out vec4 fragColor;" : "#define fragColor gl_FragColor"}
 
 uniform vec2 uResolution;
@@ -101,7 +108,10 @@ void main() {
   // alias into a solid patch. Fade them out instead.
   line *= 1.0 - smoothstep(0.45, 1.4, slope);
 
-  fragColor = vec4(uInk, line * uIntensity);
+  // Premultiplied: the colour is scaled by its own alpha here rather than by
+  // the compositor. See the context-attribute note in createContext.
+  float alpha = line * uIntensity;
+  fragColor = vec4(uInk * alpha, alpha);
 }
 `;
 }
@@ -155,7 +165,17 @@ function compile(gl: WebGLRenderingContext, type: number, source: string) {
 function createContext(canvas: HTMLCanvasElement) {
   const options: WebGLContextAttributes = {
     alpha: true,
-    premultipliedAlpha: false,
+    /**
+     * Premultiplied — the default, and the path every compositor is actually
+     * exercised on. The unpremultiplied mode is correct per spec but has a bad
+     * record on mobile compositors, and the failure is not subtle: a buffer
+     * written as `vec4(ink, a)` but composited as premultiplied puts
+     * full-strength ink on every pixel whatever its alpha, which is a white
+     * wash over the section in dark mode and an invisible one in light mode.
+     * Multiplying the colour by its own alpha in the shader reads the same
+     * under either interpretation, so nothing rests on the flag being honoured.
+     */
+    premultipliedAlpha: true,
     antialias: false,
     depth: false,
     stencil: false,
@@ -192,6 +212,13 @@ export function ContourField({
 }: ContourFieldProps) {
   const hostRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  /**
+   * Phones drop WebGL contexts routinely — backgrounding the tab or memory
+   * pressure is enough. Without this the backdrop went blank for the rest of
+   * the session; bumping the epoch on restore rebuilds the program and
+   * buffers on the context the browser hands back.
+   */
+  const [epoch, setEpoch] = useState(0);
 
   useEffect(() => {
     if (!hostRef.current || !canvasRef.current) return;
@@ -230,9 +257,9 @@ export function ContourField({
     gl.vertexAttribPointer(attribute, 2, gl.FLOAT, false, 0, 0);
 
     // No blending: the triangle covers every pixel and writes the final
-    // unpremultiplied colour, which the compositor blends over the page. With
-    // `SRC_ALPHA` blending enabled the alpha channel gets multiplied by itself,
-    // and the lines land at intensity² — thirteen times fainter than asked for.
+    // premultiplied colour, which the page compositor then blends. Blending
+    // here would fold the buffer's previous frame back in — there is nothing
+    // underneath to blend against inside the canvas itself.
     gl.disable(gl.BLEND);
 
     const uniform = (name: string) => gl.getUniformLocation(program, name);
@@ -315,6 +342,9 @@ export function ContourField({
 
     readInk();
     resize();
+    // Only now, with something actually drawn, is the canvas allowed to paint.
+    // See the note on the element itself.
+    canvas.style.visibility = "visible";
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -341,11 +371,19 @@ export function ContourField({
       attributeFilter: ["data-theme"],
     });
 
+    // `preventDefault` is what makes the loss recoverable at all; the restore
+    // then re-runs this effect against the same canvas.
     const onContextLost = (event: Event) => {
       event.preventDefault();
       cancelAnimationFrame(frame);
+      // A canvas whose context is gone does not composite as transparent — it
+      // paints its drawing buffer as an opaque white plate, which is the white
+      // block that appeared over the dark theme. Hide it until it can draw.
+      canvas.style.visibility = "hidden";
     };
+    const onContextRestored = () => setEpoch((value) => value + 1);
     canvas.addEventListener("webglcontextlost", onContextLost);
+    canvas.addEventListener("webglcontextrestored", onContextRestored);
 
     if (!prefersReducedMotion()) {
       last = performance.now();
@@ -359,6 +397,7 @@ export function ContourField({
       document.removeEventListener("visibilitychange", onVisibility);
       themeWatcher.disconnect();
       canvas.removeEventListener("webglcontextlost", onContextLost);
+      canvas.removeEventListener("webglcontextrestored", onContextRestored);
       gl.deleteProgram(program);
       gl.deleteShader(vertex);
       gl.deleteShader(fragment);
@@ -367,7 +406,7 @@ export function ContourField({
       // context object forever, so losing it here would leave a dead context
       // for the next mount — which StrictMode guarantees there will be.
     };
-  }, [seed, levels, intensity]);
+  }, [seed, levels, intensity, epoch]);
 
   return (
     <div
@@ -375,7 +414,14 @@ export function ContourField({
       aria-hidden="true"
       className={`contour-field pointer-events-none absolute inset-0 -z-10 overflow-hidden ${className}`}
     >
-      <canvas ref={canvasRef} className="size-full" />
+      {/*
+        Hidden until the effect has a working context and a drawn frame. A
+        canvas that never got one — no WebGL, a rejected shader, a context the
+        phone dropped — paints as an opaque plate rather than as nothing, and
+        over the dark theme that reads as a white hole in the page. Failing to
+        an absent backdrop is the correct degradation; it is decoration.
+      */}
+      <canvas ref={canvasRef} className="size-full" style={{ visibility: "hidden" }} />
     </div>
   );
 }

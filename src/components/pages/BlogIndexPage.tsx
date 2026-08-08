@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { postEntries } from "../../content";
+import type { ContentEntry } from "../../content/types";
 import { formatPostDate } from "../../lib/format";
 import { CoverReveal } from "../motion/CoverReveal";
 import { Reveal } from "../motion/Reveal";
@@ -34,23 +35,19 @@ export function BlogIndexPage() {
               <CoverReveal
                 src={lead.meta.cover}
                 alt=""
-                ratio="16 / 10"
+                ratio="3 / 2"
                 className="rounded-sm"
               />
             </div>
 
             <Reveal className="md:col-span-5 md:pt-2" delay={120}>
-              <div className="label mb-3">
-                Latest <span className="mx-1 text-rule-strong">/</span>{" "}
-                {formatPostDate(lead.meta.date)}
-                {lead.meta.readingTime ? (
-                  <>
-                    <span className="mx-1 text-rule-strong">/</span>
-                    {lead.meta.readingTime}
-                  </>
-                ) : null}
-              </div>
-              <h2 className="flex items-start gap-3 text-[clamp(1.75rem,3.5vw,2.75rem)] font-medium leading-[1.05] tracking-[-0.04em]">
+              <PostMeta
+                date={lead.meta.date}
+                category={lead.meta.category}
+                readingTime={lead.meta.readingTime}
+                prefix="Latest"
+              />
+              <h2 className="mt-3 flex items-start gap-3 text-[clamp(1.75rem,3.5vw,2.75rem)] font-medium leading-[1.05] tracking-[-0.04em]">
                 <span className="link-wipe">{lead.meta.title}</span>
                 <span className="mt-1.5 shrink-0 text-lg text-accent transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1">
                   ↗
@@ -62,39 +59,16 @@ export function BlogIndexPage() {
         ) : null}
 
         {rest.length ? (
-          <Reveal
-            className="mt-20 grid gap-x-8 gap-y-14 border-t border-rule pt-12 md:mt-28 md:grid-cols-2 lg:gap-x-12"
-            stagger={70}
-          >
-            {rest.map((entry) => (
-              <Link
+          <div className="mt-16 border-t border-rule md:mt-24">
+            {rest.map((entry, index) => (
+              <PostRow
                 key={entry.meta.slug}
-                to={`/blog/${entry.meta.slug}`}
-                className="group block"
-              >
-                <div className="label mb-3">
-                  {formatPostDate(entry.meta.date)}
-                  <span className="mx-1.5 text-rule-strong">/</span>
-                  {entry.meta.category}
-                  {entry.meta.readingTime ? (
-                    <>
-                      <span className="mx-1.5 text-rule-strong">/</span>
-                      {entry.meta.readingTime}
-                    </>
-                  ) : null}
-                </div>
-                <h3 className="flex items-start gap-2 text-2xl font-medium leading-tight tracking-[-0.035em]">
-                  <span className="link-wipe">{entry.meta.title}</span>
-                  <span className="shrink-0 text-base text-accent transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1">
-                    ↗
-                  </span>
-                </h3>
-                <p className="mt-3 max-w-md text-[1rem] leading-relaxed text-ink-muted">
-                  {entry.meta.summary}
-                </p>
-              </Link>
+                entry={entry}
+                // Ladder: text|image, then image|text, …
+                textFirst={index % 2 === 0}
+              />
             ))}
-          </Reveal>
+          </div>
         ) : null}
       </Container>
 
@@ -102,6 +76,83 @@ export function BlogIndexPage() {
         headline="Rather talk than read?"
         body="I am always up for a conversation about LLMs, applied ML or getting a model into production. LinkedIn is the fastest way to reach me."
       />
+    </div>
+  );
+}
+
+function PostRow({
+  entry,
+  textFirst,
+}: {
+  entry: ContentEntry;
+  textFirst: boolean;
+}) {
+  const { meta } = entry;
+
+  return (
+    <Link
+      to={`/blog/${meta.slug}`}
+      className="group grid items-center gap-6 border-b border-rule py-10 md:grid-cols-12 md:gap-10 md:py-12"
+    >
+      <div className={`${textFirst ? "order-1" : "order-2"} md:col-span-7`}>
+        <Reveal delay={40}>
+          <PostMeta
+            date={meta.date}
+            category={meta.category}
+            readingTime={meta.readingTime}
+          />
+          <h3 className="mt-2.5 flex items-start gap-2 text-2xl font-medium leading-tight tracking-[-0.035em] md:text-[1.75rem]">
+            <span className="link-wipe">{meta.title}</span>
+            <span className="mt-1 shrink-0 text-base text-accent transition-transform duration-300 ease-out group-hover:translate-x-1 group-hover:-translate-y-1">
+              ↗
+            </span>
+          </h3>
+          <p className="mt-3 max-w-xl text-[1rem] leading-relaxed text-ink-muted">
+            {meta.summary}
+          </p>
+        </Reveal>
+      </div>
+
+      <div className={`${textFirst ? "order-2" : "order-1"} md:col-span-5`}>
+        <CoverReveal
+          src={meta.coverWide ?? meta.cover}
+          alt=""
+          ratio="1350 / 555"
+          className="rounded-sm"
+        />
+      </div>
+    </Link>
+  );
+}
+
+function PostMeta({
+  date,
+  category,
+  readingTime,
+  prefix,
+}: {
+  date: string;
+  category: string;
+  readingTime?: string;
+  prefix?: string;
+}) {
+  return (
+    <div className="label">
+      {prefix ? (
+        <>
+          {prefix}
+          <span className="mx-1.5 text-rule-strong">/</span>
+        </>
+      ) : null}
+      {formatPostDate(date)}
+      <span className="mx-1.5 text-rule-strong">/</span>
+      {category}
+      {readingTime ? (
+        <>
+          <span className="mx-1.5 text-rule-strong">/</span>
+          {readingTime}
+        </>
+      ) : null}
     </div>
   );
 }

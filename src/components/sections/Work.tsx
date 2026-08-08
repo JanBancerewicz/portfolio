@@ -13,7 +13,7 @@ export function Work() {
   if (!lead) return null;
 
   return (
-    <section id="work" className="scroll-mt-24 pt-24 md:pt-36">
+    <section id="work" className="scroll-mt-24 pt-24 md:pt-24">
       <Container>
         <SectionHeader
           index="01"
@@ -47,7 +47,7 @@ export function Work() {
                 key={entry.meta.slug}
                 entry={entry}
                 index={index + 2}
-                ratio={narrow ? "4 / 3" : "16 / 10"}
+                ratio="3 / 2"
                 className={
                   narrow
                     ? "md:col-span-5 md:mt-14"
@@ -72,9 +72,9 @@ function LeadProject({ entry }: { entry: ContentEntry }) {
       aria-label={`Read the case study: ${meta.title}`}
     >
       <CoverReveal
-        src={meta.cover}
+        src={meta.coverFeatured ?? meta.cover}
         alt=""
-        ratio="16 / 9"
+        ratio="2 / 1"
         className="rounded-sm"
       />
 

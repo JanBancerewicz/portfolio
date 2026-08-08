@@ -1,13 +1,13 @@
 /**
  * Commercial experience, newest first.
  *
- * `logo` is deliberately optional and currently unset. Neither company has a
- * mark in `simple-icons`, and inventing one would be fabricating somebody
- * else's brand — so the plate falls back to a wordmark set in the site's own
- * type. To use the real marks, drop the files in `src/assets/logos/`, import
- * them here and set `logo`; the component and its hover animation need no
- * change.
+ * Real company marks live in `src/assets/logos/` (transparent PNGs). When
+ * `logo` is set, `LogoPlate` renders the image and keeps the same hover sheen
+ * / shadow swing as the wordmark fallback.
  */
+
+import ergoHestiaLogo from "../assets/logos/ErgoHestia.png";
+import energaOperatorLogo from "../assets/logos/EnergaOperator.png";
 
 export type Experience = {
   company: string;
@@ -22,45 +22,49 @@ export type Experience = {
   stack: string[];
   /** Optional imported image. When set, it replaces the wordmark plate. */
   logo?: string;
+  /** Company site — makes the logo plate an outbound link. */
+  href?: string;
 };
 
 export const experience: Experience[] = [
   {
     company: "ERGO Hestia S.A.",
     wordmark: { lead: "ERGO", tail: "Hestia" },
-    role: "Software Engineering Intern",
+    logo: ergoHestiaLogo,
+    href: "https://www.ergohestia.pl/",
+    role: "Data & Software Engineering Intern",
     start: "2026-01",
     end: null,
     location: "Sopot",
     points: [
-      "I develop and maintain PricePoint, the insurance premium calculation system that takes over 200,000 requests a day.",
-      "Integrated data pipelines with a cloud data warehouse, so business-critical figures reconcile against their source.",
-      "Ship features through CI/CD — code review and iterative deployments with the team.",
+      "Working in the Pricing department, I develop and maintain PricePoint, the insurance premium calculation system that takes over 200,000 requests a day.",
+      "Designed and hosted cloud pipelines on Azure Databricks, developing a translator to convert Earnix risk formulas into scikit-learn prediction models.",
+      "Delivered features through a CI/CD workflow, collaborating with the team on iterative deployments.",
     ],
     stack: [
       "Python",
       "SQL",
       "Azure",
       "Databricks",
-      "JavaScript",
       "Dynatrace",
-      "REST APIs",
       "Git",
-      "Jira",
       "Agile",
     ],
   },
   {
     company: "Energa Operator S.A.",
     wordmark: { lead: "Energa", tail: "Operator" },
+    logo: energaOperatorLogo,
+    href: "https://energa-operator.pl/",
     role: "IT Department Intern — DevOps & systems administration",
     start: "2025-07",
     end: "2025-12",
     location: "Gdańsk",
     points: [
-      "Administered OT infrastructure across a fleet of 90 virtualized servers — VMs and system configuration on both Windows and Linux.",
-      "Wrote PowerShell and Bash automation for server monitoring, alerting and backups.",
-      "First hands-on DevOps work: deployment, monitoring, and the unglamorous side of keeping systems up.",
+      "Administered OT infrastructure across a fleet of 90 virtualized servers, managing VMs and system configurations on both Windows and Linux.",
+      "Developed automation scripts in PowerShell and Bash to handle server monitoring, alerting, and backup processes.",
+      "Gained hands-on experience with DevOps tasks: deployment, monitoring, and keeping systems up.",
+
     ],
     stack: [
       "Hyper-V",
@@ -70,8 +74,6 @@ export const experience: Experience[] = [
       "Windows",
       "Azure",
       "Vim",
-      "Git",
-      "nginx",
     ],
   },
 ];

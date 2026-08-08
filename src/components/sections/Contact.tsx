@@ -1,7 +1,9 @@
 import { site } from "../../data/site";
+import { gmailComposeHref } from "../../lib/mailto";
 import { Reveal } from "../motion/Reveal";
 import { SplitLines } from "../motion/SplitLines";
 import { Container } from "../ui/Container";
+import { MailLink } from "../ui/MailLink";
 import { Terminal } from "../ui/Terminal";
 
 /**
@@ -63,26 +65,24 @@ export function Contact({ index = "07" }: { index?: string }) {
                   ↗
                 </span>
               </a>
-              <a
-                href={`mailto:${site.email}`}
-                className="press group inline-flex items-center justify-between gap-8 rounded-sm border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink"
-              >
+              <MailLink className="press group inline-flex items-center justify-between gap-8 rounded-sm border border-rule-strong px-6 py-3.5 text-[1rem] font-medium transition-colors duration-200 hover:border-ink">
                 Email instead
                 <span className="transition-transform duration-200 ease-out group-hover:translate-x-0.5">
                   →
                 </span>
-              </a>
+              </MailLink>
             </Reveal>
 
             {/*
               Content-width strip: equal `lg:grid-cols-4` left a hole between the
               short CV label and the long ORCID id. Auto columns + `w-fit` pack
-              the four cells and shrink the top rule to match.
+              the cells and shrink the top rule to match.
             */}
             <Reveal
-              className="mt-12 grid w-fit max-w-full gap-x-8 gap-y-px border-t border-rule sm:grid-cols-2 lg:grid-cols-[repeat(4,auto)]"
+              className="mt-12 grid w-fit max-w-full gap-x-8 gap-y-px border-t border-rule sm:grid-cols-2 lg:grid-cols-[repeat(5,auto)]"
               stagger={60}
             >
+              {/* <ContactRow label="Email" value={site.email} href={gmailComposeHref} /> */}
               <ContactRow label="LinkedIn" value="jan-bancerewicz" href={site.links.linkedin} />
               <ContactRow label="GitHub" value="JanBancerewicz" href={site.links.github} />
               <ContactRow label="CV" value="Download PDF" href={site.links.cv} />

@@ -4,6 +4,7 @@ import { Link, useLocation } from "react-router-dom";
 import { EASE_OUT, prefersReducedMotion } from "../../lib/motion";
 import { navigation, site } from "../../data/site";
 import { Container } from "../ui/Container";
+import { MailLink } from "../ui/MailLink";
 import { ThemeToggle } from "../ui/ThemeToggle";
 import { ScrollProgress } from "./ScrollProgress";
 
@@ -13,7 +14,17 @@ export function Header() {
   const location = useLocation();
 
   useEffect(() => {
-    const onScroll = () => setCondensed(window.scrollY > 24);
+    // Hysteresis around the condense threshold. A single knife-edge at 24px
+    // lets trackpad jitter and rubber-banding flip the flag every frame, which
+    // restarts the 300ms chrome transitions and makes the bar visibly blink.
+    let active = false;
+    const onScroll = () => {
+      const y = window.scrollY;
+      const next = active ? y > 12 : y > 40;
+      if (next === active) return;
+      active = next;
+      setCondensed(next);
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -44,18 +55,28 @@ export function Header() {
           Skip to content
         </a>
         <div
-          className="relative border-b transition-[background-color,border-color,backdrop-filter] duration-300 ease-out"
-          style={{
-            backgroundColor: condensed
-              ? "color-mix(in srgb, var(--paper) 82%, transparent)"
-              : "transparent",
-            borderColor: condensed ? "var(--rule)" : "transparent",
-            backdropFilter: condensed ? "blur(12px)" : "none",
-          }}
+          className="relative border-b transition-[border-color] duration-300 ease-out"
+          style={{ borderColor: condensed ? "var(--rule)" : "transparent" }}
         >
+          {/* Frosted plate is a sibling of the progress bar, not its parent.
+              ScrollProgress writes transform every frame; doing that inside a
+              backdrop-filter element forces the browser to re-raster the blur
+              continuously — that is the mid-scroll nav flicker. */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 transition-[background-color] duration-300 ease-out"
+            style={{
+              backgroundColor: condensed
+                ? "color-mix(in srgb, var(--paper) 92%, transparent)"
+                : "transparent",
+              backdropFilter: condensed ? "blur(12px)" : "none",
+              WebkitBackdropFilter: condensed ? "blur(12px)" : "none",
+            }}
+          />
+
           <ScrollProgress />
 
-          <Container>
+          <Container className="relative">
             <div
               className="flex items-center justify-between gap-6 transition-[height] duration-300 ease-out"
               style={{ height: condensed ? "3.5rem" : "4.5rem" }}
@@ -189,12 +210,9 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
           >
             Get in touch on LinkedIn
           </a>
-          <a
-            href={`mailto:${site.email}`}
-            className="press rounded-sm border border-rule-strong px-5 py-3.5 text-center text-[1rem] font-medium"
-          >
+          <MailLink className="press rounded-sm border border-rule-strong px-5 py-3.5 text-center text-[1rem] font-medium">
             {site.email}
-          </a>
+          </MailLink>
         </div>
       </Container>
     </div>

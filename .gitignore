@@ -146,6 +146,8 @@ my_assets/*.gif
 dist-ssr
 
 .claude/
+# Leftover root path if an old companion start wrote here; live sessions
+# go under temp/brainstorm-companion/ (see scripts/start-brainstorm-companion.sh).
 .superpowers/
 # .github
 temp/
@@ -158,3 +160,4 @@ preview.html
 covers-preview.png
 **/cover.preview.png
 .playwright-mcp/
+*.sh

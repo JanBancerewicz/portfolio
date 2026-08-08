@@ -11,7 +11,7 @@ export function TechRibbon() {
   return (
     <section
       aria-label="Technologies"
-      className="marquee marquee-mask mt-24 select-none overflow-hidden border-y border-rule py-5 md:mt-32"
+      className="marquee marquee-mask mt-24 select-none overflow-hidden border-y border-rule py-5 md:mt-24"
     >
       <div className="marquee-track" style={{ ["--marquee-duration" as string]: "64s" }}>
         {row.map((tech, index) => (

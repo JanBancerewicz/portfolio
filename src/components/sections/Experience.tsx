@@ -29,9 +29,9 @@ export function Experience() {
           title="Internships & commercial experience"
           lede={
             <>
-              Two internships taken while studying full time — one on grid
-              operations infrastructure, one on a pricing system that is
-              answering requests right now.
+              Over a year of commercial experience in software
+              engineering and high-throughput production systems,
+              gained alongside studying Computer Science.
             </>
           }
           aside={
@@ -90,8 +90,8 @@ function Role({ entry, current }: { entry: Entry; current: boolean }) {
 
           <p className="label mt-1.5">
             {months} months
-            <span className="mx-2 text-rule-strong">/</span>
-            {entry.location}
+            <span className="mx-2 text-rule-strong"></span>
+            {/* {entry.location} */}
           </p>
         </div>
 
@@ -130,25 +130,39 @@ function Role({ entry, current }: { entry: Entry; current: boolean }) {
  * unrelated effects that happen to fire together.
  */
 function LogoPlate({ entry }: { entry: Entry }) {
+  const mark = entry.logo ? (
+    <img
+      src={entry.logo}
+      alt={entry.company}
+      className="logo-mark max-h-14 max-w-full w-auto object-contain"
+      loading="lazy"
+      decoding="async"
+    />
+  ) : (
+    <span
+      className="logo-mark text-center text-[1.25rem] leading-none tracking-[-0.03em] md:text-[1.375rem]"
+      title={entry.company}
+    >
+      <span className="font-semibold text-ink">{entry.wordmark.lead}</span>{" "}
+      <span className="font-light text-ink-muted">{entry.wordmark.tail}</span>
+    </span>
+  );
+
+  const plateClass =
+    "logo-plate grid h-24 place-items-center rounded-sm border border-rule bg-paper-raised px-5 md:h-28";
+
+  if (!entry.href) {
+    return <div className={plateClass}>{mark}</div>;
+  }
+
   return (
-    <div className="logo-plate grid h-24 place-items-center rounded-sm border border-rule bg-paper-raised px-5 md:h-28">
-      {entry.logo ? (
-        <img
-          src={entry.logo}
-          alt={entry.company}
-          className="logo-mark max-h-12 w-auto object-contain"
-          loading="lazy"
-          decoding="async"
-        />
-      ) : (
-        <span
-          className="logo-mark text-center text-[1.25rem] leading-none tracking-[-0.03em] md:text-[1.375rem]"
-          title={entry.company}
-        >
-          <span className="font-semibold text-ink">{entry.wordmark.lead}</span>{" "}
-          <span className="font-light text-ink-muted">{entry.wordmark.tail}</span>
-        </span>
-      )}
-    </div>
+    <a
+      href={entry.href}
+      target="_blank"
+      rel="noreferrer noopener"
+      className={plateClass}
+    >
+      {mark}
+    </a>
   );
 }
