@@ -14,7 +14,8 @@ import { techIcons } from "../../data/techIcons";
  *
  * Solid for products, drawn for methods: the distinction is real, so the
  * rendering says it out loud. Marks stay monochrome at rest and take their
- * brand colour on hover, which keeps a row of them reading as one texture
+ * brand colour on hover (the ribbon opts out via `.tech-mark-active` for
+ * always-on brand colour), which keeps a row of them reading as one texture
  * rather than a bag of clashing logos.
  */
 export function TechIcon({

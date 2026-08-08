@@ -1,4 +1,5 @@
 import { marqueeTech } from "../../data/technologies";
+import { TechIcon } from "../ui/TechIcon";
 
 /**
  * Full-bleed technology ribbon. Constant motion, so it is `linear` and driven
@@ -17,11 +18,13 @@ export function TechRibbon() {
         {row.map((tech, index) => (
           <span
             key={`${tech}-${index}`}
-            className="flex shrink-0 items-center gap-8 pr-8 text-[1.375rem] tracking-[-0.03em] text-ink-muted md:text-[1.625rem]"
+            className="tech-mark-active flex shrink-0 items-center gap-2 pr-10 text-[1.375rem] tracking-[-0.03em] text-ink-muted md:text-[1.625rem]"
             aria-hidden={index >= marqueeTech.length}
           >
+            <span aria-hidden="true">
+              <TechIcon label={tech} className="text-ink" />
+            </span>
             {tech}
-            <span className="size-1 rounded-full bg-accent" />
           </span>
         ))}
       </div>

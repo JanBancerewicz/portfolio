@@ -656,6 +656,11 @@ html.js [data-split][data-split-ready] {
   }
 }
 
+/* Always-on brand colour (e.g. TechRibbon). Concept glyphs have no `--brand`. */
+.tech-mark-active svg[style*="--brand"] {
+  color: var(--brand);
+}
+
 /* ---------------------------------------------------------------------------
    Hero object-detection overlay
 
