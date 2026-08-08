@@ -28,23 +28,33 @@ jobs:
 
       - run: npm ci
 
-      - name: Resolve base path
-        id: base
-        # A repo named <user>.github.io is served from the domain root; every
-        # other repo is served from /<repo>/, and Vite needs to know which.
+      - name: Resolve base path and site URL
+        id: site
+        # Project sites live at https://<user>.github.io/<repo>/; a repo named
+        # <user>.github.io is served from the domain root. GitHub Pages always
+        # lowercases the owner in the public URL.
         run: |
-          if [ "${{ github.event.repository.name }}" = "${{ github.repository_owner }}.github.io" ]; then
+          OWNER="$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')"
+          REPO='${{ github.event.repository.name }}'
+          if [ "$REPO" = "${{ github.repository_owner }}.github.io" ]; then
             echo "path=/" >> "$GITHUB_OUTPUT"
+            echo "url=https://${OWNER}.github.io" >> "$GITHUB_OUTPUT"
           else
-            echo "path=/${{ github.event.repository.name }}/" >> "$GITHUB_OUTPUT"
+            echo "path=/${REPO}/" >> "$GITHUB_OUTPUT"
+            echo "url=https://${OWNER}.github.io/${REPO}" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Build
         env:
-          BASE_PATH: ${{ steps.base.outputs.path }}
+          BASE_PATH: ${{ steps.site.outputs.path }}
+          SITE_URL: ${{ steps.site.outputs.url }}
         run: npm run build
 
+      # Requires Pages source = "GitHub Actions" once in repo Settings → Pages.
+      # Without that, this step fails with two errors ("Get Pages site failed"
+      # + "HttpError: Not Found") and the deploy job is skipped.
       - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
