@@ -4,28 +4,29 @@ import poster from "./poster.svg";
 
 export const meta = {
   slug: "hrv-mobile-ml",
-  title: "Analysis of Heart Rate Variability Using Mobile Devices and Machine Learning",
-  date: "2026",
+  title: "Analysis of HRV Using Mobile Devices and Machine Learning",
+  date: "2025",
+  order: 3,
   category: "Research / Applied ML (biosignals)",
   role: "Co-author & primary codebase contributor (team of five)",
   summary:
-    "Research pipeline and desktop GUI for mobile ECG/PPG peak detection and HRV/PTT analysis on six subjects, pairing a Polar H10 with a camera-flash Android PPG app (software green filter) and comparing CNN detectors to Pan–Tompkins/NeuroKit baselines. Extracurricular 2025 project; TASK Quarterly publication released March 2026.",
+    "Research project for mobile ECG/PPG peak detection and HRV analysis. Compares 1D-CNN detectors against classical Pan–Tompkins/NeuroKit baselines using smartphone camera PPG and Polar H10 ECG. Peer-reviewed TASK Quarterly publication (March 2026).",
   cover,
   coverFeatured,
   poster,
   // Drop an 8s vertical clip next to this file, import it, and set `reel`.
   // reel,
   reelCaption:
-    "Six subjects, Polar ECG + fingertip PPG — CNNs and Pan–Tompkins on the same beats, then RMSSD/SDNN side by side. ECG peak F1 ≈ 0.98; PPG stays honest about motion.",
+    "Research project on ML-driven HRV: CNN & RNN beat detection from mobile ECG/PPG signals.",
   tags: [
+    "PyTorch",
+    "Signal Processing",
+    "Android",
+    "Python",
+    "Research",
     "HRV",
     "PPG",
-    "ECG",
-    "PyTorch",
-    "signal-processing",
-    "mobile-sensing",
-    "research",
-    "Pan-Tompkins",
+    "ECG"
   ],
   featured: true,
   links: [
@@ -35,7 +36,11 @@ export const meta = {
     },
     {
       label: "GitHub",
-      href: "[[ PASTE_RESEARCH_REPO_URL ]]",
+      href: "https://github.com/JanBancerewicz/research-project",
+    },
+    {
+      label: "PPGbetter (Android)",
+      href: "https://github.com/JanBancerewicz/PPGbetter",
     },
   ],
 };
@@ -44,17 +49,17 @@ export const glossary = [
   {
     term: "PPG",
     definition:
-      "Photoplethysmography — estimating blood-volume pulses optically, here from a phone camera aimed at a fingertip lit by the flash, with a software green mute/filter applied in the acquisition app.",
+      "Photoplethysmography – estimating blood-volume pulses optically, here from a phone camera aimed at a fingertip lit by the flash, with a software green mute/filter applied in the acquisition app.",
   },
   {
     term: "ECG",
     definition:
-      "Electrocardiography — recording the heart’s electrical activity; in this project primarily via a Polar H10 chest strap.",
+      "Electrocardiography – recording the heart’s electrical activity; in this project primarily via a Polar H10 chest strap.",
   },
   {
     term: "HRV",
     definition:
-      "Heart rate variability — statistics of variation between successive beat intervals (e.g. SDNN, RMSSD), used as a physiology/research marker.",
+      "Heart rate variability – statistics of variation between successive beat intervals (e.g. SDNN, RMSSD), used as a physiology/research marker.",
   },
   {
     term: "RR interval",
@@ -64,7 +69,7 @@ export const glossary = [
   {
     term: "IBI",
     definition:
-      "Inter-beat interval — time between successive PPG pulse peaks; PPG analogue of the RR interval.",
+      "Inter-beat interval – time between successive PPG pulse peaks; PPG analogue of the RR interval.",
   },
   {
     term: "RMSSD",
@@ -79,7 +84,7 @@ export const glossary = [
   {
     term: "PTT",
     definition:
-      "Pulse transit time — delay between an ECG R-peak and the corresponding PPG pulse peak after time alignment.",
+      "Pulse transit time – delay between an ECG R-peak and the corresponding PPG pulse peak after time alignment.",
   },
   {
     term: "Pan–Tompkins",
@@ -89,7 +94,7 @@ export const glossary = [
   {
     term: "SE block",
     definition:
-      "Squeeze-and-Excitation — a channel-attention module that reweights convolutional feature maps; used inside PPGPeakDetector.",
+      "Squeeze-and-Excitation – a channel-attention module that reweights convolutional feature maps; used inside PPGPeakDetector.",
   },
   {
     term: "WebSocket",
@@ -101,157 +106,152 @@ export const glossary = [
     definition:
       "Harmonic mean of precision and recall for peak matching within a time tolerance; primary detector quality metric in comparison scripts.",
   },
+  {
+    term: "match tolerance",
+    definition:
+      "Maximum allowed time offset when pairing a predicted peak with a reference peak. ECG evals here use ~10 ms; PPG often 150–250 ms – F1 is not comparable across protocols until this is published.",
+  },
+  {
+    term: "NeuroKit2",
+    definition:
+      "Open-source Python biosignal toolkit (NeuroKit) used as a classical peak-detection baseline alongside Pan–Tompkins in the comparison scripts.",
+  },
+  {
+    term: "band-pass",
+    definition:
+      "Filter that keeps a frequency band and removes the rest before peak detection. ECG: 5th-order Butterworth 0.5–45 Hz; PPG: 4th-order 0.5–5 Hz – wrong passband quietly destroys peaks.",
+  },
+  {
+    term: "R-peak",
+    definition:
+      "The prominent upward spike of the ECG QRS complex that marks a ventricular beat; RR intervals and ECG peak F1 are defined from these timestamps.",
+  },
 ];
 
-## F1 is not the whole story
+## Introduction & Core Problem
 
-On one PPG evaluation dump checked into `ppg.md`, a residual CNN reports **Accuracy 98.17%** and **F1 0.9774** on a sample-level confusion matrix — then drops to **F1 0.895** when the same family of detections is scored against reference peaks with a **~264 ms** matching tolerance (TP 64 / FP 7 / FN 8). That gap is the project in miniature: beat detection for <Term>HRV</Term> is not a classification leaderboard problem; it is a timing-and-physiology problem under messy mobile sensors. If you only ship the first number, recruiters and reviewers will over-trust the system the first time a finger slips.
+This project presents a research pipeline and desktop application for real-time and offline analysis of heart rate variability (<Term>HRV</Term>) using non-invasive mobile sensors: a camera-based smartphone app (<Term>PPG</Term>) and a Polar H10 chest strap (<Term>ECG</Term>).
 
-This repository is the Python half of a Gdańsk University of Technology extracurricular project (2025) on mobile <Term>ECG</Term> and <Term>PPG</Term> for heart-rate variability, published March 2026 as *Analysis of heart rate variability using mobile devices and machine learning* (TASK Quarterly). Recordings came from **six** subjects: Polar H10 chest/waist ECG plus fingertip camera PPG. The companion Android app ([PPGbetter](https://github.com/JanBancerewicz/PPGbetter)) lights the finger with the flash, applies a **software green mute/filter** on the frames, and streams averaged luma over a <Term>WebSocket</Term>.
+The core challenge in mobile HRV analysis lies in **beat timing accuracy**, not high-level classification metrics. Standard machine learning models trained on biosignals often report high sample-level accuracy or classification <Term>F1</Term> scores (e.g. classifying individual signal frames as "peak" vs. "non-peak"). However, evaluating a model frame-by-frame hides critical temporal errors. In physiological monitoring, a detection is only useful if the predicted peak aligns with the actual heartbeat within a strict time window (e.g. <Term>match tolerance</Term> of a few milliseconds).
 
-Primary git committer: Jan Bancerewicz (~57 commits). Co-authors: Julian Kotłowski, Mateusz Rzęsa, Julia Morawska, Ostap Lozovyy.
+Miss a single peak or insert a false positive, and key HRV metrics like <Term>RMSSD</Term> (short-term variability) and <Term>SDNN</Term> (overall dispersion) become completely unreliable. Therefore, this project focuses on evaluating deep learning architectures (CNNs) alongside classical baselines (<Term>Pan–Tompkins</Term>, <Term>NeuroKit2</Term>) strictly on beat-to-beat interval accuracy (<Term>RR interval</Term>s for ECG and <Term>IBI</Term> for PPG) rather than raw sample classification accuracy.
+### What we built, with whom, on what data
 
-### Why the naive approach fails
+This research project, developed at Gdańsk University of Technology (2025) and published in [TASK Quarterly](https://journal.mostwiedzy.pl/TASKQuarterly/article/view/3699) (March 2026), centers on an end-to-end Python ML and evaluation pipeline ([research-project](https://github.com/JanBancerewicz/research-project)). The primary focus is benchmarking custom 1D Convolutional Neural Networks (featuring Squeeze-and-Excitation modules and LSTM layers) against classical algorithmic baselines (<Term>Pan–Tompkins</Term>, <Term>NeuroKit2</Term>) across dual-modality biosignals: Polar H10 chest-strap ECG and smartphone camera PPG (streamed via [PPGbetter](https://github.com/JanBancerewicz/PPGbetter)) - a companion app developed for this project.
 
-Phone “heart rate” APIs and raw brightness thresholds give smoothed BPM, not beat-to-beat intervals. Camera PPG is inverted, motion-corrupted, and clocked differently from Polar ECG (~130 Hz). Without modality-specific band-pass filters, refractory spacing, and a classical/NeuroKit reference, you cannot tell whether an <Term>RMSSD</Term> mismatch is physiology or a missed peak.
+**Six** subjects. **ML & analysis stack:** Python 3, PyTorch (~2.6 CUDA), SciPy / NumPy / Pandas, NeuroKit2, scikit-learn, Matplotlib, Tkinter, `websockets`, `bleak`. Pre-trained weights included in repo (`cnn/ecgcnn.pth`, `ppg_peak_model.pth`).
 
-### How it works
+**Team:** Developed by Jan Bancerewicz, Julian Kotłowski, Mateusz Rzęsa, Julia Morawska, and Ostap Lozovyy under the academic supervision of Ph.D. Julian Szymański.
 
-Entry point: `appgui/ngui.py`. Producer threads feed queues — PPG via `PpgData` on **`0.0.0.0:8765`**, ECG via `EcgDataFile` or `EcgDataBluetooth`. `ECGProcessor` / `PPGProcessor` window, filter, detect peaks, and drive live plots plus RMSSD / <Term>SDNN</Term> / RR.
 
-1. **Filter** — ECG Butterworth **0.5–45 Hz**; PPG **0.5–5 Hz** (aligned validation also inverts PPG).
-2. **Classical peaks** — <Term>Pan–Tompkins</Term> (ECG); `find_peaks` / local maxima with refractory spacing (PPG).
-3. **Neural peaks** — `ECG_CNN` (Conv1D → LSTM, **256**-sample windows); `PPGPeakDetector` (residual Conv1D + <Term>SE block</Term>, **50–100**-sample segments).
-4. **Postprocess** — threshold, enforce min inter-peak distance, stamp unix times for pairing.
-5. **HRV / PTT** — RR vs <Term>IBI</Term> → mean / SDNN / RMSSD; <Term>PTT</Term> = t_PPG − t_ECG after absolute-time alignment.
+**In scope:** ML architecture design and offline neural network training/evaluation, automated beat-matching logic within strict time tolerances, comparison against classical peak detectors, end-to-end signal filtering, HRV (<Term>RMSSD</Term>/<Term>SDNN</Term>) and <Term>PTT</Term> computation, and desktop GUI for live/replay signal inspection.
 
-Offline scripts `comparison/ecg_ai_vs_pan_tompkins.py` and `ppg_ai_vs_real.py` print precision/recall/F1; `comparePPGECG.py` plots aligned dual traces.
+**Out of scope:** clinical certification, on-device mobile ML execution, full cohort raw dataset distribution (privacy/size constraints), production CI/CD, hospital integration.
+## Why Standard Mobile Pulse Estimation Fails for HRV
 
-### Before → after
+Phone health APIs and raw brightness thresholds return a calm BPM curve. Research-grade HRV needs every beat timed on both modalities, then compared.
 
-**Start:** Polar connect + early ECG CNN R-peak plots — detect chest-strap beats, little else.
+Camera PPG fights you in three concrete ways: the pulse can sit **inverted** (aligned validation in `validate_ppg_vs_ecg.py` multiplies the signal by `-1` before filtering), motion swamps the optical band, and the phone wall clock is not the Polar clock. Polar ECG at **FS ≈ 130 Hz** is the easier modality – but even there, “we trained a CNN” is meaningless unless you publish **<Term>match tolerance</Term>** and **label source**.
 
-**Then (git arc):** live Tkinter → HRV GUI → PPG CNN → timestamp/alignment fixes (`fix-hrv-final`, `peaks-compare`) → Pan–Tompkins baselines → residual+SE PPG net → cleanup for publication.
+Without modality-specific <Term>band-pass</Term> filters, a refractory gap between accepted peaks, and an explicit classical or <Term>NeuroKit2</Term> reference, you cannot tell whether an RMSSD mismatch is physiology or a missed peak. That is the failure mode we designed against.
 
-**End:** Replay or stream fingertip PPG alongside Polar/file ECG, inspect peaks and side-by-side HRV, export aligned CSV, and reproduce detector comparisons — enough to show that under controlled recording, mobile PPG can approximate ECG HRV while staying more artifact-sensitive.
+## From camera capture app to side-by-side RMSSD
 
-### Decisions I would defend
+### How the system grew
 
-1. **Classical + neural side by side** — ECG labels partly come from Pan–Tompkins; keeping `pan_tompkins.py` and comparison scripts makes that circularity visible.
-2. **Separate architectures per sensor** — 256-sample CNN+LSTM for ECG vs short residual windows for optical PPG beats one shared “universal” model.
-3. **Thin phone, heavy desktop** — PPGbetter only acquires; Tkinter + CUDA/CPU PyTorch handles ML and paper figures. The WebSocket `timestamp value` protocol on :8765 stays trivial to implement on Android at the cost of no auth and a bind to `0.0.0.0`.
+**Start:** Polar BLE connect scripts and an early ECG CNN that plotted <Term>R-peak</Term>s – detect chest-strap beats, little else.
 
-### Where it breaks
+**Then (git arc):** live Tkinter plots → HRV GUI metrics → PPG CNN branch → timestamp/alignment fixes (`fix-hrv-final`, `peaks-compare`) → classical Pan–Tompkins baselines → redesigned PPG residual + SE network (`ppg: new cnn network`) → cleanup for publication.
 
-Motion and poor finger contact wreck PPG (README). Window edges miss or duplicate beats; missing `.pth` weights trigger slow `get_or_train_model` (the GUI even cuts training epochs to avoid a multi-minute freeze on startup). The practical demo path is **file replay** (`EcgDataFile` + saved PPG) — live phone streaming still works in code, but the acquisition device is gone. There is no CI; sample-level 98% accuracy overstates beat-match quality when tolerance is ~250 ms.
+**End:** Replay (or stream) fingertip PPG next to Polar/file ECG, mark peaks classically and with CNNs, show RMSSD / SDNN / RR side by side, export aligned CSV, reproduce detector comparisons. Under controlled recording, mobile PPG can approximate ECG-based HRV while staying more artifact-sensitive.
 
-### Outcome
+### Acquisition path
 
-On six subjects under controlled recording, README reports ECG peak <Term>F1</Term> ≈ **0.98** (accuracy ≈ **97%**). For PPG, the F1 range is **0.824–0.977**: **0.824** for peak matching with an 8-sample / **264 ms** tolerance (research-project comparison script), up to **0.977** for sample-level confusion-matrix classification. `ppg.md`’s peak-match F1 **0.895** at that same ~264 ms tolerance is the number to put next to any sample-accuracy claim. Exact F1 @ 50/100/150 ms, median PTT, and plot-latency numbers were not stated in the paper. PPG can approximate ECG-based HRV when recordings are clean, with higher sensitivity to motion. Stick to detector metrics already in-repo — do not quote paper RMSSD/SDNN error tables.
+Entry point: `appgui/ngui.py` (“HR Monitor”). Two producer threads feed queues:
 
-## Project snapshot
+- **PPG** – `PpgData` listens on **`0.0.0.0:8765`**, protocol `timestamp value` (async <Term>WebSocket</Term>).
+- **ECG** – `EcgDataBluetooth` (Polar) or `EcgDataFile` (CSV replay).
 
-| Field | Value |
-| --- | --- |
-| One-liner | Python research codebase for filtering, classical + neural peak detection, and HRV/PTT comparison on Polar H10 ECG and camera-based PPG from a companion Android app |
-| Problem | Can mobile-grade ECG/PPG acquisition support beat-to-beat HRV analysis comparable to classical ECG pipelines under controlled conditions? |
-| End user | Researchers / student engineers validating mobile HRV methods; demo operators of the Tkinter GUI (`ngui.py`). Not a clinical end-user product |
-| Team | Jan Bancerewicz (primary committer), Julian Kotłowski, Mateusz Rzęsa, Julia Morawska, Ostap Lozovyy |
-| Cohort | **6** subjects (Polar H10 ECG + fingertip camera PPG) |
-| Stack | Python 3; PyTorch (~2.6 CUDA); SciPy/NumPy/Pandas; NeuroKit2; scikit-learn; Matplotlib; Tkinter; `websockets`; `bleak`; [PPGbetter](https://github.com/JanBancerewicz/PPGbetter) |
-| Architecture | Single-repo research pipeline + desktop GUI. Live ingest (BLE ECG / WebSocket PPG) → processors → peaks → RR/IBI → HRV (+ optional PTT) |
-| Status | Research project (2025); peer-reviewed publication **March 2026** (TASK Quarterly). Not production clinical software |
-| Paper | [TASK Quarterly](https://journal.mostwiedzy.pl/TASKQuarterly/article/view/3699) |
+`ECGProcessor` (windows of **256** samples) and `PPGProcessor` (windows of **~100** samples) filter, detect peaks, and drive three tabs: **PPG + ECG**, **HRV** (RMSSD / SDNN / RR for EKG vs PPG), **Peaks Compare**. Save buttons write ECG, PPG, or both aligned; HRV plots export as PNG at 300 dpi.
 
-**In scope:** offline training/eval of peak detectors; live desktop visualization; classical baselines (Pan–Tompkins, `find_peaks`); HRV from RR/IBI; PTT on aligned ECG–PPG; example/partial datasets.
 
-**Out of scope:** clinical certification; production on-device mobile ML; full cohort packaging; CI/CD deploy; hospital EHR integration.
-
-**Constraints:** CUDA preferred; real-time-ish GUI with windowed inference; biometric privacy — full datasets limited in-repo. Demo/screenshot path: **file replay** (Android device no longer available).
-
-## Results
-
-| Metric | Value | Conditions | Conclusion | Conf. |
-| --- | --- | --- | --- | --- |
-| ECG R-peak F1 | ≈ 0.98 | README / Polar H10; neural detector vs NeuroKit / Pan–Tompkins | CNN+LSTM viable for this strap/FS; classical baseline still required | reported |
-| ECG accuracy | ≈ 97% | README model section | Sample-level accuracy tracks F1 but is easier to inflate | reported |
-| PPG F1 (range) | **0.824–0.977** | Peak match @ 8 samples / 264 ms (research-project script) → sample-level confusion matrix | Protocol dominates headline score | reported |
-| PPG sample accuracy / F1 | 98.17% / 0.9774 | `ppg.md` confusion matrix `[[9609,9],[7,375]]` | Strong frame-level separation after training | reported |
-| PPG AI vs reference peaks | Prec 0.901, Rec 0.889, F1 **0.895** | `ppg.md`; tolerance ≈ 264 ms (8 samples) | Beat-matching is the metric that matters for HRV | reported |
-| PPG band-pass | 0.5–5 Hz, order 4 | README + processors (ECG 0.5–45 Hz) | Wrong filter destroys optical peaks | measured |
-| ECG window / FS | 256 samples; FS=130 | `ECG_CNN`, comparison script | Window ≈ 2 s at 130 Hz | measured |
-| Cohort size | 6 subjects | Author-confirmed | Small controlled cohort — keep generalization claims narrow | reported |
-| Paper RMSSD/SDNN tables | — | — | **Do not quote** in this write-up (author) | n/a |
-| F1 @ 50/100/150 ms | not in paper | — | Not stated in the article | n/a |
-| Median PTT / plot latency | not in paper | Alignment pipeline exists | Not stated in the article | n/a |
-
-**Takeaway:** publish matching tolerance and label source next to F1. Sample-level 98% is not the same claim as beat-match F1 0.895.
-
-## Lessons
-
-1. **Evolution:** Polar/ECG CNN → live GUI → PPG path → timestamp alignment as a first-class subsystem → classical baselines → residual+SE PPG model → cleanup for publication.
-2. **Trade-offs:** dual detector paths; `get_or_train_model` convenience vs long GUI startup; file replay default vs BLE live; open WebSocket vs zero auth; labels from classical detectors (fast, somewhat circular).
-3. **Worked:** side-by-side comparison scripts; explicit band-pass per modality; held-out file lists; GUI tabs that mirror paper figures.
-4. **Friction:** path churn; inconsistent windows (50 vs 100) and tolerances; no automated tests; no single “canonical run” Makefile.
-5. **Next time:** one `configs/eval.yaml`; frozen metrics JSON from re-runnable scripts; auth-bind WebSocket; pytest smoke on synthetic fixtures; document file-replay as the supported demo path.
-6. **Transferable:** for physiological ML, publish the **matching tolerance and label source** next to F1 — otherwise mobile-sensor results are not comparable.
-
-## Serving path
-
-**Canonical (article / screenshots):** file replay of ECG + PPG CSVs → peaks → HRV (PTT optional). Live PPGbetter WebSocket + BLE ECG remains implemented but is not the preferred demo path.
+Canonical happy path (replay or live):
 
 ```text
-User                PPGbetter           PpgData:8765      EcgSource         Processors              GUI
- |  start ngui            |                  |                |                      |                      |
- |----------------------->|                  |                |                      |                      |
- |  start WS server       |                  | listen 0.0.0.0 |                      |                      |
- |  place finger+flash    |--async WS msg--->| put(queue)     |                      |                      |
- |                        |                  |                |--samples----------->| filter+detect        |
- |                        |                  |                |                      |--peaks/HRV---------->| update
- |  optional Save Both    |                  |                |                      | align timestamps     | CSV
+User -> ngui.py
+     -> PpgData :8765  (async WS)  and/or CSV PPG
+     -> EcgDataFile / BLE          (sync queue drain)
+     -> ECGProcessor / PPGProcessor
+           band-pass -> classical or neural peaks
+           -> RR / IBI -> RMSSD / SDNN
+           -> optional PTT on unix-aligned peaks
+     -> Tkinter plots + optional aligned CSV
 ```
 
-```mermaid
-sequenceDiagram
-    actor User
-    participant App as PPGbetter (Android)
-    participant WS as PpgData WebSocket :8765
-    participant ECG as EcgDataFile / BLE
-    participant Proc as ECGProcessor / PPGProcessor
-    participant GUI as ngui Tkinter
-    participant Disk as CSV / .pth
+**Error paths that matter:** WebSocket disconnect freezes PPG while ECG may continue – dual HRV becomes meaningless until reconnect. Missing `.pth` triggers `get_or_train_model` (slow) or `find_peaks` fallback – under-detection, broken RMSSD. Science bottleneck is **cross-device time alignment**, not model FLOPs.
 
-    User->>GUI: python ngui.py
-    GUI->>WS: start server (async thread)
-    GUI->>ECG: start producer thread
-    User->>App: fingertip + flash, connect LAN IP
-    loop streaming (async)
-        App->>WS: "timestamp value"
-        WS->>GUI: queue.put(sample)
-    end
-    loop UI timer (sync)
-        ECG->>GUI: queue ECG samples
-        GUI->>Proc: windowed add_sample
-        Proc->>Disk: load weights (or train fallback)
-        Proc->>Proc: band-pass + neural/classical peaks
-        Proc->>GUI: peaks + RMSSD/SDNN/RR
-        GUI->>User: update plots
-    end
-    User->>GUI: Save Both (Aligned)
-    GUI->>Disk: write paired CSV
+### Signal chain (same idea, different numbers)
+
+1. **<Term>band-pass</Term>** – ECG: 5th-order Butterworth **0.5–45 Hz**. PPG: 4th-order **0.5–5 Hz**. Wrong passband quietly destroys peaks before any network runs.
+2. **Classical peaks** – ECG: <Term>Pan–Tompkins</Term> in `pan_tompkins.py` (<Term>band-pass</Term> → derivative → square → integrate → threshold). PPG: local maxima / SciPy `find_peaks` with refractory spacing (~300–600 ms depending on script; comparison path often ~350 ms).
+3. **Neural peaks**
+   - **ECG (`ECG_CNN`)** – input length **256**. Conv1D channels **1 → 16 → 32 → 64 → 128** (kernels 5 / 5 / 3 / 3), BatchNorm + LeakyReLU, max-pool, unidirectional LSTM, FC head → per-sample logits. Training: labels from <Term>Pan–Tompkins</Term> on filtered Polar recordings; BCE-with-logits; Adam **1e-4**. Held-out files in `cnn/ecg/train.py`: `R20.csv`, `R21.csv`.
+   - **PPG (`PPGPeakDetector`)** – segments **50–100** samples (paths disagree – real friction). Initial Conv1D 1→32 (k=7, GELU + BN); residual blocks 32→64 (k=9), 64→128 (k=5), 128→128 (k=3), 128→128 (k=7) with dropout; <Term>SE block</Term> on 128 channels; avg+max pool; FC → sigmoid per-sample peak probability. Validation holdout in `cnn/ppg/data.py`: `ppg_data_johnny_10min.csv`.
+4. **Postprocess** – threshold probabilities (often 0.5; probabilistic PPG eval also uses height 0.25 on the probability trace), enforce minimum inter-peak distance, map to unix timestamps for pairing.
+5. **HRV / PTT** – RR from ECG, IBI from PPG → mean / SDNN / RMSSD (rolling window ~60 s in the paper narrative). After absolute-time alignment, pair each <Term>R-peak</Term> with the next chronological PPG peak:
+
+```text
+PTT = t_PPG - t_ECG
 ```
 
-**Error variants:** WS disconnect freezes PPG while ECG may continue; missing `.pth` triggers slow retrain or `find_peaks` fallback. Science bottleneck is **cross-device time alignment**, not model FLOPs.
+Offline evaluation lives under `comparison/`:
 
-## Screenshot plan
+| Script | What it answers |
+| --- | --- |
+| `ecg_ai_vs_pan_tompkins.py` | CNN vs <Term>Pan–Tompkins</Term> vs <Term>NeuroKit2</Term> on `data/ecg/ECG2.csv`; <Term>match tolerance</Term> ~**10 ms** (`0.01 * FS` at 130 Hz) |
+| `ppg_ai_vs_real.py` | PPG CNN vs reference peaks on aligned CSV; tolerance often **150–250 ms** (ppg.md dump: **264 ms**) |
+| `validate_ppg_vs_ecg.py` | PPG model vs ECG <Term>NeuroKit2</Term> peaks on aligned pair; invert + <Term>band-pass</Term>; `TOLERANCE_MS = 250` |
+| `comparePPGECG.py` | Amplitude-aligned dual-trace visualization |
 
-> Prefer **file replay** / offline scripts — Android device no longer available. Soft-anonymize subject nicknames in filenames if shown.
+ECG and PPG <Term>F1</Term> numbers are **not directly comparable** until you normalize <Term>match tolerance</Term>. That is intentional honesty, not a bug in the write-up.
 
-1. **PPG+ECG tab with dual peaks (replay)** — `ngui.py` tab “PPG + ECG” with red peak markers on both traces. Anchors acquisition + detection. Must. Fallback: README asset / Matplotlib from comparison scripts.
-2. **HRV dashboard (ECG vs PPG)** — HRV tab with RMSSD, SDNN, RR for EKG vs PPG; ≥60 s aligned replay or “Save HRV Plots (PNG, 300dpi)”. Must. Fallback: exported PNG from a prior session.
-3. **AI vs Pan–Tompkins ECG peaks** — `ecg_ai_vs_pan_tompkins.py` plot + terminal F1 block (`data/ecg/ECG2.csv`, `cnn/ecgcnn.pth`). Must. Fallback: README comparison figure.
-4. **PPG AI vs reference peaks (tolerance callout)** — `ppg_ai_vs_real.py` overlay + Precision/Recall/F1 and tolerance in ms (`comparison/ppg_data_aligned.csv`, `ppg_peak_model.pth`). Must. Fallback: numbers from `ppg.md`.
-5. **Phone acquisition (archive only)** — existing PPGbetter capture: flash + software green mute/filter + waveform. Nice. Fallback: caption + link to PPGbetter README.
-6. **Aligned ECG–PPG / Peaks Compare** — Peaks Compare tab or `comparePPGECG.py` dual plot from aligned CSVs. Nice. Fallback: mermaid sequence only.
-7. **Architecture / filter passbands** — diagram: Polar + Phone → queues → processors → HRV; 0.5–45 Hz vs 0.5–5 Hz. Nice. Fallback: ASCII/mermaid above.
-8. **Training split hygiene** — `TEST_FILES` / `VAL_FILES` held-outs in `cnn/ecg/train.py` and `cnn/ppg/data.py`. Nice. Fallback: bullet list in body.
+### Decisions worth defending
+
+1. **Classical + neural side by side.** ECG training labels partly come from Pan–Tompkins. Keeping `pan_tompkins.py` and the comparison scripts makes label circularity visible instead of one glossy neural score.
+2. **Separate architectures per sensor.** Polar QRS context at 130 Hz and camera pulse morphology are not one problem. Forcing a shared “universal beats model” would hide that.
+3. **Thin phone, heavy desktop.** PPGbetter only acquires. Tkinter + CUDA/CPU PyTorch owns ML and paper figures. WebSocket `timestamp value` on :8765 stays trivial to implement on Android – at the cost of no auth on `0.0.0.0`. Fine for a lab LAN.
+4. **Held-out file lists in training scripts.** `TEST_FILES` / `VAL_FILES` are not a full MLOps story, but they are an explicit anti-leakage gesture in a student research repo.
+
+
+## What the numbers say – and what we refuse to inflate
+
+| Metric | Value | Conditions | Takeaway |
+| --- | --- | --- | --- |
+| ECG <Term>R-peak</Term> <Term>F1</Term> | ≈ **0.98** | README / Polar H10; neural vs <Term>NeuroKit2</Term> / <Term>Pan–Tompkins</Term> | CNN+LSTM viable for this strap/FS; keep classical baseline |
+| ECG accuracy | ≈ **97%** | README model section | Tracks F1 here; easier to inflate alone |
+| PPG sample accuracy / F1 | **98.17%** / **0.9774** | `ppg.md` confusion matrix above | Strong frame-level separation |
+| PPG AI vs reference peaks | Prec 0.901, Rec 0.889, F1 **0.895** | `ppg.md`; tolerance ≈ **264 ms** | Beat-match is the HRV-relevant metric |
+| PPG F1 span | **~0.824–0.977** | Peak-match @ ~264 ms → sample-level classification | Protocol dominates the headline |
+| ECG <Term>match tolerance</Term> (script) | ~**10 ms** | `ecg_ai_vs_pan_tompkins.py`, FS=130 | Stricter than PPG evals |
+| PPG <Term>band-pass</Term> | **0.5–5 Hz**, order 4 | vs ECG **0.5–45 Hz** | Wrong filter destroys optical peaks |
+| ECG window / FS | **256** samples @ **130 Hz** | `ECG_CNN` | ≈ 2 s of QRS context |
+| Cohort | **6** subjects | Author-confirmed | Keep generalization claims narrow |
+| Paper RMSSD/SDNN error tables | – | – | **Not quoted** in this write-up |
+| F1 @ 50/100/150 ms, median PTT, plot latency | not frozen in-repo | pipelines exist | Re-measure from scripts if needed |
+
+**Transferable rule:** publish <Term>match tolerance</Term> and label source next to every peak <Term>F1</Term>. Otherwise mobile-sensor results are not comparable across blogs or papers.
+
+### What we would do differently next time
+
+1. Improve the companion app before collecting data. We limited ourselves to 30Hz sample rate, which gievs us hard limit on how heart rate can be measured.
+1. One `configs/eval.yaml` for FS, window lengths, tolerances, model paths.
+2. Commit a frozen metrics JSON produced by re-runnable `comparison/` scripts.
+3. Auth-bind WebSocket to localhost or a token.
+4. pytest smoke on synthetic sine / QRS fixtures.
+5. Document **file replay** as the supported demo path; treat BLE + phone as optional.
+
+### Figures worth capturing (file replay)
+
+Must: PPG+ECG tab with peak markers; HRV tab (RMSSD/SDNN/RR both columns); `ecg_ai_vs_pan_tompkins.py` plot + terminal F1; `ppg_ai_vs_real.py` overlay with tolerance callout. Nice: archive PPGbetter shot (flash + software green filter); Peaks Compare / `comparePPGECG.py`; filter-passband diagram; `TEST_FILES` / `VAL_FILES` snippet. Fall back to README assets and `ppg.md` numbers when a live phone is unavailable.
+
+We started with Polar <Term>R-peak</Term>s on a plot. We ended with a pipeline that can replay fingertip PPG beside Polar ECG, defend detector scores against classical and <Term>NeuroKit2</Term> references, and show side-by-side HRV without pretending sample accuracy is beat accuracy. Consumer sensors can support controlled HRV research. They do not forgive motion, clock skew, or optimistic metrics.

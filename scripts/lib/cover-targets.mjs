@@ -55,9 +55,9 @@
 export const projectTargets = [
   {
     dir: "src/content/projects/hrv-mobile-ml",
-    coverTitle: "HRV on a Phone",
+    coverTitle: "HRV with Neural Networks",
     category: "Applied ML",
-    tag: "PPG",
+    tag: "Research Paper",
     bg: "medical",
     muteChannel: "rb",
     accent: "red",
@@ -67,7 +67,7 @@ export const projectTargets = [
     dir: "src/content/projects/core-llm-comments",
     coverTitle: "CORE Comments",
     category: "LLM interpretability",
-    tag: "CORE",
+    tag: "Research Paper",
     bg: "datacenter",
     muteChannel: "r",
     accent: "purple",

@@ -13,6 +13,10 @@ function byDateDesc(a: ContentEntry, b: ContentEntry) {
   return b.meta.date.localeCompare(a.meta.date);
 }
 
+function byOrderAsc(a: ContentEntry, b: ContentEntry) {
+  return (a.meta.order ?? Number.POSITIVE_INFINITY) - (b.meta.order ?? Number.POSITIVE_INFINITY);
+}
+
 function toEntries(
   modules: Record<string, MdxContentModule>,
   kind: ContentKind,
@@ -24,7 +28,7 @@ function toEntries(
       Component: module.default,
       glossary: module.glossary ?? [],
     }))
-    .sort(byDateDesc);
+    .sort(kind === "project" ? byOrderAsc : byDateDesc);
 }
 
 export const projectEntries = toEntries(projectModules, "project");

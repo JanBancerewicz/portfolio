@@ -110,8 +110,8 @@ That last sentence is the part people get wrong. A 4-bit checkpoint still has th
 
 Local inference usually fails on memory before it fails on FLOPs. A rough lower bound for the weight footprint is:
 
-```text
-memory ≈ parameter_count × (bits_per_parameter / 8)
+```math
+\text{memory} \approx \text{parameter\_count} \times \frac{\text{bits\_per\_parameter}}{8}
 ```
 
 Ignore metadata, scratch buffers, the <Term>KV cache</Term>, and the runtime for a moment. A 12B model still needs about 24 GB of weight storage at 16 bits, and about 6 GB at 4 bits. Google’s Gemma 4 docs put the real loading numbers at **26.7 GB** in <Term>BF16</Term> and **6.7 GB** in <Term>Q4_0</Term>, including ~20% overhead – roughly a **75% cut in the static footprint**, not a 75% cut in intelligence. ([Gemma 4 model overview](https://ai.google.dev/gemma/docs/core))
@@ -122,46 +122,52 @@ There is a second payoff once the model fits: generation rereads those weights t
 
 So how do you actually put a float onto a smaller ruler? In **symmetric** quantization you pick a <Term>scale</Term> from the largest absolute value and map each value to an integer:
 
-```text
-q     = clip( round(x / s), q_min, q_max )
-x_hat = s * q
+```math
+\begin{aligned}
+q &= \mathrm{clip}\!\left(\mathrm{round}(x / s),\, q_{\min},\, q_{\max}\right) \\
+\hat{x} &= s \cdot q
+\end{aligned}
 ```
 
 For signed N-bit integers, a common choice is:
 
-```text
-s = max(|x|) / (2^(N-1) - 1)
+```math
+s = \frac{\max(|x|)}{2^{N-1} - 1}
 ```
 
 Four bits give you 16 codes. Sixteen-bit float gives you a much wider dynamic range. The difference is the approximation error:
 
-```text
-e(x) = x - x_hat
+```math
+e(x) = x - \hat{x}
 ```
 
 You do not need every error to be zero. You need errors not to pile up where the task cares.
 
 When values are not centered on zero, **asymmetric** quantization adds a <Term>zero-point</Term>:
 
-```text
-q     = clip( round(x / s) + z, q_min, q_max )
-x_hat = s * (q - z)
+```math
+\begin{aligned}
+q &= \mathrm{clip}\!\left(\mathrm{round}(x / s) + z,\, q_{\min},\, q_{\max}\right) \\
+\hat{x} &= s \cdot (q - z)
+\end{aligned}
 ```
 
 A shared <Term>scale</Term> and <Term>zero-point</Term> can cover a whole tensor, a channel, a token, or a small group – that is <Term>granularity</Term> / <Term>group-wise</Term> quantization. Finer scales usually preserve quality; they also cost more metadata and can be harder for kernels. These are the standard uniform formulas used across LLM papers, including <Term>SmoothQuant</Term> ([paper](https://proceedings.mlr.press/v202/xiao23c/xiao23c.pdf)).
 
 A tiny example makes the failure mode obvious. Take:
 
-```text
-[-1.00, -0.62, -0.13, 0.22, 0.71, 1.00]
+```math
+[-1.00,\, -0.62,\, -0.13,\, 0.22,\, 0.71,\, 1.00]
 ```
 
-Signed 4-bit, max magnitude 1.00 → `s ≈ 1/7 ≈ 0.1429`. Then `0.71` becomes:
+Signed 4-bit, max magnitude 1.00 → $s \approx 1/7 \approx 0.1429$. Then $0.71$ becomes:
 
-```text
-q     = round(0.71 / 0.1429) = 5
-x_hat = 5 × 0.1429 ≈ 0.7145
-error ≈ 0.0045
+```math
+\begin{aligned}
+q &= \mathrm{round}(0.71 / 0.1429) = 5 \\
+\hat{x} &= 5 \times 0.1429 \approx 0.7145 \\
+\text{error} &\approx 0.0045
+\end{aligned}
 ```
 
 Fine. Now replace one value with an <Term>outlier</Term> of `10.0` while the rest stay near zero. The <Term>scale</Term> jumps to cover that spike, and many ordinary values collapse onto the same few codes. That is why “float → int” is incomplete: distribution, <Term>granularity</Term>, clipping, and <Term>calibration</Term> – measuring real ranges on representative inputs – decide whether the smaller ruler still measures the parts of the model that matter.

@@ -4,11 +4,13 @@ import poster from "./poster.svg";
 import metricsBar from "./1_metrics_comparison_bar.png";
 import refinementChart from "./3_inference_refinement.png";
 import panel65 from "./65_panel.png";
+import sequenceDiagram from "./4_arterio_diagram2.png";
 
 export const meta = {
   slug: "qwen-vl-angiography",
   title: "Qwen-VL for Angiography",
   date: "2026",
+  order: 2,
   category: "Multimodal LLMs, Vision-Language",
   role: "Pipeline design, implementation / coauthor",
   summary:
@@ -21,14 +23,15 @@ export const meta = {
   reelCaption:
     "Qwen vision tower → vessel masks for Arterio. LoRA+DeepStack Dice 0.758 vs U-Net 0.795",
   tags: [
-    "Medical Imaging",
-    "Segmentation",
-    "transformers",
     "Qwen3-VL",
-    "Arterio",
+    "Hugging Face",
     "PyTorch",
-    "LoRA",
-    "DeepStack"
+    "LoRA/PEFT",
+    "DeepStack",
+    "Medical Imaging",
+    "Transformers",
+    "Segmentation",
+    "Arterio",
   ],
   featured: true,
   links: [
@@ -139,9 +142,24 @@ Qwen3-VL was never trained to output masks. Our first real bug came from wiring 
 
 Getting dense prediction out of a model like this means reshaping `model.visual` features into a fixed spatial grid, and using a loss that respects how sparse the foreground actually is – vessels cover roughly 2–5% of pixels. We settled on `0.5·BCE + 0.5·Dice` with the decoder's output bias initialized to `logit(0.1)`, so training doesn't spend its first epochs just learning "predict background."
 
-### How it works
+## How we solved the problem
 
-It's a script pipeline, not a service mesh:
+
+### Architecture
+
+Canonical flow: Qwen LoRA+DeepStack, trained once, then run online-style in a single stage. U-Net is comparison-only; the hybrid refiner is a documented failed experiment, not a serving option.
+
+<figure className="article-figure">
+  <img
+    src={sequenceDiagram}
+    alt="End-to-End Online Labeling Pipeline with Vision-Language Features and System Guardrails"
+  />
+  <figcaption>
+    Inference architecture diagram. Synchronous end-to-end pipeline processing <Term>XCA</Term> frames through a fine-tuned Qwen Vision backbone, feature fusion layers, and <Term>SegDecoder</Term>.
+  </figcaption>
+</figure>
+
+### Pipeline in code
 
 - **`convert_mask.py`** merges the COCO-style <Term>SYNTAX</Term> polygons into binary vessel masks.
 - **`dataset.py` / `augmentations.py`** feed 512×512 RGB frames.
@@ -163,7 +181,7 @@ One asymmetry worth flagging: Qwen trains unfairly on compute (8B parameters, ba
   </figcaption>
 </figure>
 
-### The journey
+### Developement map
 
 **Start:** ARCADE frames and polygons, plus a classical U-Net we could already train. Qwen was already locked in as the multimodal backbone for <Term>Arterio</Term> labeling – but not yet a competitive pixel segmenter.
 
@@ -171,7 +189,7 @@ One asymmetry worth flagging: Qwen trains unfairly on compute (8B parameters, ba
 
 **End:** a reproducible Qwen LoRA+DeepStack pipeline producing masks for <Term>Arterio</Term>'s online labeling flow. U-Net remains the published accuracy comparison, not the serving path. Weights are not redistributed – only metrics and plots are public. The group deliverable is complete; integration with <Term>Arterio</Term>'s doctor-assist system is the next phase.
 
-### Results
+## Results
 
 ARCADE SYNTAX test set, N = 300 frames; hardware: 2× RTX 4080 SUPER 16 GB.
 
@@ -231,45 +249,3 @@ The cascade refiner was trained on the teacher's *best* train-set masks, so it n
 4. **Friction points:** cascade trained on the teacher's best-case outputs, non-transferable validation threshold search, GPU pinning issues, and evolving specifications.
 5. **Next time:** abandon the cascade approach or train it on actual teacher failure modes; freeze the evaluation protocol before tuning thresholds; run integration sanity tests; log latency and VRAM footprint prior to targeting production SLAs.
 6. **Core insight:** a refiner must learn a teacher's *failure distribution*, not its optimal outputs.
-
-### Serving path
-
-Canonical flow: Qwen LoRA+DeepStack, trained once, then run online-style in a single stage. U-Net is comparison-only; the hybrid refiner is a documented failed experiment, not a serving option.
-
-```text
-Operator/Arterio client
-  -> (sync) frame PNG
-  -> Qwen vision (+LoRA) -> DeepStackFusion -> SegDecoder
-  -> sigmoid/threshold -> binary vessel mask
-  -> (sync) return mask for labeling UI
-```
-
-```mermaid
-sequenceDiagram
-  actor User as Labeling user / Arterio
-  participant API as Online labeling service
-  participant VT as Qwen vision (+LoRA)
-  participant Fuse as DeepStackFusion
-  participant Dec as SegDecoder
-
-  User->>API: XCA frame (sync)
-  API->>VT: pixel_values, image_grid_thw
-  VT->>Fuse: last + layers 8/16/24
-  Fuse->>Dec: fused 16×16×4096
-  Dec-->>API: logits 512×512
-  API-->>User: binary mask (sync)
-
-  Note over API,VT: Error A – OOM / cold HF load: pin GPU, warm weights
-  Note over API: Error B – empty/corrupt frame: reject before forward
-```
-
-### Screenshot plan
-
-1. **Qualitative panel (Qwen vs GT)** – `results/infer/panels/195_panel.png`; TP/FP/FN overlays. Must. Fallback: README panel.
-2. **Ablation bar chart** – `results/plots_en/1_metrics_comparison_bar.png`. Must.
-3. **Learning curves** – `2_learning_curves.png`. Must.
-4. **Refiner hurts teacher** – `3_inference_refinement.png` + 0.761→0.696 callout. Must (short sidebar claim).
-5. **Architecture contract** – visual → DeepStack → SegDecoder diagram. Must.
-6. **Demo UI** – online labeling screen. Must once live. Fallback: CLI infer log.
-7. **Failure panel** – low-Dice distal/catheter case from `panels/`. Nice.
-8. **Generalization gap** – `8_generalization_gap.png`. Nice.

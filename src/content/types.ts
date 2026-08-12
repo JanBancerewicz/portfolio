@@ -16,6 +16,11 @@ export type ContentMeta = {
   tags: string[];
   /** Sort key: `YYYY` for projects, `YYYY-MM-DD` for posts. */
   date: string;
+  /**
+   * Projects only — explicit display rank (lower = earlier).
+   * Posts are sorted by `date` instead.
+   */
+  order?: number;
   /** Eyebrow shown on cards. */
   category: string;
   /** Projects only — pulls the entry into the featured showcase. */
