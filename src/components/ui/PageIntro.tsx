@@ -8,11 +8,13 @@ type PageIntroProps = {
   eyebrow: string;
   title: ReactNode;
   lede?: ReactNode;
+  /** Sits opposite the lede (e.g. project GitHub CTA), above the cover. */
+  action?: ReactNode;
   meta?: ReactNode;
 };
 
 /** Masthead shared by every subpage, so they read as one publication. */
-export function PageIntro({ eyebrow, title, lede, meta }: PageIntroProps) {
+export function PageIntro({ eyebrow, title, lede, action, meta }: PageIntroProps) {
   return (
     <Container>
       <Reveal
@@ -33,11 +35,23 @@ export function PageIntro({ eyebrow, title, lede, meta }: PageIntroProps) {
         {title}
       </SplitLines>
 
-      {lede ? (
-        <Reveal className="mt-8 max-w-2xl" delay={320}>
-          <p className="text-[1.125rem] leading-relaxed text-ink-muted md:text-lg">
-            {lede}
-          </p>
+      {lede || action ? (
+        <Reveal
+          className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between sm:gap-10"
+          delay={320}
+        >
+          {lede ? (
+            <p className="max-w-2xl text-[1.125rem] leading-relaxed text-ink-muted md:text-lg">
+              {lede}
+            </p>
+          ) : (
+            <div />
+          )}
+          {action ? (
+            <div className="flex shrink-0 flex-wrap items-center gap-3 sm:justify-end">
+              {action}
+            </div>
+          ) : null}
         </Reveal>
       ) : null}
 

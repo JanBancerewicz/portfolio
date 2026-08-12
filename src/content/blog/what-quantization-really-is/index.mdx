@@ -1,0 +1,297 @@
+import cover from "./cover.svg";
+import coverWide from "./cover-wide.svg";
+import quantDiagram from "./diagram_quant.png";
+
+export const meta = {
+  slug: "what-quantization-really-is",
+  title: "What quantization really is",
+  date: "2026-07-28",
+  category: "AI Engineering",
+  readingTime: "8 min",
+  summary:
+    "Quantization is not magic compression. It is a controlled change in numerical representation that trades precision for memory, bandwidth, and often speed – illustrated with Gemma 4 12B.",
+  cover,
+  coverWide,
+  tags: ["LLMs", "Quantization", "Inference", "Gemma 4"],
+};
+
+export const glossary = [
+  {
+    term: "BF16",
+    definition:
+      "Brain floating-point 16-bit format. Common inference baseline for LLM weights before quantization; Gemma 4 12B loads at ~26.7 GB in BF16 per Google's docs.",
+  },
+  {
+    term: "Quantization",
+    definition:
+      "Representing model values (usually weights, sometimes activations or the KV cache) with fewer bits via a scale and optional zero-point. Same architecture; smaller numerical ruler – not a smaller network.",
+  },
+  {
+    term: "calibration",
+    definition:
+      "Running representative inputs through a model to measure value ranges (min/max or percentiles) before locking scales for post-training quantization.",
+  },
+  {
+    term: "GGUF",
+    definition:
+      "File format used by llama.cpp and tools like LM Studio for packing weights, metadata, and often quantized tensors for local inference.",
+  },
+  {
+    term: "granularity",
+    definition:
+      "How fine the scale (and optional zero-point) is shared: per-tensor, per-channel, or group-wise. Finer usually means better quality and more metadata.",
+  },
+  {
+    term: "group-wise",
+    definition:
+      "Quantization that shares one scale across a small block of weights (a group) instead of an entire tensor – a common quality/metadata trade-off.",
+  },
+  {
+    term: "KV cache",
+    definition:
+      "Stored key/value tensors from attention that grow with context length. Separate from static weight quantization; can be quantized on its own for long prompts.",
+  },
+  {
+    term: "outlier",
+    definition:
+      "A rare large-magnitude value that forces a coarser scale, crushing many ordinary values into the same few integer codes.",
+  },
+  {
+    term: "PTQ",
+    definition:
+      "Post-training quantization – convert a finished model to lower bits without (or with only light) retraining. Cheap; quality depends on recipe and calibration.",
+  },
+  {
+    term: "Q4_0",
+    definition:
+      "A 4-bit weight packing used in GGUF / llama.cpp. \"Q4\" alone is incomplete without format and kernel; Google ships Gemma 4 QAT Q4_0 GGUFs for local runtimes.",
+  },
+  {
+    term: "QAT",
+    definition:
+      "Quantization-aware training – train (or fine-tune) while simulating rounding/clipping so weights adapt to the deployment bit width. Gemma 4 ships official QAT checkpoints.",
+  },
+  {
+    term: "scale",
+    definition:
+      "Multiplier that maps floats to integers and back. In symmetric quantization, often max(|x|) / qmax for the chosen bit width.",
+  },
+  {
+    term: "SmoothQuant",
+    definition:
+      "Xiao et al. (PMLR 2023) method that migrates activation outliers into weights so W8A8-style quantization stays accurate; also a clean reference for the uniform quantizer formulas.",
+  },
+  {
+    term: "W4A16",
+    definition:
+      "Contract for 4-bit weights and 16-bit activations. Weight-only schemes like this are common for local LLM inference because weights dominate storage.",
+  },
+  {
+    term: "W8A8",
+    definition:
+      "8-bit weights and 8-bit activations. Can unlock integer matmul kernels, but dynamic activations with outliers make it harder than weight-only quantization.",
+  },
+  {
+    term: "zero-point",
+    definition:
+      "Integer offset in asymmetric quantization so the float range need not be centered on zero. Dequantization becomes x_hat = scale * (q - zero_point).",
+  },
+];
+
+## What is quantization?
+
+You download a 12-billion-parameter model. The card says it is “open.” Your GPU has 16 GB. The loader asks for something closer to 27 GB and dies. However somehow a different filename ending in `q4_0` works flawlessly. Same model name, a quarter of the weight file. The work has a name.
+
+<Term>Quantization</Term> means representing model values (usually weights, sometimes activations or the <Term>KV cache</Term>) with fewer bits via a <Term>scale</Term> and optional <Term>zero-point</Term>. Same architecture; smaller numerical ruler – not a smaller network.
+
+That last sentence is the part people get wrong. A 4-bit checkpoint still has the same layers, attention, vocabulary, and parameter count as its 16-bit twin. Nothing was “distilled away.” You did not turn a 12B model into a 4B model. You changed how many distinct numbers each weight is allowed to take, and you stored a <Term>scale</Term> so those integers can be turned back into approximate floats when the runtime needs them.
+
+### Why the tip exists: memory first
+
+Local inference usually fails on memory before it fails on FLOPs. A rough lower bound for the weight footprint is:
+
+```text
+memory ≈ parameter_count × (bits_per_parameter / 8)
+```
+
+Ignore metadata, scratch buffers, the <Term>KV cache</Term>, and the runtime for a moment. A 12B model still needs about 24 GB of weight storage at 16 bits, and about 6 GB at 4 bits. Google’s Gemma 4 docs put the real loading numbers at **26.7 GB** in <Term>BF16</Term> and **6.7 GB** in <Term>Q4_0</Term>, including ~20% overhead – roughly a **75% cut in the static footprint**, not a 75% cut in intelligence. ([Gemma 4 model overview](https://ai.google.dev/gemma/docs/core))
+
+There is a second payoff once the model fits: generation rereads those weights token by token. Fewer bytes to move can mean higher tokens/s – *if* the runtime has efficient low-bit kernels. Hardware, batch size, and context length decide whether you feel that. Fitting at all is the first win; speed is a maybe.
+
+### How the ruler works
+
+So how do you actually put a float onto a smaller ruler? In **symmetric** quantization you pick a <Term>scale</Term> from the largest absolute value and map each value to an integer:
+
+```text
+q     = clip( round(x / s), q_min, q_max )
+x_hat = s * q
+```
+
+For signed N-bit integers, a common choice is:
+
+```text
+s = max(|x|) / (2^(N-1) - 1)
+```
+
+Four bits give you 16 codes. Sixteen-bit float gives you a much wider dynamic range. The difference is the approximation error:
+
+```text
+e(x) = x - x_hat
+```
+
+You do not need every error to be zero. You need errors not to pile up where the task cares.
+
+When values are not centered on zero, **asymmetric** quantization adds a <Term>zero-point</Term>:
+
+```text
+q     = clip( round(x / s) + z, q_min, q_max )
+x_hat = s * (q - z)
+```
+
+A shared <Term>scale</Term> and <Term>zero-point</Term> can cover a whole tensor, a channel, a token, or a small group – that is <Term>granularity</Term> / <Term>group-wise</Term> quantization. Finer scales usually preserve quality; they also cost more metadata and can be harder for kernels. These are the standard uniform formulas used across LLM papers, including <Term>SmoothQuant</Term> ([paper](https://proceedings.mlr.press/v202/xiao23c/xiao23c.pdf)).
+
+A tiny example makes the failure mode obvious. Take:
+
+```text
+[-1.00, -0.62, -0.13, 0.22, 0.71, 1.00]
+```
+
+Signed 4-bit, max magnitude 1.00 → `s ≈ 1/7 ≈ 0.1429`. Then `0.71` becomes:
+
+```text
+q     = round(0.71 / 0.1429) = 5
+x_hat = 5 × 0.1429 ≈ 0.7145
+error ≈ 0.0045
+```
+
+Fine. Now replace one value with an <Term>outlier</Term> of `10.0` while the rest stay near zero. The <Term>scale</Term> jumps to cover that spike, and many ordinary values collapse onto the same few codes. That is why “float → int” is incomplete: distribution, <Term>granularity</Term>, clipping, and <Term>calibration</Term> – measuring real ranges on representative inputs – decide whether the smaller ruler still measures the parts of the model that matter.
+
+## What you choose to shrink
+
+Once the mapping is clear, the next question is *which* tensors get the smaller ruler.
+
+- **Weight-only** (e.g. <Term>W4A16</Term>) – 4-bit weights, 16-bit activations. The usual local-LLM choice: weights dominate storage and the recipe is comparatively robust.
+- **Weight + activation** (e.g. <Term>W8A8</Term>) – also low-bit activations. Can unlock integer matmul; activations are dynamic and often full of <Term>outlier</Term>s, so this is harder.
+- **<Term>KV cache</Term> quantization** – shrinks the growing conversational state. Separate decision from quantizing the static weights you downloaded.
+
+The letters are a contract: <Term>W4A16</Term> means 4-bit weights and 16-bit activations. A bare `Q4` in a filename is incomplete until you know format and kernel – which is why the Discord tip worked only because everyone already assumed <Term>GGUF</Term> + llama.cpp.
+
+### When you apply it: after training or during
+
+Two production paths, same goal.
+
+**<Term>PTQ</Term>** (post-training quantization): train normally, convert afterward. Cheap. Aggressive conversion can hurt, especially with activations or coarse scales.
+
+**<Term>QAT</Term>** (quantization-aware training): train while simulating rounding and clipping so weights adapt to the deployment constraint. Google’s Gemma 4 <Term>QAT</Term> checkpoints are built this way to keep quality while cutting memory. ([<Term>QAT</Term> announcement](https://blog.google/innovation-and-ai/technology/developers-tools/quantization-aware-training-gemma-4/))
+
+One naming trap: a <Term>QAT</Term> checkpoint may ship as half-precision weights for further conversion, as a quantized <Term>GGUF</Term> for llama.cpp / LM Studio, or as compressed tensors for vLLM / SGLang. “Unquantized <Term>QAT</Term>” does **not** mean “trained without quantization.” It means half-precision weights from a <Term>QAT</Term> pipeline.
+
+## How you actually do it
+
+Where the model runs picks the packaging. Local CPU / Apple Silicon / consumer GPU: a pre-quantized <Term>GGUF</Term> and a llama.cpp-compatible runtime is usually the least painful. Production GPU serving: use what the engine expects – Google routes Gemma <Term>QAT</Term> <Term>GGUF</Term> to llama.cpp / LM Studio and <Term>W4A16</Term> compressed tensors to vLLM / SGLang. ([Deployment routing](https://ai.google.dev/gemma/docs/core))
+
+A generic <Term>PTQ</Term> checklist, in the order you will actually care about:
+
+1. Target representation (W8A16, <Term>W4A16</Term>, …).
+2. <Term>granularity</Term> (per-tensor, per-channel, <Term>group-wise</Term>).
+3. <Term>calibration</Term> data that looks like real prompts.
+4. Measure ranges, pick scales, optionally clip outliers.
+5. Quantize weights; keep <Term>scale</Term> metadata.
+6. Export (<Term>GGUF</Term>, GPTQ, AWQ, compressed tensors, …).
+7. Evaluate on standard benchmarks **and** your real prompts.
+8. Measure peak memory, prefill, generation, and quality on the target box.
+
+The core of symmetric weight quantization, as a teaching sketch:
+
+```python
+import torch
+
+def quantize_symmetric(weights, bits=4):
+    qmax = 2 ** (bits - 1) - 1
+    scale = weights.abs().amax().clamp_min(1e-8) / qmax
+    quantized = torch.round(weights / scale).clamp(-qmax - 1, qmax)
+    return quantized.to(torch.int8), scale
+
+def dequantize(quantized, scale):
+    return quantized.float() * scale
+```
+
+Real formats pack multiple low-bit values into bytes, store per-group scales, and need optimized kernels. A mathematically correct conversion can still be slow if the runtime unpacks inefficiently – which brings us back to why “it fits” and “it is fast” are different claims.
+
+### Gemma 4 puts numbers on the tip
+
+Dense Gemma 4 12B instruction-tuned is a clean case. Baseline: `google/gemma-4-12B-it` in <Term>BF16</Term>. Quantized path: official <Term>QAT</Term> <Term>Q4_0</Term>, typically as <Term>GGUF</Term> (`google/gemma-4-12B-it-qat-q4_0-gguf`).
+
+| Representation | Bits per weight | Approx. memory to load | Relative to BF16 |
+| --- | ---: | ---: | ---: |
+| BF16 baseline | 16 | 26.7 GB | 100% |
+| SFP8 | 8 | 13.4 GB | 50% |
+| Q4_0 | 4 | 6.7 GB | 25% |
+
+Google’s figures include ~20% overhead. <Term>Q4_0</Term> saves ~20 GB vs <Term>BF16</Term>. Context, <Term>KV cache</Term>, framework overhead, and multimodal inputs sit **on top** – a “6.7 GB model” does not mean a machine with exactly 6.7 GB of VRAM will run it happily. ([Memory requirements](https://ai.google.dev/gemma/docs/core))
+
+Parameter count alone is incomplete in another way too. Gemma 4 includes a 26B A4B MoE that activates ~4B parameters per token, but **all** experts still load for fast routing. <Term>Quantization</Term> shrinks the storage cost of those weights; it does not make inactive experts disappear. Same lesson as the opening: smaller ruler, not fewer layers.
+
+### Quality is a claim you have to earn
+
+There is no universal “quantization accuracy penalty.” Bit width, quantizer, <Term>calibration</Term>, group size, runtime, and task all move the needle. A 4-bit model can look identical to baseline on one workload and stumble on precise arithmetic, long reasoning chains, or rare tokens.
+
+For Gemma 4 specifically: Google publishes family capability scores, but the public card does **not** give a controlled <Term>BF16</Term>-vs-<Term>Q4_0</Term> table. <Term>QAT</Term> is described as staying close to <Term>BF16</Term>; the docs give hard memory numbers. That supports a deployment claim about memory. It does not license inventing a quality delta.
+
+| Question | BF16 Gemma 4 12B | Official QAT Q4_0 Gemma 4 12B |
+| --- | --- | --- |
+| Weight precision | 16-bit | 4-bit weights, Q4_0 |
+| Static load memory | 26.7 GB | 6.7 GB |
+| Memory reduction | Baseline | ~75% |
+| Expected quality | Reference | Designed to stay close to BF16 – verify on your task |
+| Best fit | Large / multi-GPU | Local GPU, CPU, laptop, constrained server |
+| Published same-run quality score | Reference | Not in the official card |
+
+Resist filling that last row with a number from a different runtime, prompt template, revision, or recipe. Useful as engineering notes; not a controlled comparison.
+
+To earn your own numbers, keep everything except precision fixed:
+
+```bash
+# Matching chat templates and the same prompt set.
+llama-bench -m gemma-4-12b-it-bf16.gguf -p 512 -n 128
+llama-bench -m gemma-4-12b-it-qat-q4_0.gguf -p 512 -n 128
+```
+
+Record prefill throughput, generation throughput, peak RSS, time-to-first-token, and quality on a fixed eval set. Report model revision, quant format, runtime version, hardware, context, batch size, sampling, and dataset – or “Q4 is 2× faster” is just another Discord tip without receipts.
+
+## When it changes what can run at all
+
+<Term>Quantization</Term> matters most when it changes the set of machines that can host the model. Google’s Gemma 4 estimates put 31B at **69.9 GB** <Term>BF16</Term> vs **17.5 GB** <Term>Q4_0</Term> – multi-GPU vs something that can fit a high-end 24 GB card before context and runtime. ([Model overview](https://ai.google.dev/gemma/docs/core))
+
+Speed stays less predictable: good kernels and less traffic help; bad unpack paths or prefill-dominated workloads do not. Energy and cost follow the systems story – fewer GPUs, lower-power devices, more concurrent requests – not promises glued to the string `Q4` in a filename.
+
+The whole loop, in one picture:
+
+<figure className="article-figure">
+  <img
+    src={quantDiagram}
+    alt="Quantization pipeline: prepare and pack weights, then at runtime trade lower memory for approximation error and decide whether to deploy or refine"
+  />
+  <figcaption>
+    Prepare (bit width → granularity → calibrate → pack), then runtime:
+    lower memory and bandwidth versus approximation error. If quality fails,
+    raise bits, refine groups, try <Term>QAT</Term>, or mix precisions.
+  </figcaption>
+</figure>
+
+Spend bits where they protect quality; remove them where they mostly encode redundant detail. The best quantized model is not the one with the fewest bits – it is the one that meets quality, latency, memory, and cost for the job you opened Discord about.
+
+### Takeaways
+
+1. Same architecture, smaller ruler – that is the definition, and it is enough to kill the “smaller model” myth.
+2. Memory is why the tip exists; kernels decide whether speed follows.
+3. <Term>outlier</Term>s, <Term>calibration</Term>, and <Term>granularity</Term> decide whether the tip still answers well.
+4. Gemma 4 makes the payoff concrete: **26.7 GB <Term>BF16</Term> → 6.7 GB <Term>Q4_0</Term>** for 12B. Measure quality yourself; do not invent the delta Google did not publish.
+
+### Sources
+
+- [Google: Gemma 4 model overview and memory requirements](https://ai.google.dev/gemma/docs/core)
+- [Google DeepMind: Gemma 4 with quantization-aware training](https://blog.google/innovation-and-ai/technology/developers-tools/quantization-aware-training-gemma-4/)
+- [Hugging Face: Gemma 4 12B QAT unquantized checkpoint](https://huggingface.co/google/gemma-4-12B-it-qat-q4_0-unquantized)
+- [Xiao et al.: SmoothQuant, PMLR 2023](https://proceedings.mlr.press/v202/xiao23c/xiao23c.pdf)
+- [Gemma 4 Developer Hub: quantization formats](https://gemma4.dev/docs/concepts/quantization)

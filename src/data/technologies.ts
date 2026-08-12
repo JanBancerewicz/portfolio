@@ -7,7 +7,7 @@ export type TechGroup = {
 export const techGroups: TechGroup[] = [
   {
     label: "Languages",
-    items: ["Python", "SQL", "TypeScript", "C++", "Java / Spring"],
+    items: ["Python", "SQL", "TypeScript", "C++", "Spring / Java"],
   },
   {
     label: "Core AI / ML Frameworks",
@@ -23,14 +23,14 @@ export const techGroups: TechGroup[] = [
   },
   {
     label: "Backend & Data Engineering",
-    items: ["FastAPI", "Android", "PostgreSQL", "Redis", "MongoDB", "REST API", "Numpy / Pandas", "PyTest"],
+    items: ["FastAPI", "PyTest", "PostgreSQL", "Redis", "MongoDB", "REST API", "Numpy / Pandas", "Android"],
   },
   {
     label: "Cloud, Web & DevOps",
-    items: ["Docker", "Kubernetes", "Azure Databricks", "AWS", "React / Next.js", "Linux", "Tailwind CSS", "CI/CD & GitHub Actions"],
+    items: ["Docker", "Kubernetes", "Azure Databricks", "AWS", "React / Next.js", "Tailwind CSS", "Linux", "CI/CD & GitHub Actions"],
   },
   {
-    label: "Tools",
+    label: "Coding GenAI Tools",
     items: ["Claude Code", "OpenAI Codex", "Cursor IDE"],
   },
 ];

@@ -1,29 +1,29 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 800" role="img" aria-label="HRV on a Phone">
   <defs>
     <filter id="mute" color-interpolation-filters="sRGB">
-      <feColorMatrix type="matrix" values="1 0.04 0.04 0 0.05  0.04 1 0.04 0 0.05  0.04 0.04 0.62 0 0.05  0 0 0 1 0"/>
+      <feColorMatrix type="matrix" values="0.62 0.04 0.04 0 0.05  0.04 1 0.04 0 0.05  0.04 0.04 0.62 0 0.05  0 0 0 1 0"/>
     </filter>
     
     <radialGradient id="accentTL" cx="0%" cy="0%" r="85%" gradientUnits="objectBoundingBox">
-      <stop offset="0%" stop-color="#1a9a88" stop-opacity="0.85"/>
-      <stop offset="35%" stop-color="#1a9a88" stop-opacity="0.50"/>
-      <stop offset="70%" stop-color="#1a9a88" stop-opacity="0.15"/>
-      <stop offset="100%" stop-color="#1a9a88" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#c43c4a" stop-opacity="0.85"/>
+      <stop offset="35%" stop-color="#c43c4a" stop-opacity="0.50"/>
+      <stop offset="70%" stop-color="#c43c4a" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#c43c4a" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="accentTR" cx="100%" cy="0%" r="75%" gradientUnits="objectBoundingBox">
-      <stop offset="0%" stop-color="#1a9a88" stop-opacity="0.65"/>
-      <stop offset="40%" stop-color="#1a9a88" stop-opacity="0.30"/>
-      <stop offset="100%" stop-color="#1a9a88" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#c43c4a" stop-opacity="0.65"/>
+      <stop offset="40%" stop-color="#c43c4a" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#c43c4a" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="accentBL" cx="0%" cy="100%" r="70%" gradientUnits="objectBoundingBox">
-      <stop offset="0%" stop-color="#1a9a88" stop-opacity="0.60"/>
-      <stop offset="40%" stop-color="#1a9a88" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#1a9a88" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#c43c4a" stop-opacity="0.60"/>
+      <stop offset="40%" stop-color="#c43c4a" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#c43c4a" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="accentBR" cx="100%" cy="100%" r="65%" gradientUnits="objectBoundingBox">
-      <stop offset="0%" stop-color="#1a9a88" stop-opacity="0.50"/>
-      <stop offset="45%" stop-color="#1a9a88" stop-opacity="0.20"/>
-      <stop offset="100%" stop-color="#1a9a88" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#c43c4a" stop-opacity="0.50"/>
+      <stop offset="45%" stop-color="#c43c4a" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#c43c4a" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="frost" x1="0" y1="0" x2="0.15" y2="1">
       <stop offset="0%" stop-color="#f3f6fa" stop-opacity="0.18"/>
@@ -33,33 +33,29 @@
   </defs>
   <g filter="url(#mute)">
     <defs>
-      <linearGradient id="visbg" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#243a52"/><stop offset="100%" stop-color="#152636"/>
-      </linearGradient>
-      <radialGradient id="vislens">
-        <stop offset="0%" stop-color="#e8f4ff"/><stop offset="35%" stop-color="#5a9ad0"/>
-        <stop offset="70%" stop-color="#1e4a78"/><stop offset="100%" stop-color="#0a2030"/>
-      </radialGradient>
+      <linearGradient id="medbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#142830"/><stop offset="100%" stop-color="#0a1418"/></linearGradient>
+      <linearGradient id="ecg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#3d9ea0" stop-opacity="0"/><stop offset="30%" stop-color="#5ec8c0"/><stop offset="70%" stop-color="#0073ff"/><stop offset="100%" stop-color="#3d9ea0" stop-opacity="0"/></linearGradient>
+      <filter id="medblur"><feGaussianBlur stdDeviation="3"/></filter>
     </defs>
-    <rect width="1600" height="800" fill="url(#visbg)"/>
-    <ellipse cx="320" cy="200" rx="280" ry="180" fill="#0073ff" opacity="0.1"/>
-    <ellipse cx="980" cy="560" rx="320" ry="220" fill="#22d3ee" opacity="0.08"/>
-    <!-- Camera body -->
-    <rect x="620" y="220" width="420" height="300" rx="36" fill="#2a4868" stroke="#9ec8e8" stroke-width="3" opacity="0.85"/>
-    <rect x="650" y="250" width="120" height="36" rx="10" fill="#1a3048"/>
-    <circle cx="860" cy="370" r="108" fill="#122030" stroke="#c8e4f8" stroke-width="4"/>
-    <circle cx="860" cy="370" r="78" fill="url(#vislens)"/>
-    <circle cx="860" cy="370" r="28" fill="#0a1828" opacity="0.7"/>
-    <circle cx="830" cy="340" r="14" fill="#fff" opacity="0.35"/>
-    <!-- Viewfinder / corner brackets (detection UI) -->
-    <g fill="none" stroke="#7ec0ff" stroke-width="3" opacity="0.55">
-      <path d="M180,160 L180,120 L240,120"/><path d="M400,120 L460,120 L460,160"/>
-      <path d="M180,320 L180,360 L240,360"/><path d="M400,360 L460,360 L460,320"/>
+    <rect width="1600" height="800" fill="url(#medbg)"/>
+    <g fill="none" stroke="#4a9088" stroke-width="2" opacity="0.25">
+      <ellipse cx="600" cy="400" rx="160" ry="160"/>
+      <ellipse cx="600" cy="400" rx="260" ry="260"/>
+      <ellipse cx="600" cy="400" rx="360" ry="360"/>
+      <ellipse cx="600" cy="400" rx="460" ry="460"/>
     </g>
-    <rect x="200" y="150" width="240" height="190" rx="8" fill="#0073ff" opacity="0.08" stroke="#7ec0ff" stroke-width="1.5"/>
-    <circle cx="320" cy="245" r="6" fill="#22d3ee" opacity="0.8"/>
-    <line x1="200" y1="200" x2="440" y2="200" stroke="#7ec0ff" stroke-width="1" opacity="0.25"/>
-    <line x1="200" y1="290" x2="440" y2="290" stroke="#7ec0ff" stroke-width="1" opacity="0.25"/>
+    <ellipse cx="600" cy="400" rx="100" ry="100" fill="#2a6060" opacity="0.3"/>
+    <line x1="600" y1="280" x2="600" y2="520" stroke="#7ec8c0" stroke-width="1.5" opacity="0.3"/>
+    <line x1="480" y1="400" x2="720" y2="400" stroke="#7ec8c0" stroke-width="1.5" opacity="0.3"/>
+    <path d="M0,440 L160,440 L200,440 L230,300 L260,560 L290,400 L320,440 L480,440 L510,440 L540,260 L570,580 L600,400 L630,440 L800,440 L830,440 L860,290 L890,540 L920,420 L950,440 L1200,440"
+      fill="none" stroke="url(#ecg)" stroke-width="5" opacity="0.85" filter="url(#medblur)"/>
+    <path d="M0,440 L160,440 L200,440 L230,300 L260,560 L290,400 L320,440 L480,440 L510,440 L540,260 L570,580 L600,400 L630,440 L800,440 L830,440 L860,290 L890,540 L920,420 L950,440 L1200,440"
+      fill="none" stroke="#c8f0ec" stroke-width="2" opacity="0.55"/>
+    <path d="M0,560 L120,560 L150,560 L176,500 L200,620 L224,550 L250,560 L400,560 L440,560 L470,490 L500,630 L530,540 L560,560 L1200,560"
+      fill="none" stroke="#3a7880" stroke-width="2.5" opacity="0.35"/>
+    <circle cx="540" cy="260" r="7" fill="#7ec8c0" opacity="0.7"/>
+    <circle cx="860" cy="290" r="6" fill="#0073ff" opacity="0.6"/>
+    <rect x="0" y="390" width="1600" height="2" fill="#fff" opacity="0.06"/>
   </g>
   <rect width="1600" height="800" fill="url(#frost)"/>
   <rect width="1600" height="800" fill="url(#accentTL)"/>
@@ -81,7 +77,7 @@
     <div style="display:inline-block;box-sizing:border-box;
       background:#ffffff;border-radius:999px;padding:14px 24px;
       font-family:'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;font-size:33px;font-weight:700;
-      letter-spacing:0.12em;color:#1a9a88;line-height:1.1;
+      letter-spacing:0.12em;color:#c43c4a;line-height:1.1;
       white-space:nowrap;">APPLIED ML</div>
   </div>
 </foreignObject>
@@ -89,7 +85,7 @@
   <text x="48" y="317" font-family="'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="138"
         font-weight="700" letter-spacing="-0.045em"
         paint-order="stroke fill"
-        stroke="#ffffff" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"><tspan x="48" dy="0" fill="#10161c">HRV on a</tspan><tspan x="48" dy="141" fill="#1a9a88">Phone</tspan></text>
+        stroke="#ffffff" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"><tspan x="48" dy="0" fill="#10161c">HRV on a</tspan><tspan x="48" dy="141" fill="#c43c4a">Phone</tspan></text>
 
   <foreignObject x="72" y="661" width="1456" height="67">
   <div xmlns="http://www.w3.org/1999/xhtml"
@@ -97,7 +93,7 @@
     <div style="display:inline-block;box-sizing:border-box;
       background:#ffffff;border-radius:999px;padding:14px 24px;
       font-family:'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;font-size:33px;font-weight:700;
-      letter-spacing:0.14em;color:#1a9a88;line-height:1.1;
+      letter-spacing:0.14em;color:#c43c4a;line-height:1.1;
       white-space:nowrap;">PPG</div>
   </div>
 </foreignObject>

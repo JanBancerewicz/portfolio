@@ -1,21 +1,110 @@
 import cover from "./cover.svg";
 import coverWide from "./cover-wide.svg";
+import claudeCodeUsage from "./3-block.png";
+import claudeCodeInstall from "./1-install.png";
+
 
 export const meta = {
   slug: "reduce-claude-code-token-usage",
   title: "How to cut your Claude Code token usage by 20x",
-  date: "2026-08-07",
+  date: "2026-08-12",
   category: "LLM tooling",
-  readingTime: "5 min",
+  readingTime: "8 min",
   summary:
-    "Claude bills a cached token at 0.1x and a cache write at 2x — a 20x spread on identical content. How context and prompt caching work in Claude Code, and the changes that stop you paying the high side.",
+    "Claude bills a cached token at 0.1x and a cache write at 2x – a 20x spread on identical content. How context and prompt caching work in Claude Code, the hygiene that cuts always-on context, and a one-plugin guard that blocks cold-cache turns before you pay.",
   cover,
   coverWide,
   tags: ["Claude", "LLMs", "Tooling", "Prompt caching"],
+  links: [
+    {
+      label: "GitHub",
+      href: "https://github.com/JanBancerewicz/context-cost-guard",
+    },
+  ],
 };
 
+export const glossary = [
+  {
+    term: "AGENTS.md",
+    definition:
+      "Project (and optional nested) instruction file read by OpenAI Codex and other agents. Codex also supports AGENTS.override.md for local-only overrides.",
+  },
+  {
+    term: "CLAUDE.md",
+    definition:
+      "Claude Code instruction file: global under ~/.claude/, plus a project-level file. Re-read every turn unless you push detail into scoped rules.",
+  },
+  {
+    term: "Claude Code",
+    definition:
+      "Anthropic’s agentic coding CLI/IDE harness. Builds each turn as a full Messages API request with system prompt, tools, instructions, and history.",
+  },
+  {
+    term: "Codex",
+    definition:
+      "OpenAI’s coding agent (CLI / IDE / cloud). Same stateless context shape as Claude Code; primary instruction file is AGENTS.md.",
+  },
+  {
+    term: "GEMINI.md",
+    definition:
+      "Default instruction file for Gemini CLI (global ~/.gemini/ plus project hierarchy). Can be pointed at AGENTS.md via settings.",
+  },
+  {
+    term: "Gemini CLI",
+    definition:
+      "Google’s agentic coding CLI. Stateless turns and instruction files like the others; caching discounts and TTLs follow Gemini’s API, not Anthropic’s.",
+  },
+  {
+    term: "MCP",
+    definition:
+      "Model Context Protocol – extra tool servers whose schemas join the request. Deferred tools cost little until used; enabled servers still tax the prefix.",
+  },
+  {
+    term: "Messages API",
+    definition:
+      "Anthropic’s chat endpoint. Stateless: the client must resend the full conversation each turn for the model to “remember” anything.",
+  },
+  {
+    term: "TTL",
+    definition:
+      "Time-to-live for a cached prompt prefix. Anthropic: 5-minute writes at 1.25x, 1-hour writes at 2x; a hit resets the clock.",
+  },
+  {
+    term: "cache read",
+    definition:
+      "Billing for tokens served from a warm prompt-cache prefix. On Anthropic Claude this is 0.1x the input rate – the cheap side of the 20x spread.",
+  },
+  {
+    term: "cache write",
+    definition:
+      "Billing for creating or refreshing a prompt-cache prefix. On Anthropic: 1.25x (5-minute TTL) or 2x (1-hour TTL) the input rate.",
+  },
+  {
+    term: "context-cost-guard",
+    definition:
+      "Open-source Claude Code plugin: a UserPromptSubmit hook that blocks once before a large, likely cold-cache turn. Install via /plugin; no settings.json edit required.",
+  },
+  {
+    term: "instruction files",
+    definition:
+      "Always-on markdown the harness injects every turn – CLAUDE.md / rules, AGENTS.md, GEMINI.md, Cursor rules, and similar. The audit target you control.",
+  },
+  {
+    term: "prompt cache",
+    definition:
+      "Provider-side store of a request prefix. Next turn, a byte-identical prefix bills as a cache read instead of full input – until the TTL expires or the prefix changes.",
+  },
+  {
+    term: "system prompt",
+    definition:
+      "Harness rules sent every turn (tools, environment, git). Shared across sessions of the same setup, so it usually hits cache; editing it invalidates the prefix.",
+  },
+];
+
+You do not pay for the one-line question you just typed. You pay for everything the agent must resend so the model can pretend it remembers the conversation – and for whether that payload hits a warm <Term>prompt cache</Term>.
+
 The 20x is one specific number: Anthropic bills a token read from the prompt
-cache at **0.1x** the input rate, and a token written into the cache at **2x**.
+cache at **0.1x** the input rate (<Term>cache read</Term>), and a token written into the cache at **2x** (<Term>cache write</Term>).
 Same content, twenty times the price, decided by whether the cache was warm
 when you hit enter.
 
@@ -24,47 +113,49 @@ by cache temperature is your bill.
 
 ## Why a one-line question can be expensive
 
-The Messages API is stateless. A conversation only exists because the client
-resends the entire history every turn — system prompt, tool definitions,
-instruction files, every previous message, every file read, every tool result.
+The <Term>Messages API</Term> is stateless. A conversation only exists because the client
+resends the entire history every turn – <Term>system prompt</Term>, tool definitions,
+<Term>instruction files</Term>, every previous message, every file read, every tool result.
 
 The cost of turn N is the size of turns 1 to N−1. A short question at the end
 of a long session drags everything before it along.
 
-## What is already in context before you type
+### What is already in context before you type
 
-- **Harness system prompt** — tool-use rules, environment, git instructions.
-- **Tool definitions** — full JSON schema per tool. MCP servers add theirs.
+- **Harness system prompt** – tool-use rules, environment, git instructions.
+- **Tool definitions** – full JSON schema per tool. <Term>MCP</Term> servers add theirs.
   Deferred tools cost only their name until used.
-- **Instruction files** — `~/.claude/CLAUDE.md`, the project `CLAUDE.md`, and
+- **Instruction files** – `~/.claude/CLAUDE.md`, the project <Term>CLAUDE.md</Term>, and
   everything under `~/.claude/rules/`. Re-read every turn.
-- **Skill catalogue** — each skill's name and one-line description. Bodies load
+- **Skill catalogue** – each skill's name and one-line description. Bodies load
   only on invocation.
 
 Instruction files are the ones to audit: paid on every turn of every session,
 and entirely under your control.
 
-## How the caching actually prices out
+### How the caching actually prices out
 
 Anthropic caches a prefix of the request. Next turn, if the first N tokens are
 byte-identical, they bill as a cache read. Reads are 0.1x, writes are 1.25x for
-the 5-minute TTL and 2x for the 1-hour one. Every hit resets the TTL, so an
+the 5-minute <Term>TTL</Term> and 2x for the 1-hour one. Every hit resets the TTL, so an
 active session stays warm indefinitely.
 
 Expiry is where it bites:
 
-```
+```text
 240,000-token conversation
 
 warm    240,000 × 0.1  =   24,000
 expired 240,000 × 2    =  480,000
 ```
 
-The mechanism is not Claude-specific — every stateless chat API resends
+The mechanism is not Claude-specific – every stateless chat API resends
 context, and OpenAI and Google cache too. The numbers above are Anthropic's,
-and the tooling below is Claude Code's.
+and the tooling below is <Term>Claude Code</Term>'s.
 
-## Fix 1: scope your instruction files
+## How to fix it in Claude Code
+
+### Fix 1: scope your instruction files
 
 Any markdown file under `~/.claude/rules/` can declare what it applies to:
 
@@ -91,100 +182,165 @@ wc -c ~/.claude/CLAUDE.md ~/.claude/rules/**/*.md | tail -1
 ```
 
 Bytes divided by four is a rough token count. The same applies to `CLAUDE.md`
-itself — it should hold routing and behaviour, not inlined config samples that
+itself – it should hold routing and behaviour, not inlined config samples that
 belong in a scoped rule.
 
-## Fix 2: one conversation per task
+### Fix 2: one conversation per task
 
 If a question does not need the history, `/clear` first. A new session carries
 the system prompt and nothing else, and that prefix is identical between
 sessions so it usually hits cache anyway.
 
-## Fix 3: watch the clock, not the size
+### Fix 3: watch the clock, not the size
 
-A 300,000-token conversation you are actively working in is cheap — every turn
+A 300,000-token conversation you are actively working in is cheap – every turn
 lands inside the TTL and refreshes it. The same conversation after lunch costs
 2x on all 300,000 tokens.
 
 Closing the app flushes nothing; the cache is server-side on a timer. Starting
-a new session is not what costs — resuming a large old one is. Note that any
+a new session is not what costs – resuming a large old one is. Note that any
 system-prompt change invalidates the cached prefix, so editing `CLAUDE.md` or
 installing a plugin buys you one rebuild on the next session.
 
-## Fix 4: keep long sessions light
+### Fix 4: keep long sessions light
 
 Anything entering context stays for the session and is resent every turn.
 Screenshots are the usual offender, along with large file reads and full test
 logs. Need a big artifact for one decision? Make the decision, then `/clear`.
 
-Compact when a task ends rather than waiting for auto-compact at the limit —
+Compact when a task ends rather than waiting for auto-compact at the limit –
 every turn before that fires was paid at near-maximum context.
 
-## Measure your own usage
+### Fix 5: same idea on Codex, Gemini, and the rest
 
-Claude Code writes a JSONL transcript per session under
-`~/.claude/projects/<project>/`, and every assistant record carries its usage:
+The multipliers change by vendor. The shape of the problem does not.
 
-```python
-import json, glob, os, collections
+Every coding agent that talks to a chat API is still **stateless**: turn N resends
+history, tools, and instruction files. A warm <Term>prompt cache</Term> (or the provider’s
+equivalent) is what keeps that from pricing like a full re-read. Cold cache,
+edited prefix, or a giant always-on instruction blob hurts the same way whether
+the product is branded Claude, GPT, or Gemini.
 
-WEIGHTS = {"input": 1, "read": 0.1, "write": 2, "output": 5}
-seen, cost = set(), collections.Counter()
+Map the files, then apply the same four fixes:
 
-for path in glob.glob(os.path.expanduser("~/.claude/projects/*/*.jsonl")):
-    for line in open(path, encoding="utf-8", errors="replace"):
-        try:
-            msg = json.loads(line).get("message") or {}
-        except ValueError:
-            continue
-        usage, mid = msg.get("usage"), msg.get("id")
-        if not usage or mid in seen:      # records repeat; dedupe by message id
-            continue
-        seen.add(mid)
-        cost["input"]  += usage.get("input_tokens", 0)
-        cost["read"]   += usage.get("cache_read_input_tokens", 0)
-        cost["write"]  += usage.get("cache_creation_input_tokens", 0)
-        cost["output"] += usage.get("output_tokens", 0)
+| Harness | Instruction surface | What to audit first |
+| --- | --- | --- |
+| <Term>Claude Code</Term> | <Term>CLAUDE.md</Term> + `~/.claude/rules/` | Unscoped rules; fat global CLAUDE.md |
+| <Term>Codex</Term> | <Term>AGENTS.md</Term> (+ `AGENTS.override.md`) | Nested AGENTS.md size; MCP servers left on |
+| <Term>Gemini CLI</Term> | <Term>GEMINI.md</Term> (or point it at AGENTS.md) | Global `~/.gemini/` plus project hierarchy |
+| Cursor / Copilot / others | `.cursor/rules`, `copilot-instructions.md`, … | Rules that load on every chat |
 
-total = sum(cost[k] * w for k, w in WEIGHTS.items())
-for k, w in WEIGHTS.items():
-    print(f"{k:7} {cost[k]:>12,}  ×{w:<4} = {cost[k]*w:>12,.0f}  {100*cost[k]*w/total:5.1f}%")
-```
+Practical carry-overs:
 
-The `write` row is the share of your bill spent rebuilding caches instead of
-doing work. Above roughly 15%, your problem is session hygiene.
+1. **Keep instruction files thin and scoped.** Codex walks `AGENTS.md` from repo
+   root down to cwd and caps combined project docs (32 KiB by default) – nest
+   package-specific guidance instead of one novel at the root. Gemini discovers
+   `GEMINI.md` hierarchically; you can set `context.fileName` to `AGENTS.md` if
+   the team standardizes on one file. Claude’s path-scoped rules are the same
+   idea under another name.
+2. **One task per session.** `/clear` (or the local equivalent: new thread,
+   new Codex turn without the old transcript) when history is not needed.
+3. **Do not resume a huge cold session.** TTL and write pricing differ – Anthropic’s
+   0.1x / 2x spread is not universal – but an idle large context still forces a
+   rebuild somewhere on the bill or the rate limit.
+4. **Disable idle MCP servers.** Every enabled server’s schema rides along;
+   Codex’s own pricing notes call this out explicitly.
 
-Summing `input_tokens`, `cache_read_input_tokens` and
-`cache_creation_input_tokens` on any single record gives that call's context
-size. Check the first call of a session — that is your floor.
+Do not copy Anthropic’s 20x into a Codex or Gemini spreadsheet. Read the current
+cache-read / cache-write (or “cached input”) line for the model you actually use,
+then measure. The hygiene is portable; the constants are not.
 
 ## Block the expensive turn automatically
 
-A `UserPromptSubmit` hook runs before the request goes out, so it can stop the
-turn rather than report on it afterwards:
+Hygiene cuts the floor. It does not stop you from hitting Enter on a 300k-token
+thread after lunch. That is what <Term>context-cost-guard</Term> is for: a
+`UserPromptSubmit` hook that runs **before** the request leaves, and **blocks
+once** when a turn looks cheap but will rewrite a cold cache.
 
-```python
-IDLE_MINUTES = 55      # TTL is an hour; warn just under it
-BIG_CONTEXT  = 60_000  # below this a rebuild is cheap enough to ignore
+You do not paste Python into `~/.claude` or edit `settings.json`. Install the
+plugin (Claude Code Desktop or terminal – both work; needs `python3` on `PATH`):
 
-context, stamp = read_transcript(payload["transcript_path"])
-if context < BIG_CONTEXT or idle_minutes(stamp) < IDLE_MINUTES:
-    return                       # silent: this turn is fine
-
-print(json.dumps({"decision": "block", "reason": warning(context, idle)}))
+```text
+/plugin marketplace add JanBancerewicz/context-cost-guard
+/plugin install context-cost-guard@context-cost-guard
 ```
 
-Requiring both conditions keeps it quiet during normal work. Record a short
-snooze after firing so re-sending the same prompt always goes through.
+Then **restart Claude Code** (or `/reload-plugins`). Hooks load at session start;
+a restart is the reliable activation. The plugin merges its hook with any hooks
+you already have – it does not overwrite your config.
 
-## Numbers from one session
+<figure className="article-figure">
+  <img
+    src={claudeCodeInstall}
+    alt="Claude Code plugin context-cost-guard installation"
+  />
+  <figcaption>
+    <Term>context-cost-guard</Term> installation in Claude Code terminal. Installation in terminal also causes the plugin to be loaded in Claude desktop application.
+  </figcaption>
+</figure>
 
+Source, MIT license, and the ~130-line script:
+[github.com/JanBancerewicz/context-cost-guard](https://github.com/JanBancerewicz/context-cost-guard).
+No network calls – it only reads your local session transcript and a tiny snooze
+file under `~/.claude/`.
+
+**When it blocks** – both must be true:
+
+- last-turn context ≥ 60,000 tokens (`input` + cache read + cache write fields), and
+- idle ≥ 55 minutes since the last assistant timestamp (tuned for a ~1h <Term>TTL</Term>)
+
+**When it stays quiet** – small context, short idle, you are inside the 5-minute
+snooze after a block, or anything goes wrong reading the transcript (**fail-open**:
+errors never trap a turn).
+
+**After a block** the card looks roughly like:
+
+```text
+This turn will cost much more than it looks.
+
+  Conversation context : 379,250 tokens
+  Idle                 : 94 min  (cache likely expired after 60 min)
+  Est. turn cost       : ~758,500 vs ~37,925 token-equivalents
+
+  /clear    new topic – cheapest, start from zero
+  /compact  same thread, summarized
+  resend    send the same prompt again to continue anyway
 ```
+
+Warm vs cold numbers are illustrative (`context × 0.1` vs `context × 2`), not an
+invoice. `/clear` and `/compact` are the cheap exits; **resend** within five
+minutes always goes through so the guard cannot lock you out.
+
+<figure className="article-figure">
+  <img
+    src={claudeCodeUsage}
+    alt="Claude Code block card from context-cost-guard warning that a short message would rewrite a large cold cache"
+  />
+  <figcaption>
+    <Term>context-cost-guard</Term> intercepts a short follow-up on a long idle
+    session and blocks before the cold <Term>cache write</Term> – resend within
+    five minutes to continue anyway.
+  </figcaption>
+</figure>
+
+**Caveat worth knowing:** the hook infers expiry from **idle time**, assuming a
+**1-hour** prompt-cache TTL. On routes that use a **5-minute** TTL (or similar
+overage behavior) it can **under-warn** – the cache may already be cold while
+idle is still under 55 minutes. Defaults live at the top of the plugin script if
+you fork; most readers should just install and leave them.
+
+The same gate pattern (observe size + idle → block before send → explain → snooze
+→ fail open) ports to other agents; this plugin is the Claude Code CTA because
+that is where `UserPromptSubmit` already exists.
+
+### Numbers from one session
+
+```text
 first API call, before any work     109,618 tokens of context
 context by end of session           274,376 tokens
 average context re-read per call    187,867 tokens
 
-most expensive single turn — a two-line question, no tools:
+most expensive single turn – a two-line question, no tools:
   cache rebuild   475,888   97.8%
   cache read        2,222    0.5%
   the answer        8,335    1.7%
@@ -194,5 +350,5 @@ That turn's answer was 1,667 output tokens. The rest was a conversation being
 written back into a cache that had expired 34 minutes earlier.
 
 Scoping the instruction files in that setup took 155,875 bytes of always-on
-context — about 39,000 tokens per turn — down to 6,925. Nothing was deleted;
+context – about 39,000 tokens per turn – down to 6,925. Nothing was deleted;
 the rules still load when they are relevant.

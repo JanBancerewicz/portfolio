@@ -1,6 +1,10 @@
 import mdx from "@mdx-js/rollup";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
+import rehypePrettyCode, {
+  type Options as RehypePrettyCodeOptions,
+} from "rehype-pretty-code";
+import remarkGfm from "remark-gfm";
 import { defineConfig } from "vite";
 
 /**
@@ -8,13 +12,36 @@ import { defineConfig } from "vite";
  * (`https://<user>.github.io/` → "/") or a project site
  * (`https://<user>.github.io/<repo>/` → "/<repo>/").
  */
+
+const prettyCodeOptions: RehypePrettyCodeOptions = {
+  // Dual themes → CSS vars (--shiki-light / --shiki-dark); switched via
+  // [data-theme] in index.css to match the site toggle.
+  theme: {
+    light: "github-light",
+    dark: "github-dark",
+  },
+  keepBackground: false,
+  bypassInlineCode: true,
+  defaultLang: {
+    block: "text",
+  },
+};
+
 export default defineConfig({
   base: process.env.BASE_PATH ?? "/",
   plugins: [
     // MDX must compile before anything else touches the file, and the React
     // transform has to claim .mdx as well — otherwise the JSX that MDX emits
     // reaches Vite's import analysis untransformed and fails to parse.
-    { enforce: "pre", ...mdx() },
+    // remark-gfm unlocks tables, strikethrough, task lists, and autolinks.
+    // rehype-pretty-code highlights fenced blocks (python, bash, …) at build time.
+    {
+      enforce: "pre",
+      ...mdx({
+        remarkPlugins: [remarkGfm],
+        rehypePlugins: [[rehypePrettyCode, prettyCodeOptions]],
+      }),
+    },
     react({ include: /\.(mdx|jsx|tsx|js|ts)$/ }),
     tailwindcss(),
   ],

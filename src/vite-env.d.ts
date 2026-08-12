@@ -1,10 +1,15 @@
 /// <reference types="vite/client" />
 
 declare module "*.mdx" {
-  import type { ComponentType } from "react";
-  import type { ContentMeta } from "./content/types";
+  import type { ComponentType, ReactNode } from "react";
+  import type { ContentMeta, GlossaryEntry } from "./content/types";
+
+  type MdxComponents = {
+    [key: string]: ComponentType<Record<string, unknown>> | keyof HTMLElementTagNameMap;
+  };
 
   export const meta: ContentMeta;
-  const MDXComponent: ComponentType;
+  export const glossary: GlossaryEntry[] | undefined;
+  const MDXComponent: ComponentType<{ components?: MdxComponents; children?: ReactNode }>;
   export default MDXComponent;
 }

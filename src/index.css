@@ -38,6 +38,10 @@
   --accent-text: #005ccc;
   --accent-ink: #f7f8f9;
   --accent-wash: color-mix(in srgb, var(--accent) 9%, transparent);
+  /* GitHub CTA on project case studies — brand green, not the site accent. */
+  --github: #1a7f37;
+  --github-hover: #116329;
+  --github-ink: #ffffff;
   --shadow-card: 0 1px 2px rgba(16, 22, 28, 0.05),
     0 14px 34px -20px rgba(16, 22, 28, 0.4);
   --selection-bg: #10161c;
@@ -74,6 +78,9 @@
   --accent-text: #0b83fa;
   --accent-ink: #0a0d11;
   --accent-wash: color-mix(in srgb, var(--accent) 14%, transparent);
+  --github: #3fb950;
+  --github-hover: #56d364;
+  --github-ink: #0a0d11;
   --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5), 0 18px 44px -22px rgba(0, 0, 0, 0.85);
   /* --selection-bg: #ff6a4d; */
   --selection-bg: #0b83fa;
@@ -93,10 +100,15 @@
   --color-accent-text: var(--accent-text);
   --color-accent-ink: var(--accent-ink);
   --color-accent-wash: var(--accent-wash);
+  --color-github: var(--github);
+  --color-github-hover: var(--github-hover);
+  --color-github-ink: var(--github-ink);
 
   --font-sans: "Inter Tight", Inter, ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Instrument Serif", ui-serif, Georgia, serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Article / project fenced code — Plex reads cleaner at body sizes than JetBrains. */
+  --font-code: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
 * {
@@ -201,32 +213,35 @@ body {
 }
 
 .prose-editorial h2 {
-  margin: 2.5rem 0 0.75rem;
-  font-size: 1.55rem;
+  margin: 3rem 0 1rem;
+  font-size: clamp(2rem, 3.2vw, 2.55rem);
   font-weight: 500;
-  letter-spacing: -0.03em;
-  line-height: 1.15;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
   color: var(--ink);
+  scroll-margin-top: 6rem;
 }
 
 .prose-editorial h3 {
-  margin: 2rem 0 0.5rem;
-  font-size: 1.15rem;
+  margin: 2.35rem 0 0.65rem;
+  font-size: clamp(1.4rem, 2.1vw, 1.65rem);
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
   color: var(--ink);
+  scroll-margin-top: 6rem;
 }
 
 .prose-editorial p {
   margin: 0 0 1.15rem;
-  max-width: 68ch;
+  max-width: none;
 }
 
 .prose-editorial ul,
 .prose-editorial ol {
   margin: 0 0 1.15rem;
   padding-left: 1.15rem;
-  max-width: 68ch;
+  max-width: none;
   list-style: revert;
 }
 
@@ -248,28 +263,116 @@ body {
 }
 
 .prose-editorial code {
-  font-family: var(--font-mono);
-  font-size: 0.85em;
+  font-family: var(--font-code);
+  font-size: 0.875em;
+  font-weight: 400;
   background: var(--paper-sunken);
-  padding: 0.15em 0.4em;
+  padding: 0.12em 0.38em;
   border-radius: 3px;
+  letter-spacing: 0;
+}
+
+/* rehype-pretty-code wraps highlighted fences in a figure. */
+.prose-editorial figure[data-rehype-pretty-code-figure] {
+  position: relative;
+  margin: 0 0 1.35rem;
+  max-width: none;
+}
+
+.prose-editorial figure[data-rehype-pretty-code-figure] pre {
+  margin: 0;
+}
+
+.prose-editorial figure[data-rehype-pretty-code-figure] figcaption {
+  margin: 0;
+  padding: 0.55rem 1.1rem 0;
+  font-family: var(--font-code);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-bottom: 0;
+  border-radius: 6px 6px 0 0;
+}
+
+.prose-editorial
+  figure[data-rehype-pretty-code-figure]:has(figcaption)
+  pre {
+  border-radius: 0 0 6px 6px;
 }
 
 .prose-editorial pre {
-  font-family: var(--font-mono);
-  font-size: 0.8125rem;
-  line-height: 1.6;
-  background: var(--paper-sunken);
+  position: relative;
+  font-family: var(--font-code);
+  font-size: 0.875rem;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0;
+  tab-size: 2;
+  background: var(--paper-raised);
   border: 1px solid var(--rule);
-  padding: 1rem 1.15rem;
-  border-radius: 4px;
+  padding: 1.1rem 1.2rem;
+  border-radius: 6px;
   overflow-x: auto;
-  margin: 0 0 1.15rem;
+  margin: 0 0 1.35rem;
+  max-width: none;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Language chip when there is no explicit title/caption. */
+.prose-editorial
+  figure[data-rehype-pretty-code-figure]:not(:has(figcaption))
+  pre[data-language]:not([data-language="text"]):not([data-language="plaintext"])::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 0.65rem;
+  right: 0.85rem;
+  font-family: var(--font-code);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.prose-editorial
+  figure[data-rehype-pretty-code-figure]:not(:has(figcaption))
+  pre[data-language]:not([data-language="text"]):not([data-language="plaintext"]) {
+  padding-top: 1.85rem;
 }
 
 .prose-editorial pre code {
+  display: grid;
   background: none;
   padding: 0;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  border-radius: 0;
+  color: inherit;
+}
+
+.prose-editorial pre code .line {
+  min-height: 1.65em;
+  padding-inline: 0;
+}
+
+/* Dual-theme tokens from rehype-pretty-code / shiki. */
+.prose-editorial code[data-theme*=" "],
+.prose-editorial code[data-theme*=" "] span {
+  color: var(--shiki-light);
+  background-color: transparent;
+}
+
+[data-theme="dark"] .prose-editorial code[data-theme*=" "],
+[data-theme="dark"] .prose-editorial code[data-theme*=" "] span {
+  color: var(--shiki-dark);
+  background-color: transparent;
 }
 
 .prose-editorial blockquote {
@@ -281,6 +384,365 @@ body {
   font-size: 1.3rem;
   line-height: 1.4;
   color: var(--ink);
+  max-width: none;
+}
+
+.prose-editorial table {
+  width: 100%;
+  max-width: none;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.prose-editorial .table-wrap {
+  max-width: none;
+  overflow-x: auto;
+  margin: 0 0 1.35rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--paper-raised);
+}
+
+.prose-editorial .table-wrap > table {
+  max-width: none;
+  margin-bottom: 0;
+}
+
+.prose-editorial th,
+.prose-editorial td {
+  border-bottom: 1px solid var(--rule);
+  padding: 0.7rem 0.9rem;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.45;
+}
+
+.prose-editorial tr:last-child td {
+  border-bottom: 0;
+}
+
+.prose-editorial th {
+  color: var(--ink);
+  font-weight: 600;
+  background: var(--paper-sunken);
+  border-bottom-color: var(--rule-strong);
+  white-space: nowrap;
+}
+
+.prose-editorial td {
+  overflow-wrap: anywhere;
+}
+
+.prose-editorial tbody tr:nth-child(even) td {
+  background: color-mix(in srgb, var(--paper-sunken) 45%, transparent);
+}
+
+.prose-editorial hr {
+  border: 0;
+  border-top: 1px solid var(--rule);
+  margin: 2rem 0;
+}
+
+/*
+ * Article body + sticky TOC live in one section. TOC sticks while you read,
+ * then scrolls away with the section — never floats above the glossary.
+ * Narrow / zoomed viewports: hide the rail, prose keeps the full measure.
+ */
+.article-reading {
+  width: 100%;
+  max-width: none;
+}
+
+.article-toc {
+  display: none;
+  color: var(--ink-muted);
+}
+
+.article-toc-heading {
+  margin: 0 0 0.85rem;
+}
+
+.article-toc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.article-toc-item {
+  margin: 0;
+}
+
+.article-toc-item--nested .article-toc-link {
+  padding-left: 0.85rem;
+}
+
+.article-toc-link {
+  display: block;
+  padding: 0.28rem 0.5rem 0.28rem 0.65rem;
+  border-left: 1.5px solid var(--rule);
+  color: var(--ink-faint);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  line-height: 1.35;
+  text-decoration: none;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease;
+}
+
+/* H2 entries: heavier + darker + slightly larger — must read as section titles */
+.article-toc-item--h2 > .article-toc-link {
+  font-weight: 700;
+  font-size: 0.875rem;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.article-toc-item--h3 > .article-toc-link {
+  font-weight: 400;
+  color: var(--ink-faint);
+}
+
+.article-toc-link:hover {
+  color: var(--ink);
+}
+
+.article-toc-link.is-active {
+  border-left-color: var(--accent);
+  color: var(--ink);
+}
+
+.article-toc-item--h2 > .article-toc-link.is-active {
+  font-weight: 700;
+}
+
+@media (min-width: 1024px) {
+  .article-reading--with-toc {
+    display: grid;
+    grid-template-columns: 11.5rem minmax(0, 1fr);
+    column-gap: 2.25rem;
+    align-items: start;
+  }
+
+  .article-toc {
+    display: block;
+    position: sticky;
+    top: 6rem;
+    max-height: calc(100svh - 7rem);
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* Sticky child must not stretch the grid row past content */
+    align-self: start;
+  }
+}
+
+@media (min-width: 1280px) {
+  .article-reading--with-toc {
+    grid-template-columns: 13rem minmax(0, 1fr);
+    column-gap: 2.75rem;
+  }
+}
+
+/* Inline glossary term + collapsible panel (MDX <Term> / <Glossary>) */
+.prose-editorial .term {
+  color: var(--ink);
+  background: var(--accent-wash);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  padding: 0.05em 0.22em;
+  border-radius: 3px;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1.5px;
+  transition:
+    background-color 160ms ease,
+    text-decoration-color 160ms ease;
+}
+
+.prose-editorial .term:hover {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  text-decoration-color: var(--accent);
+}
+
+.prose-editorial .glossary {
+  width: 100%;
+  max-width: none;
+  margin: 0 0 1.75rem;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--paper-raised);
+  scroll-margin-top: 6rem;
+}
+
+.prose-editorial .glossary-summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 1rem;
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: -0.02em;
+}
+
+.prose-editorial .glossary-summary::-webkit-details-marker {
+  display: none;
+}
+
+.prose-editorial .glossary-summary::before {
+  content: "▸";
+  color: var(--accent);
+  margin-right: 0.55rem;
+  transition: transform 160ms ease;
+  display: inline-block;
+}
+
+.prose-editorial .glossary[open] > .glossary-summary::before {
+  transform: rotate(90deg);
+}
+
+.prose-editorial .glossary-count {
+  color: var(--ink-faint);
+  font-weight: 500;
+  font-size: 0.8125rem;
+  letter-spacing: 0;
+}
+
+.prose-editorial .glossary-empty {
+  margin: 0;
+  padding: 0.85rem 1rem 1rem;
+  border-top: 1px solid var(--rule);
+  color: var(--ink-faint);
+  font-size: 0.9375rem;
+  max-width: none;
+}
+
+.prose-editorial .glossary-list {
+  margin: 0;
+  padding: 0.35rem 1rem 1rem;
+  border-top: 1px solid var(--rule);
+  display: grid;
+  gap: 0;
+}
+
+@media (min-width: 1024px) {
+  .prose-editorial .glossary-list {
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1.75rem;
+  }
+}
+
+.prose-editorial .glossary-entry {
+  padding: 0.75rem 0.35rem;
+  border-radius: 3px;
+  scroll-margin-top: 5rem;
+  border-top: 1px solid var(--rule);
+}
+
+.prose-editorial .glossary-entry:first-child {
+  border-top: 0;
+}
+
+@media (min-width: 1024px) {
+  .prose-editorial .glossary-entry:nth-child(2) {
+    border-top: 0;
+  }
+}
+
+.prose-editorial .glossary-entry dt {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  margin: 0 0 0.2rem;
+}
+
+.prose-editorial .glossary-entry dd {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+.prose-editorial .glossary-entry--flash {
+  animation: glossary-flash 1.1s ease;
+}
+
+@keyframes glossary-flash {
+  0%,
+  100% {
+    background: transparent;
+  }
+  20%,
+  55% {
+    background: var(--accent-wash);
+  }
+}
+
+/* Clinical / legal note callout inside project MDX */
+.prose-editorial .article-disclaimer {
+  margin: 0 0 1.75rem;
+  padding: 1rem 1.15rem 1.1rem;
+  border: 1px solid var(--rule-strong);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 7%, var(--paper-raised));
+}
+
+.prose-editorial .article-disclaimer-label {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+}
+
+.prose-editorial .article-disclaimer > p:last-child {
+  margin: 0;
+  max-width: none;
+  color: var(--ink);
+  font-size: 1rem;
+  line-height: 1.55;
+  font-style: normal;
+}
+
+.prose-editorial .article-figure {
+  margin: 0 0 1.75rem;
+  padding: 0;
+}
+
+.prose-editorial .article-figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  background: var(--paper-raised);
+}
+
+/* Narrow UI crops (toolbar buttons, icons) — don't stretch to full prose width. */
+.prose-editorial .article-figure--compact {
+  max-width: 36rem;
+}
+
+.prose-editorial .article-figure--compact img {
+  width: 100%;
+  margin-inline: 0;
+}
+
+.prose-editorial .article-figure figcaption {
+  margin: 0.65rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  max-width: none;
 }
 
 /* ---------------------------------------------------------------------------
@@ -313,6 +775,18 @@ html.js [data-split][data-split-ready] {
 
 .press:active {
   transform: scale(0.97);
+}
+
+.project-github-btn {
+  background: var(--github);
+  color: var(--github-ink);
+  transition:
+    transform 160ms var(--ease-out),
+    background-color 180ms ease;
+}
+
+.project-github-btn:hover {
+  background: var(--github-hover);
 }
 
 /* Underline wiping in from the left. */

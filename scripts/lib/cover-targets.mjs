@@ -23,15 +23,44 @@
  *   extras?: ProjectExtra[],
  * }>}
  */
+
+/*
+* WALLPAPER_IDS = [
+*   "silk",
+*   "orbs",
+*   "facets",
+*   "drapery",
+*   "signal",
+*   "techgrid",
+*   "webpage",
+*   "neural",
+*   "tokens",
+*   "code",
+*   "genai",
+*   "medical",
+*   "finance",
+*   "cogwheel",
+*   "mesh",
+*   "topo",
+*   "bloom",
+*   "graph",
+*   "vision",
+*   "flowchart",
+*   "datacenter",
+];*/
+
+// ACCENTS = { blue, purple, orange, mint, gold, red, berry, coral};
+
+
 export const projectTargets = [
   {
     dir: "src/content/projects/hrv-mobile-ml",
     coverTitle: "HRV on a Phone",
     category: "Applied ML",
     tag: "PPG",
-    bg: "vision",
-    muteChannel: "b",
-    accent: "mint",
+    bg: "medical",
+    muteChannel: "rb",
+    accent: "red",
     extras: ["featured"],
   },
   {
@@ -46,12 +75,12 @@ export const projectTargets = [
   },
   {
     dir: "src/content/projects/qwen-vl-angiography",
-    coverTitle: "Qwen for Angio",
+    coverTitle: "Qwen-VL for Angiography",
     category: "Vision-language",
-    tag: "VLM",
-    bg: "tokens",
-    muteChannel: "b",
-    accent: "blue",
+    tag: "Segmentation",
+    bg: "neural",
+    muteChannel: "g",
+    accent: "mint",
     extras: ["featured"],
   },
   {
@@ -73,13 +102,13 @@ export const projectTargets = [
     accent: "gold",
   },
   {
-    dir: "src/content/projects/pricepoint",
-    coverTitle: "Price Point",
-    category: "Product",
-    tag: "PRICE",
+    dir: "src/content/projects/code-analysis-tool",
+    coverTitle: "Code Reviewer Plugin",
+    category: "Code Parsing",
+    tag: "Graph Analysis",
     bg: "graph",
-    muteChannel: "",
-    accent: "red",
+    muteChannel: "gb",
+    accent: "gold",
   },
 ];
 
@@ -98,37 +127,28 @@ export const blogTargets = [
   {
     dir: "src/content/blog/reduce-claude-code-token-usage",
     coverTitle: "Cut Token Cost",
-    category: "LLM tooling",
-    tag: "CACHE",
+    category: "LLM Tooling",
+    tag: "Claude Code",
     bg: "tokens",
     muteChannel: "bg",
     accent: "orange",
   },
   {
-    dir: "src/content/blog/what-comments-do-to-a-model",
-    coverTitle: "What Comments Do",
-    category: "LLM interpretability",
-    tag: "PROBE",
+    dir: "src/content/blog/what-quantization-really-is",
+    coverTitle: "Quantization Explained",
+    category: "Performance Optimization",
+    tag: "LLM",
     bg: "neural",
-    muteChannel: "r",
-    accent: "purple",
-  },
-  {
-    dir: "src/content/blog/beating-a-baseline-honestly",
-    coverTitle: "Beat the Baseline",
-    category: "Machine learning",
-    tag: "EVAL",
-    bg: "signal",
     muteChannel: "g",
-    accent: "mint",
+    accent: "blue",
   },
   {
-    dir: "src/content/blog/what-a-hackathon-actually-teaches-you",
-    coverTitle: "What Not to Build",
+    dir: "src/content/blog/how-to-debug-python-like-a-pro",
+    coverTitle: "Learn Python Debugging",
     category: "Notes",
-    tag: "BUILD",
+    tag: "Python",
     bg: "cogwheel",
-    muteChannel: "gbr",
-    accent: "blue",
+    muteChannel: "rg",
+    accent: "gold",
   },
 ];

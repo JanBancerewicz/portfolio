@@ -1,0 +1,237 @@
+import cover from "./cover.svg";
+import coverWide from "./cover-wide.svg";
+import muteButton from "./mute-button.png";
+import muteBreakpoints from "./mute-breakpoints.png";
+
+export const meta = {
+  slug: "how-to-debug-python-like-a-pro",
+  title: "How to debug Python like a pro",
+  date: "2026-08-10",
+  category: "Developer Tools",
+  readingTime: "10 min",
+  summary:
+    "Debugging in PyCharm is not print-spam. Breakpoints freeze the process, Step Over/Into/Out move with intent, diffs show what changed, and one mute-all trick lets you jump without getting snagged.",
+  cover,
+  coverWide,
+  tags: ["Python", "Debugging", "PyCharm"],
+};
+
+export const glossary = [
+  {
+    term: "PyCharm",
+    definition:
+      "JetBrains IDE for Python. The debugger UI in this post — gutter breakpoints, mute, and jump-to-line — is from PyCharm’s run/debug tool window.",
+  },
+  {
+    term: "breakpoint",
+    definition:
+      "A mark on a line that tells the debugger to pause before that line runs, so you can inspect variables, the call stack, and control flow live.",
+  },
+  {
+    term: "Step Over",
+    definition:
+      "Execute the current line and pause on the next one in this function. Calls on that line run to completion without entering their body.",
+  },
+  {
+    term: "Step Into",
+    definition:
+      "If the current line calls a function, enter that function and pause on its first statement. Use when you care what happens inside the call.",
+  },
+  {
+    term: "Step Out",
+    definition:
+      "Run until the current function returns, then pause in the caller. Escape a deep call you stepped into by mistake.",
+  },
+  {
+    term: "Force Step Into",
+    definition:
+      "Like Step Into, but also enters library / skipped code that normal Step Into would jump over. Use sparingly when the bug might be inside a dependency.",
+  },
+  {
+    term: "Resume",
+    definition:
+      "Continue running until the next breakpoint, exception stop, or the end of the program. The green play button on the Debug toolbar.",
+  },
+  {
+    term: "Mute Breakpoints",
+    definition:
+      "Debugger toolbar action that temporarily disables every breakpoint (icons go pale / white). Execution can pass those lines without stopping until you unmute.",
+  },
+  {
+    term: "Jump to Line",
+    definition:
+      "Debugger action that moves the current execution point to another line without finishing the rest of the function normally. Still respects active breakpoints unless they are muted. In PyCharm this is often Run to Cursor (⌥F9).",
+  },
+  {
+    term: "execution point",
+    definition:
+      "The yellow/current-line marker in the debugger: the next statement Python will run when you continue, step, or jump.",
+  },
+  {
+    term: "diff",
+    definition:
+      "Line-by-line comparison of two versions of a file (or a commit range). Often the fastest way to find which change introduced a bug.",
+  },
+  {
+    term: "traceback",
+    definition:
+      "Python’s stack dump when an exception escapes — file, line, and call chain. The symptom to start from, not the whole diagnosis.",
+  },
+];
+
+You have a failing test, a wrong number in production, or a <Term>traceback</Term> that points at a line that “cannot possibly” be wrong. Most Python bugs feel bigger than they are — the dump looks dramatic, the path feels tangled, and the temptation is to rewrite random lines until the error disappears.
+
+That is amateur debugging. Professional debugging is simpler: treat the first visible failure as **evidence**, not the whole story. Freeze the program, inspect reality, and narrow the gap between what the code does and what you thought it did.
+
+This post is that workflow in <Term>PyCharm</Term> — symptom → reproduce → breakpoints → stepping controls → diffs → one mute-and-jump trick — plus locking the fix so it stays fixed.
+
+## Before the debugger
+
+### Reproduce the bug
+
+Do not begin with a rewrite. Begin with the exact symptom: the traceback, the wrong output, the slow function, or the failing test. Read the file, line, and exception type carefully before you touch anything.
+
+A bug you cannot reproduce is a rumor. Strip the input down to the **smallest case that still fails**, then run it the same way every time — same command, same fixture, same Debug configuration. That turns debugging from a guessing game into an experiment. If a tiny `pytest` case fails every time, you have a laboratory. If it only fails “sometimes in staging,” you do not have a debugger problem yet — you have a reproduction problem.
+
+### Diff when it used to work
+
+Not every bug needs a long debugger session. If it “worked on Friday” and fails on Monday, the cheapest evidence is often a <Term>diff</Term>.
+
+Compare the last known-good commit (or branch) to `HEAD`:
+
+```bash
+git log --oneline -20
+git diff <good-sha>..HEAD -- path/to/suspect.py
+```
+
+In PyCharm: select two commits in the Git tool window → **Compare**, or right-click a file → **Git → Compare with…**. Read the hunks that touch the failing path. A one-line change to a default argument, a swapped condition, or a missing `copy()` shows up faster in a diff than in twenty stepped lines.
+
+Use the debugger to **confirm** what the diff suggests — not to rediscover the whole history of the file by hand. Diffs shrink the search space; breakpoints inspect the remaining theory.
+
+## Inside the PyCharm debugger
+
+### What a breakpoint is
+
+A <Term>breakpoint</Term> is an instruction to the debugger: *when execution reaches this line, pause before it runs.* The process is still alive. Locals, the call stack, and the heap are whatever they were at that instant. You are not reading a log of the past — you are standing inside the running program.
+
+That is why breakpoints beat print spam. A print shows one expression you thought to write. A breakpoint lets you ask new questions without restarting: expand a dict, evaluate an expression in the console, check which branch you are on, step into a call you did not expect.
+
+Under the hood, PyCharm (via the Python debugger) attaches to your process and stops on those marks. Conditional breakpoints (“break only if `user is None`”), logpoints, and exception breakpoints are variations on the same idea: stop when *this* is true, not on every pass.
+
+### How to set one — and why
+
+In the editor gutter, left of the line number, click once. A red circle appears. That line is now a stop. Click again to remove it. You can also use the shortcut (default macOS: `Cmd+F8`) with the caret on the line.
+
+Put breakpoints where your **mental model** might be wrong, not only where the traceback pointed:
+
+- the first line of the function that “must” receive good data,
+- the branch you believe never runs,
+- the assignment that should produce the value you later see corrupted,
+- one line *before* the exception, so you still have a live stack.
+
+Run with **Debug** (bug icon), not plain Run. Plain Run ignores breakpoints. When you hit one, the <Term>execution point</Term> sits on that line; the Variables / Debug tool window shows locals and the stack.
+
+If you never stop, you are either not in Debug mode, the line never executes, or the breakpoint is muted (more on that below).
+
+### Step Over, Step Into, Step Out
+
+Once paused, the toolbar buttons next to Resume are how you move with intent. They are not interchangeable — each answers a different question.
+
+| Control | What it does | When to use it |
+| --- | --- | --- |
+| <Term>Resume</Term> | Run until the next breakpoint (or the end). | You are done here; wait for the next stop. |
+| <Term>Step Over</Term> | Finish this line; pause on the next line in *this* function. Calls on the line run fully without entering them. | Default move. “Does this line leave state how I expect?” |
+| <Term>Step Into</Term> | Enter the function call on this line; pause on its first statement. | You suspect the bug is *inside* that call. |
+| <Term>Force Step Into</Term> | Like Step Into, but also enters library / “skip” frames normal Step Into jumps over. | Rare — the bug might live in a dependency or wrapper. |
+| <Term>Step Out</Term> | Run until the current function returns; pause in the caller. | You stepped in too deep; get out without finishing the whole program. |
+| Run to Cursor / <Term>Jump to Line</Term> | Move execution to a chosen line (see mute trick below). | You already know the interesting line and refuse to step fifty times. |
+
+A practical rhythm:
+
+1. **Step Over** through your own code until something looks wrong in Variables.
+2. **Step Into** only the call that smells.
+3. **Step Out** the moment that call is no longer interesting.
+4. **Resume** when the next breakpoint is the better stop than more stepping.
+
+Stepping into every `len()`, logger, or library helper is how sessions die. Prefer Over; earn Into.
+
+### Inspect state before you change code
+
+Once you are paused, check four things before you edit anything:
+
+1. **Inputs** — is the function receiving what you think it is?
+2. **Assumptions** — types, shapes, non-null promises you silently relied on.
+3. **Control flow** — did a branch run that should not have run?
+4. **Recent mutations** — did an earlier line mutate a list or dict in place?
+
+A lot of Python bugs wear ordinary disguises: `None` where a string was expected, a mutable default argument, a shallow copy that shares nested state, a timezone-naive datetime, or an off-by-one loop boundary.
+
+Useful panels while paused:
+
+- **Variables** — live locals and fields.
+- **Evaluate Expression** — one-off checks (`len(items)`, `user.get("id")`).
+- **Frames** — the bug is often two frames up, not on the line that threw.
+
+### Mute breakpoints, then jump
+
+**Jump to Line** / **Run to Cursor** (`⌥F9`) moves the execution point to another line in the current frame — you are not “finishing” the function the normal way; you are teleporting the next statement. Perfect when the interesting spot is fifty lines down and you do not want to Step Over every loop iteration.
+
+There is a catch: that jump still **respects active breakpoints**. If there is a red circle between where you are and where you want to go, the debugger will stop on it. You think you jumped; you got snagged halfway. That is not a bug in PyCharm — it is the breakpoints doing their job.
+
+Here is the move that makes the jump usable on a messy session:
+
+1. You are paused somewhere useful (or somewhere wrong — either works).
+2. You know the line you actually care about — maybe deeper in the same function, maybe after a loop.
+3. Before you jump, hit **Mute Breakpoints** on the debugger toolbar (red circle with a slash).
+
+<figure className="article-figure article-figure--compact">
+  <img
+    src={muteButton}
+    alt="PyCharm Debug toolbar with the Mute Breakpoints button highlighted and tooltip visible"
+  />
+  <figcaption>
+    The <Term>Mute Breakpoints</Term> control lives on the Debug toolbar — hover
+    shows the name. One click mutes every breakpoint in the session.
+  </figcaption>
+</figure>
+
+4. The red circles turn **pale / white**. They are still marked, but they will not stop you.
+5. **Run to Cursor** (`⌥F9`) — or drag the execution point — to the target.
+6. Unmute when you want normal stopping again — or set a fresh breakpoint on the target first, unmute, and Resume if you prefer to land “cleanly.”
+
+Mute is global and temporary. You are not deleting breakpoints; you are telling the debugger to ignore them for a moment. That is why the icons change color — visual confirmation that the snag-wires are down.
+
+Without mute, Run to Cursor feels broken. With mute, it is a teleport.
+
+<figure className="article-figure">
+  <img
+    src={muteBreakpoints}
+    alt="PyCharm editor during debug with a pale muted breakpoint on the current line and Run to Cursor hint on the next line"
+  />
+  <figcaption>
+    Muted breakpoint is the white/hollow circle in the gutter. With
+    <Term>Mute Breakpoints</Term> on, <Term>Jump to Line</Term> / Run to Cursor
+    can move the <Term>execution point</Term> past those marks without stopping.
+  </figcaption>
+</figure>
+
+## Close the loop
+
+### Lock the fix in a test
+
+Once the root cause is clear, write or update a test **before** you tidy the code. That turns today’s bug into a permanent asset: one failure now prevented forever. The real win is not only fixing the issue — it is making sure the same class of issue cannot quietly return next month.
+
+If you already reproduced with a tiny failing case, you are halfway there: flip it to green after the fix and keep it in the suite.
+
+### The practical checklist
+
+1. Capture the symptom (traceback, wrong value, failing test) — evidence, not a rewrite brief.
+2. Reproduce it on demand with the smallest input you can.
+3. Diff against last-good if the regression is recent.
+4. Debug (not Run) with a breakpoint where expectation and reality might diverge.
+5. Prefer <Term>Step Over</Term>; <Term>Step Into</Term> only the suspicious call; <Term>Step Out</Term> when you are done inside.
+6. Inspect inputs, assumptions, control flow, and mutations; change one hypothesis at a time.
+7. Need to skip ahead in the same pause? **Mute → Run to Cursor → unmute.**
+8. Lock the fix in a test so the same bug cannot quietly return.
+
+The best developers are not the ones who never hit bugs. They are the ones who shrink confusion quickly, stay methodical under pressure, and turn every broken assumption into a clearer system — freeze time with a breakpoint, move with Step Over/Into/Out, shrink history with a diff, and when PyCharm’s own stop-marks get in the way of a jump — mute them first.

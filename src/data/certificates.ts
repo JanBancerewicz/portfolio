@@ -52,7 +52,7 @@ export type CertificateGroup = {
 export const certificateGroups: CertificateGroup[] = [
   {
     issuer: "Gdańsk University of Technology",
-    note: "BSc Computer Science, final year, 4.41 GPA",
+    note: "BSc in Computer Science (4.41 GPA) & leadership roles",
     logo: gdanskUniversityLogo,
     logoTone: "ink",
     items: [
@@ -69,7 +69,7 @@ export const certificateGroups: CertificateGroup[] = [
   },
   {
     issuer: "Research & programmes",
-    note: "Published and peer-reviewed work",
+    note: "Peer-reviewed publications & research initiatives",
     logo: researchLogo,
     logoTone: "ink",
     items: [
@@ -96,7 +96,7 @@ export const certificateGroups: CertificateGroup[] = [
   },
   {
     issuer: "Google",
-    note: "AI and cloud infrastracture",
+    note: "AI business applications & cloud", // AI and cloud infrastracture
     logo: googleLogo,
     items: [
       {
@@ -109,7 +109,7 @@ export const certificateGroups: CertificateGroup[] = [
   },
   {
     issuer: "NVIDIA Deep Learning Institute",
-    note: "Applied deep learning and edge inference",
+    note: "High-performance AI & GPU acceleration",
     logo: nvidiaLogo,
     logoDark: nvidiaLogoDark,
     items: [
@@ -135,7 +135,7 @@ export const certificateGroups: CertificateGroup[] = [
   },
   {
     issuer: "DataCamp",
-    note: "Deep learning and LLM specialisations",
+    note: "Deep learning specialisations",
     logo: datacampLogo,
     items: [
       {
@@ -162,7 +162,7 @@ export const certificateGroups: CertificateGroup[] = [
   },
   {
     issuer: "Academic Partners",
-    note: "Cloud and AI platform fundamentals",
+    note: "Modern AI Stack & Applied Software Architecture",
     logo: academicPartnersLogo,
     logoTone: "ink",
     items: [

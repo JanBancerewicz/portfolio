@@ -18,7 +18,12 @@ function toEntries(
   kind: ContentKind,
 ): ContentEntry[] {
   return Object.values(modules)
-    .map((module) => ({ kind, meta: module.meta, Component: module.default }))
+    .map((module) => ({
+      kind,
+      meta: module.meta,
+      Component: module.default,
+      glossary: module.glossary ?? [],
+    }))
     .sort(byDateDesc);
 }
 

@@ -27,7 +27,7 @@ const MAP = {
   Python: "siPython",
   TypeScript: "siTypescript",
   "C++": "siCplusplus",
-  "Java / Spring": "siSpring",
+  "Spring / Java": "siSpring",
   Kotlin: "siKotlin",
 
   // Core AI / ML frameworks

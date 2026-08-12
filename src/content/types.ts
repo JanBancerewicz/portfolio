@@ -1,4 +1,5 @@
 import type { ComponentType } from "react";
+import type { GlossaryEntry } from "../components/mdx/glossaryIds";
 
 export type ContentKind = "project" | "post";
 
@@ -53,13 +54,22 @@ export type ContentMeta = {
   readingTime?: string;
 };
 
+export type MdxComponents = {
+  [key: string]: ComponentType<Record<string, unknown>>;
+};
+
 export type ContentEntry = {
   kind: ContentKind;
   meta: ContentMeta;
-  Component: ComponentType;
+  Component: ComponentType<{ components?: MdxComponents }>;
+  /** Term definitions shown above the article body. Empty = structure only. */
+  glossary: GlossaryEntry[];
 };
 
 export type MdxContentModule = {
-  default: ComponentType;
+  default: ComponentType<{ components?: MdxComponents }>;
   meta: ContentMeta;
+  glossary?: GlossaryEntry[];
 };
+
+export type { GlossaryEntry };

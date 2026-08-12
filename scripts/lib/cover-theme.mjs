@@ -12,8 +12,10 @@ export const ACCENTS = {
   purple: "#6b4fd8",
   orange: "#c65d2e",
   mint: "#1a9a88",
-  gold: "#b8860b",
+  gold: "#f2cb05",
   red: "#c43c4a",
+  berry: "#85295c",
+  coral: "#d9534f",
 };
 
 export const ACCENT_IDS = Object.keys(ACCENTS);

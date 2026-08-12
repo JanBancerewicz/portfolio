@@ -75,7 +75,7 @@ export const hackathons: Hackathon[] = [
     result: "Solo debut, high score",
     role: "Biohacking Category",
     what: "My first hackathon! I built StressLess – a mobile biofeedback app measuring heart rate and HRV via smartphone camera PPG. Combined biometric signals with an LLM pipeline to deliver real-time stress analysis and biohacking insights.",
-    tags: ["Android", "Signal Processing", "LLM API", "Java / Spring"],
+    tags: ["Android", "Signal Processing", "LLM API", "Spring / Java"],
     href: "https://hackyeah.pl/pl/"
   },
 ];

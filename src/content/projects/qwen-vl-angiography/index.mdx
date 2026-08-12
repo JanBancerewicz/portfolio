@@ -1,60 +1,275 @@
 import cover from "./cover.svg";
 import coverFeatured from "./cover-featured.svg";
 import poster from "./poster.svg";
+import metricsBar from "./1_metrics_comparison_bar.png";
+import refinementChart from "./3_inference_refinement.png";
+import panel65 from "./65_panel.png";
 
 export const meta = {
   slug: "qwen-vl-angiography",
   title: "Qwen-VL for Angiography",
   date: "2026",
-  category: "Vision-language models",
-  role: "Fine-tuning, evaluation, benchmarking",
+  category: "Multimodal LLMs, Vision-Language",
+  role: "Pipeline design, implementation / coauthor",
   summary:
-    "Fine-tuned Qwen-VL 3 for coronary artery segmentation on angiography images. Dice 0.7984, IoU 0.6704 — slightly ahead of U-Net ResNet-34, the prior state of the art for this task.",
+    "Adapting Qwen3-VL for coronary vessel segmentation using DeepStack and LoRA, benchmarked against ResNet-34 U-Net on ARCADE SYNTAX. Extension of the Arterio labeling platform at Gdańsk University of Technology",
   cover,
   coverFeatured,
   poster,
   // Drop an 8s vertical clip next to this file, import it, and set `reel`.
   // reel,
   reelCaption:
-    "A vision-language model beating U-Net at coronary segmentation. Dice 0.7984, IoU 0.6704.",
-  tags: ["Qwen-VL", "Segmentation", "PyTorch", "OpenCV"],
+    "Qwen vision tower → vessel masks for Arterio. LoRA+DeepStack Dice 0.758 vs U-Net 0.795",
+  tags: [
+    "Medical Imaging",
+    "Segmentation",
+    "transformers",
+    "Qwen3-VL",
+    "Arterio",
+    "PyTorch",
+    "LoRA",
+    "DeepStack"
+  ],
   featured: true,
-  links: [{ label: "GitHub", href: "https://github.com/JanBancerewicz" }],
+  links: [
+    {
+      label: "GitHub",
+      href: "https://github.com/JanBancerewicz/arterio-AI-segmentation",
+    },
+  ],
 };
 
-Segmentation on coronary angiography is a hard, narrow, well-benchmarked
-problem, and the answer has been a U-Net variant for years. This project asked
-whether a general vision-language model, fine-tuned properly, could compete
-with a purpose-built architecture on its home turf.
+export const glossary = [
+  {
+    term: "ARCADE",
+    definition:
+      "Public X-ray angiography challenge dataset. This project uses the SYNTAX vessel-segment track, not stenosis.",
+  },
+  {
+    term: "Arterio",
+    definition:
+      "Coronary angiography labeling platform at Gdańsk University of Technology; this project supplies vessel masks for its labeling / doctor-assist flow.",
+  },
+  {
+    term: "clDice",
+    definition:
+      "Topology-aware Dice on vessel skeletons (Shit et al., CVPR 2021); flags thin-structure breaks area Dice can miss.",
+  },
+  {
+    term: "DeepStack",
+    definition:
+      "Last hidden state plus ViT layers 8/16/24, fused by learnable softmax weights before the decoder.",
+  },
+  {
+    term: "Dice",
+    definition:
+      "Mask overlap 2|P∩G|/(|P|+|G|); primary training/selection metric under severe foreground imbalance.",
+  },
+  {
+    term: "LoRA",
+    definition:
+      "Low-rank adapters on vision qkv/MLP layers so the 8B tower can adapt without full fine-tuning.",
+  },
+  {
+    term: "Qwen3-VL",
+    definition:
+      "Qwen/Qwen3-VL-8B-Instruct. Its vision tower is used as a feature extractor.",
+  },
+  {
+    term: "SegDecoder",
+    definition:
+      "CNN that maps 4096-ch 16×16 features through five upsample stages to 512×512 vessel logits.",
+  },
+  {
+    term: "SYNTAX",
+    definition:
+      "ARCADE track labeling coronary segments by SYNTAX numbering; merged here into one binary vessel class.",
+  },
+  {
+    term: "U-Net",
+    definition:
+      "ResNet-34 ImageNet encoder–decoder baseline (segmentation-models-pytorch); comparison only, not the Arterio serve path.",
+  },
+  {
+    term: "ViT",
+    definition:
+      "Vision Transformer – the Qwen vision tower’s patch encoder; intermediate layers feed DeepStack.",
+  },
+  {
+    term: "XCA",
+    definition:
+      "X-ray coronary angiography – 512×512 grayscale projection frames of contrast-filled coronaries (ARCADE).",
+  },
+];
 
-## The setup
+## Teaching a Multimodal LLM's Vision Tower to Draw Coronary Vessels
 
-Qwen-VL 3, fine-tuned on angiography frames for pixel-level segmentation of the
-coronary tree, evaluated against U-Net ResNet-34 on the same split.
+### The problem
 
-## Result
+Coronary angiograms (X-ray coronary angiography, or <Term>XCA</Term>) are read constantly in cardiology, and a lot of downstream decision-support work – stenosis detection, vessel-health scoring, doctor-assist overlays – depends on having a clean pixel mask of the vessel tree for every frame. Right now that mask mostly comes from a human tracing it by hand. That does not scale, and it is the bottleneck we set out to remove: given an XCA frame, produce a binary vessel mask automatically, accurately enough to be useful as a labeling aid.
 
-| Metric | Qwen-VL 3 (fine-tuned) |
-| --- | --- |
-| Dice | 0.7984 |
-| IoU | 0.6704 |
-| Precision | 0.8504 |
-| Recall | 0.7609 |
+We built this inside the <Term>Arterio</Term> ecosystem, where the near-term goal is an *online labeling* path: an operator (or eventually a doctor-assist flow) sends a frame, gets a mask back, and moves on. That framing matters for everything downstream – it's why we cared more about not missing thin vessels than about raw pixel-perfect accuracy, and why a heavier, slower model was still an acceptable choice if it labeled well.
 
-Slightly ahead of the U-Net ResNet-34 baseline, which is the interesting part:
-a model that was never designed for this beat one that was, given the right
-adaptation.
+<aside class="article-disclaimer" role="note">
+  <p class="article-disclaimer-label">Disclaimer</p>
+  <p>
+    This is an assistance tool for medical specialists — it still requires
+    expert review of every output and is not intended for autonomous or
+    unsupervised clinical use.
+  </p>
+</aside>
 
-## What I would defend
+### Authors
 
-- **Precision above recall was the right trade for the first pass.** In a
-  diagnostic context a confident false vessel is a worse failure than a missed
-  faint one, because it is the one a reader will not double-check.
-- **Same split, same preprocessing, or the comparison is worthless.** Most of
-  the work in beating a baseline is making sure you actually raced it.
+Four of us at Gdańsk University of Technology: myself ([Jan Bancerewicz](https://github.com/JanBancerewicz)), [Franciszek Borys](https://github.com/FranBory), [Julia Augustyniak](https://github.com/Julia-A1202), and [Patryk Lewandowski](https://github.com/PatrykColo), coordinated by [Ph.D. Tomasz Dziubich](https://pg.edu.pl/p/tomasz-dziubich-16629). Graded 5.0.
 
-## Limitations
 
-PLACEHOLDER — the honest section. Dataset size, how much of the gain survives a
-different split, and inference cost against U-Net, which is dramatically
-cheaper to run.
+### Two paths, one question
+
+We trained two very different models on the same <Term>ARCADE</Term> SYNTAX split so we could compare them:
+
+- **State-of-the-art baseline** – a ResNet-34 <Term>U-Net</Term>, the kind of purpose-built segmenter you'd reach for by default. (This is not a language model. It is a traditional computer vision model.)
+- **The model we actually want to ship** – a <Term>LoRA</Term>-adapted <Term>Qwen3-VL</Term> vision tower with a small (~6M-parameter) <Term>SegDecoder</Term> bolted on top.
+
+We didn't pick Qwen because it segments well out of the box – it doesn't, it generates text. We picked it because we wanted to give a try to emerging technologies know how close a generalist vision-language backbone could get to a purpose-built segmenter if we adapted it properly. The U-Net's job in this project is entirely to answer that question, not to be the thing we serve.
+
+### Why the naive approach fails
+
+Qwen3-VL was never trained to output masks. Our first real bug came from wiring the segmentation decoder to the wrong Hugging Face class (`AutoModel`), which left the vision MLP/merger randomly initialized – this was a block for a while,however, we managed to identify the issue and fix it.
+
+Getting dense prediction out of a model like this means reshaping `model.visual` features into a fixed spatial grid, and using a loss that respects how sparse the foreground actually is – vessels cover roughly 2–5% of pixels. We settled on `0.5·BCE + 0.5·Dice` with the decoder's output bias initialized to `logit(0.1)`, so training doesn't spend its first epochs just learning "predict background."
+
+### How it works
+
+It's a script pipeline, not a service mesh:
+
+- **`convert_mask.py`** merges the COCO-style <Term>SYNTAX</Term> polygons into binary vessel masks.
+- **`dataset.py` / `augmentations.py`** feed 512×512 RGB frames.
+- **`train_qwen_seg_new.py`** discards the language model, runs the vision tower (patch 16, merge 2 → 256 tokens / 16×16), optionally fuses the final hidden state with ViT layers 8/16/24 via <Term>DeepStack</Term>, then upsamples through SegDecoder.
+- **`train_unet.py`** trains the ImageNet-pretrained ResNet-34 baseline under the identical loss, so the comparison is fair.
+- **`qwen_unet_pipeline.py`** was our hybrid experiment: soft Qwen mask concatenated with RGB, fed into a U-Net refiner.
+- **`evaluate.py`** adds <Term>clDice</Term> on top of area-based metrics; **`inference_qwen_unet.py`** and **`generate_plots.py`** produce panels and figures.
+
+One asymmetry worth flagging: Qwen trains unfairly on compute (8B parameters, batch size 1, two 16 GB cards) but fairly on loss, its loss function remains consistent, making the ablation numbers directly comparable on the variable we controlled.
+
+<figure className="article-figure">
+  <img
+    src={panel65}
+    alt="Qualitative panel comparing Qwen, Qwen+U-Net refine, and ground-truth vessel mask on frame 65"
+  />
+  <figcaption>
+    Frame 65 — green TP, blue FN, red FP. Qwen alone Dice 0.833; the cascade
+    refine drops to 0.771 and thickens false positives.
+  </figcaption>
+</figure>
+
+### The journey
+
+**Start:** ARCADE frames and polygons, plus a classical U-Net we could already train. Qwen was already locked in as the multimodal backbone for <Term>Arterio</Term> labeling – but not yet a competitive pixel segmenter.
+
+**Along the way:** U-Net's test <Term>Dice</Term> landed at **0.7955** and stayed there. Qwen started at a frozen last-hidden-state Dice of **0.619**, climbed to **0.672** with DeepStack, and reached **0.758** with LoRA added on top. A hybrid refiner looked genuinely strong on validation (**0.818**) – and then fell apart at test time, actually hurting the teacher model it was supposed to improve (Qwen-only **0.761** → refined **0.696**).
+
+**End:** a reproducible Qwen LoRA+DeepStack pipeline producing masks for <Term>Arterio</Term>'s online labeling flow. U-Net remains the published accuracy comparison, not the serving path. Weights are not redistributed – only metrics and plots are public. The group deliverable is complete; integration with <Term>Arterio</Term>'s doctor-assist system is the next phase.
+
+### Results
+
+ARCADE SYNTAX test set, N = 300 frames; hardware: 2× RTX 4080 SUPER 16 GB.
+
+| Model | Dice | IoU | Prec. | Rec. | Best val | Conf. |
+| --- | --- | --- | --- | --- | --- | --- |
+| U-Net (comparison) | 0.7955 | 0.6625 | 0.8349 | 0.7611 | 0.8278 | measured |
+| Qwen LoRA+DeepStack | 0.7585 | 0.6219 | 0.8352 | 0.7127 | 0.7976 | measured |
+| Qwen→U-Net refine | 0.7392 | 0.5922 | 0.803 | 0.694 | 0.8177 | measured |
+| Hybrid v4 curriculum | 0.7073 | 0.5523 | 0.7514 | 0.6824 | 0.7895 | measured |
+| Frozen+DeepStack | 0.6723 | 0.5209 | 0.7578 | 0.6352 | 0.7264 | measured |
+| Frozen last-only | 0.6192 | 0.4634 | 0.735 | 0.5625 | 0.6811 | measured |
+| Infer Qwen / +U-Net | 0.761 / 0.696 | 0.625 / 0.542 | 0.825 / 0.695 | 0.725 / 0.721 | – | measured |
+
+U-Net wins on pure accuracy (0.795 vs 0.758), but the gap is almost entirely recall (0.713 vs 0.761), with **identical precision** (0.835 both). Qwen misses thin distal branches more than it invents vessels that aren't there – for a labeling tool, that's the failure mode we'd rather have. DeepStack alone added +0.053 Dice; LoRA added +0.086 on top of that.
+
+<figure className="article-figure">
+  <img
+    src={metricsBar}
+    alt="Grouped bar chart of test-set Dice, IoU, precision, and recall across six models"
+  />
+  <figcaption>
+    Same numbers as the table: U-Net on top, LoRA+DeepStack the best Qwen path,
+    frozen last-only at the bottom.
+  </figcaption>
+</figure>
+
+**Takeaway:** intermediate <Term>ViT</Term> features plus LoRA are what actually make the Qwen path viable. Cascade refinement failed because it never saw the teacher's real test-time errors – more on that below.
+
+
+### Crucial decisions
+
+1. **Binary SYNTAX merge.** Going multi-class would have buried the real question – can this vision tower segment at all – under a much harder problem.
+2. **DeepStack as four fused scalars.** Worth +5.3 Dice on its own; the early ViT layers preserve thin-structure detail the last layer alone loses.
+3. **LoRA at 0.1× the decoder's learning rate.** Worth +8.6 Dice without a full 8B fine-tune on two 16 GB cards.
+4. **clDice in evaluation.** Area-based Dice can look fine while missing topology breaks that actually matter clinically.
+
+### Issues with the Qwen-based approach
+
+The cascade refiner was trained on the teacher's *best* train-set masks, so it never encountered the kind of errors Qwen actually makes at test time – it learned to thicken and hallucinate false positives instead of correcting them. Validation Dice for the hybrid was inflated by threshold and curriculum choices that didn't generalize. Errors cluster around catheters and low-contrast distal branches.
+
+<figure className="article-figure">
+  <img
+    src={refinementChart}
+    alt="Bar chart showing Qwen alone beating Qwen plus U-Net refinement on Dice, IoU, precision, and recall"
+  />
+  <figcaption>
+    Inference-time refine hurts the teacher across the board — Dice 0.761 → 0.696,
+    with the biggest hit on precision.
+  </figcaption>
+</figure>
+
+### Lessons
+
+1. **Evolution:** data and masks → U-Net baseline → Qwen frozen → DeepStack → LoRA → hybrid (negative result) → Integration with Arterio Platform.
+2. **Trade-offs made:** constrained the task to binary segmentation, trained in bf16, applied PEFT to satisfy memory constraints, and adopted hybrid parameters that yielded suboptimal results.
+3. **What worked:** a rigorous loss comparison against U-Net, monotonic ablations, standardized JSON and plot logging, and topology-aware evaluation.
+4. **Friction points:** cascade trained on the teacher's best-case outputs, non-transferable validation threshold search, GPU pinning issues, and evolving specifications.
+5. **Next time:** abandon the cascade approach or train it on actual teacher failure modes; freeze the evaluation protocol before tuning thresholds; run integration sanity tests; log latency and VRAM footprint prior to targeting production SLAs.
+6. **Core insight:** a refiner must learn a teacher's *failure distribution*, not its optimal outputs.
+
+### Serving path
+
+Canonical flow: Qwen LoRA+DeepStack, trained once, then run online-style in a single stage. U-Net is comparison-only; the hybrid refiner is a documented failed experiment, not a serving option.
+
+```text
+Operator/Arterio client
+  -> (sync) frame PNG
+  -> Qwen vision (+LoRA) -> DeepStackFusion -> SegDecoder
+  -> sigmoid/threshold -> binary vessel mask
+  -> (sync) return mask for labeling UI
+```
+
+```mermaid
+sequenceDiagram
+  actor User as Labeling user / Arterio
+  participant API as Online labeling service
+  participant VT as Qwen vision (+LoRA)
+  participant Fuse as DeepStackFusion
+  participant Dec as SegDecoder
+
+  User->>API: XCA frame (sync)
+  API->>VT: pixel_values, image_grid_thw
+  VT->>Fuse: last + layers 8/16/24
+  Fuse->>Dec: fused 16×16×4096
+  Dec-->>API: logits 512×512
+  API-->>User: binary mask (sync)
+
+  Note over API,VT: Error A – OOM / cold HF load: pin GPU, warm weights
+  Note over API: Error B – empty/corrupt frame: reject before forward
+```
+
+### Screenshot plan
+
+1. **Qualitative panel (Qwen vs GT)** – `results/infer/panels/195_panel.png`; TP/FP/FN overlays. Must. Fallback: README panel.
+2. **Ablation bar chart** – `results/plots_en/1_metrics_comparison_bar.png`. Must.
+3. **Learning curves** – `2_learning_curves.png`. Must.
+4. **Refiner hurts teacher** – `3_inference_refinement.png` + 0.761→0.696 callout. Must (short sidebar claim).
+5. **Architecture contract** – visual → DeepStack → SegDecoder diagram. Must.
+6. **Demo UI** – online labeling screen. Must once live. Fallback: CLI infer log.
+7. **Failure panel** – low-Dice distal/catheter case from `panels/`. Nice.
+8. **Generalization gap** – `8_generalization_gap.png`. Nice.
