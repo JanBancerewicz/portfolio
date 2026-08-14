@@ -7,31 +7,31 @@ export type TechGroup = {
 export const techGroups: TechGroup[] = [
   {
     label: "Languages",
-    items: ["Python", "SQL", "TypeScript", "C++", "Spring / Java"],
+    items: ["Python", "Java", "SQL", "TypeScript", "C++"],
   },
   {
-    label: "Core AI / ML Frameworks",
-    items: ["PyTorch", "Hugging Face", "scikit-learn", "YOLO", "OpenCV", "vLLM / Ollama", "MLflow"],
+    label: "ML Frameworks & Training",
+    items: ["PyTorch", "Hugging Face", "scikit-learn", "LoRA/PEFT", "MLflow", "Pandas"],
   },
   {
-    label: "GenAI & LLM Stack",
-    items: ["Qdrant / ChromaDB", "LlamaIndex", "LoRA/PEFT", "Quantization", "RAG Systems", "Anthropic/OpenAI API", "Google ADK"],
+    label: "LLM Serving & RAG",
+    items: ["vLLM", "LlamaIndex", "RAG Systems", "Qdrant", "Anthropic/OpenAI API", "Google ADK"],
   },
   {
-    label: "AI Domains & Architectures",
-    items: ["LLM Interpretability", "Multimodal / VLMs", "Computer Vision", "Signal Processing", "Model Optimization"],
+    label: "AI Domains & Specializations",
+    items: ["LLM Interpretability", "Multimodal / VLMs", "Computer Vision", "YOLO", "OpenCV", "Signal Processing", "Model Optimization"],
   },
   {
-    label: "Backend & Data Engineering",
-    items: ["FastAPI", "PyTest", "PostgreSQL", "Redis", "MongoDB", "REST API", "Numpy / Pandas", "Android"],
+    label: "Backend & Databases",
+    items: ["FastAPI", "Spring Boot", "PostgreSQL", "Redis", "MongoDB", "Android"],
   },
   {
-    label: "Cloud, Web & DevOps",
-    items: ["Docker", "Kubernetes", "Azure Databricks", "AWS", "React / Next.js", "Tailwind CSS", "Linux", "CI/CD & GitHub Actions"],
+    label: "Cloud & DevOps",
+    items: ["Docker", "Kubernetes", "Azure Databricks", "AWS", "CI/CD & GitHub Actions"],
   },
   {
-    label: "Coding GenAI Tools",
-    items: ["Claude Code", "OpenAI Codex", "Cursor IDE"],
+    label: "Web & GenAI Tools",
+    items: ["React", "Next.js", "Claude Code", "Cursor IDE"],
   },
 ];
 

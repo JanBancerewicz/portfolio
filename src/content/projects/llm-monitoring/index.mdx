@@ -1,0 +1,422 @@
+import cover from "./cover.svg";
+import coverFeatured from "./cover-featured.svg";
+import poster from "./poster.svg";
+import lensStack from "./lens-stack.svg";
+import hookPath from "./hook-path.svg";
+import analysisUi from "./Visualization-monitoring.png";
+import comparisonUi from "./Comparison.png";
+import runInProgress from "./LLMgif.gif";
+
+export const meta = {
+  slug: "llm-monitoring",
+  title: "LLM Internal States Monitoring",
+  date: "2026",
+  order: 1,
+  category: "LLM Engineering",
+  role: "Full-stack development, backend, design, and AI engineering",
+  summary:
+    "Full-stack project designed to turn black-box LLMs into fully observable systems. By running local checkpoints in-process and attaching forward hooks across the decoder stack, it computes logit lens projections, attention dynamics, and decision-depth metrics displayed in a React and FastAPI dashboard.",
+  cover,
+  coverFeatured,
+  poster,
+  reelCaption:
+    "A local interpretability lab: Every decoder layer visualized. Decision depth, tuned lens, and attention.",
+  tags: [
+    "LLMs",
+    "LLM Interpretability",
+    "Logit lens",
+    "PyTorch",
+    "FastAPI",
+    "React",
+    "RAG",
+    "Transformers"],
+  featured: true,
+  links: [{ label: "GitHub", href: "https://github.com/JanBancerewicz/LLM-monitoring" }],
+};
+
+export const glossary = [
+  {
+    term: "residual stream",
+    definition:
+      "The running vector each token carries through the decoder stack. Every layer reads it, adds its contribution, and passes it on – so layer N's residual is a partially finished answer, not an intermediate scribble.",
+  },
+  {
+    term: "logit lens",
+    definition:
+      "Reading an intermediate layer by pushing its residual stream through the model's own final norm and unembedding, producing the distribution that layer would have emitted if the stack had stopped there.",
+  },
+  {
+    term: "unembedding",
+    definition:
+      "The output projection (lm_head) that turns a hidden vector into one logit per vocabulary entry. Its cost is what makes a per-layer lens expensive: layers times vocabulary, per token.",
+  },
+  {
+    term: "tuned lens",
+    definition:
+      "A learned per-layer affine translator trained to map a layer's residual stream into the output basis before unembedding. Fixes most of the raw lens's mid-stack error; has to be trained per model, on a corpus.",
+  },
+  {
+    term: "KL divergence",
+    definition:
+      "Distance from one probability distribution to another. Here: from a layer's distribution to the model's final output distribution – how much information that layer is still missing.",
+  },
+  {
+    term: "decision depth",
+    definition:
+      "How far up the stack a token's identity settles. Shallow means the answer was recalled or copied from the prompt; deep means it was computed on the way out.",
+  },
+  {
+    term: "attention sink",
+    definition:
+      "Position 0, where attention heads with nothing useful to do dump their weight. A layer with high sink mass is idle for that token.",
+  },
+  {
+    term: "prompt mass",
+    definition:
+      "The share of a token's attention landing on the prompt rather than on the model's own output so far. The practical read on whether context is being used or ignored.",
+  },
+  {
+    term: "sliding-window attention",
+    definition:
+      "Layers that only keep the last W keys instead of the whole context. Cheap, but they cannot reach a distant prompt at all – which makes their attention numbers a ceiling, not a choice.",
+  },
+  {
+    term: "logit softcapping",
+    definition:
+      "A tanh squash applied to logits before the softmax, used by Gemma. Any hand-projected layer has to receive the same treatment or it is being compared on a different scale.",
+  },
+  {
+    term: "chat template",
+    definition:
+      "The role markers and generation prompt a tokenizer wraps around your text for an instruction-tuned model. Routinely most of the input, and every attention index is against the expanded version.",
+  },
+  {
+    term: "eager attention",
+    definition:
+      "The transformers attention path that actually materializes the attention matrix. SDPA and FlashAttention skip it, which is faster and leaves nothing to measure.",
+  },
+  {
+    term: "massive activations",
+    definition:
+      "Single residual dimensions running 100 to 1000 times larger than the rest. Harmless at full precision, and the usual reason a quantized checkpoint falls apart.",
+  },
+  {
+    term: "SSE",
+    definition:
+      "Server-sent events. Here: one event per generated token, carrying the scalars aggregated in the hook, so the UI draws while the model is still running.",
+  },
+  {
+    term: "ModelSpec",
+    definition:
+      "One registry row in backend/config.py: id, hub name, family, whether it is instruction-tuned, and a note saying what the model is for. Adding a checkpoint is a code change, not a settings screen.",
+  },
+  {
+    term: "BPE",
+    definition:
+      "Byte-pair encoding – the sub-word units the tokenizer actually feeds the model. The model never sees letters as letters; 'strawberry' arrives as two or three tokens, which is why letter-counting prompts fail in a characteristic way.",
+  },
+  {
+    term: "depth ratio",
+    definition:
+      "Decision depth divided by total layers (layer ÷ L). Cross-model comparison uses ratio, not raw index, because a 28-layer and a 35-layer stack are not comparable position by position.",
+  },
+  {
+    term: "GGUF",
+    definition:
+      "A quantized checkpoint format common with llama.cpp. Here it is a hard no: transformers dequantizes it to fp32 on load, so a 12B file becomes ~48 GB and the quantization buys nothing for in-process hooks.",
+  },
+];
+
+## What this project does
+
+AI Generated text is just an outcome of a model's internal states changing with every forward pass. We, as end-users, cannot see the internal confidence, hesitation, and routing that shaped them. Everything explaining *how* an answer formed lives one level down in the <Term>residual stream</Term>. By projecting an intermediate layer's hidden state through the model's final norm and <Term>unembedding</Term>, the **<Term>logit lens</Term>** reveals what the network computed at each step.
+
+**LLM-monitoring** is an interpretability tool built to make this internal state legible in real time. Running local Hugging Face checkpoints in-process, it attaches PyTorch forward hooks across all decoder layers and streams layer-by-layer metrics to an interactive React UI via <Term>SSE</Term>. Rather than treating the LLM as a black box API endpoint, it acts as a real-time per-layer X-ray for every token as it is emitted.
+
+<figure className="article-figure">
+  <img
+    src={runInProgress}
+    alt="LLM-monitoring during generation: tokens stream into the output panel while per-token metrics accumulate"
+  />
+  <figcaption>
+    A run in progress. Each token carries a per-layer record as it is generated – the UI updates
+    live, not after the fact.
+  </figcaption>
+</figure>
+
+### What you are looking at
+
+
+If interpretability is new to you but transformers are not, here is the architecture at a glance before digging into the internals.
+
+You type a prompt. The FastAPI backend loads a causal LM in-process (defaulting to Qwen3-1.7B) and executes an autoregressive decode loop. During each forward pass, three **collectors** tap into the decoder stack via PyTorch forward hooks:
+
+- **Tier 1 (Logit Lens):** Layer-wise predictions, rank metrics, and <Term>KL divergence</Term>.
+- **Tier 2 (Residual Geometry):** Layer cosine similarities, vector norms, and <Term>massive activations</Term>.
+- **Tier 3 (Attention Dynamics):** <Term>Prompt mass</Term> and <Term>attention sink</Term> ratios.
+
+Clicking any token in the generated stream opens a full per-layer diagnostic for that isolated step: where the prediction crystallized (<Term>decision depth</Term>), how far intermediate distributions sit from the output (<Term>KL divergence</Term>), whether the network was actively attending to context (<Term>prompt mass</Term>), and intermediate token candidates. Every run is indexed token $\times$ layer in SQLite for historical review, side-by-side diffing, and cross-checkpoint comparisons.
+
+To keep live streaming viable, all collectors aggregate tensors into scalars directly inside the hook, never forwarding raw activations to the client. The memory footprint of doing otherwise makes the engineering trade-off obvious:
+
+$$\text{Payload per token} = L \times d_{\text{model}} \times \text{sizeof}(\text{fp16})$$
+
+For an 8B class model ($L = 32$, $d_{\text{model}} = 4096$, 2 bytes per float):
+
+$$\text{Per-token footprint} = 32 \times 4096 \times 2\text{ B} \approx 256\text{ KB}$$
+
+$$\text{1,000-token stream} = 1000 \times 256\text{ KB} \approx 256\text{ MB of raw states}$$
+
+Streaming hundreds of megabytes of raw states over <Term>SSE</Term> would overwhelm browser memory and serialization throughput. Instead, the backend pushes compact scalar events token-by-token while generation runs.
+
+
+The application runs as a self-contained monolith: Python 3.12 + FastAPI on the backend and React 19 + Vite + Tailwind on the frontend, served from a single process on port 8100.
+
+### Main motivation
+
+I didn’t set out to build an observability suite. I was driven by pure curiosity: *what does a transformer actually "think" before it commits to an answer?*
+
+Static papers on the <Term>logit lens</Term> proved mid-stack states hold latent predictions, but offline notebooks felt too detached. I wanted an X-ray of the network thinking in real time. **Day one** was a basic CLI script hooking into Qwen to print layer predictions to stdout. It worked in an afternoon, but answering one isolated question immediately spawned ten more: *How does computation evolve across a full answer? When does a token resolve by shallow recall versus deep reasoning? Is context actually being read?*
+
+Chasing those questions forced the tool to evolve:
+- **Taming silent failures:** Handling architecture quirks–like Gemma's <Term>logit softcapping</Term> or <Term>tuned lens</Term> drift on non-English text–which silently distort telemetry without throwing errors.
+- **Designing for live intuition:** Shipping lightweight scalars over <Term>SSE</Term> to turn opaque tensors into real-time decision-depth curves and attention heatmaps.
+
+What began as an afternoon experiment grew into a self-validating instrument built to observe what the model is doing beneath fluent prose.
+
+### The Analysis screen – turning a single token into datamining tool
+
+The UI has four tabs – Analysis, Comparison, History, Definitions – but Analysis is where you
+spend most of your time. Generate, click a token, read the right column.
+
+<figure className="article-figure">
+  <img
+    src={analysisUi}
+    alt="LLM-monitoring Analysis view: prompt input, streaming output with decision-depth coloring, and per-layer charts for the selected token"
+  />
+  <figcaption>
+    Analysis view on the "count the r's in strawberry" preset. Output tokens are underlined
+    cold → warm by <Term>decision depth</Term> (blue = shallow recall, amber = deep computation).
+    The right column is entirely about the selected token – here the final answer "2", decided
+    at layer 23 of 28 after sixteen changes of mind.
+  </figcaption>
+</figure>
+
+| ###| Panel | What it does |
+| --- | --- | --- |
+| **1** | Prompt | Two views: `yours` and `what the model sees`. The second applies the <Term>chat template</Term> live as you type, so you can see the special tokens the model actually receives. |
+| **2** | Run settings | Token budget, temperature, lens choice (raw or <Term>tuned lens</Term>), and which collector tiers are on (`t1+t2+t3`). |
+| **3** | Example prompts | Six presets, each chosen to make one specific phenomenon visible. See [Worked examples](#worked-examples). |
+| **4** | Output | `live` streams as it generates, `paused` freezes the panel. `tokens` shows raw <Term>BPE</Term>, `formatted` renders markdown. Both select the same token. Each token is underlined cold → warm by its <Term>decision depth</Term>: blue = shallow (recall), amber = deep (computation). |
+| **5** | Selected token | The token whose forward pass the whole right column describes. |
+| **6** | Prompt as seen by that token | The <Term>chat template</Term>-expanded prompt, with the positions the attention numbers are indexed against. |
+| **7** | Run metrics | `this run` vs `all time` averages: confidence, margin, output entropy, tokens per second, lens overhead, time to first token, <Term>depth ratio</Term>. Lens overhead is reported separately from throughput so the instrument's own cost stays checkable rather than assumed. |
+| **8** | Token verdict | "decided at layer 23 of 28 · 16 changes of mind · half-converged by layer 20", the final candidate distribution with the margin over the runner-up, and the **layer trail** – what each layer would have said if you had stopped there. |
+| **9** | Per-layer charts | Decision, Convergence, Uncertainty, Attention, Residual geometry. See [Reading the charts](#reading-the-charts). |
+| **10** | Model picker | The resident model and its memory state. Models not yet on disk are priced in GB up front. |
+
+Worth knowing on first open:
+
+- **Prompt vs what the model sees.** The toggle applies the <Term>chat template</Term> live. A
+  one-word prompt at Gemma arrives as thirteen tokens; every attention index is against *those*
+  positions, not your raw string.
+- **Run settings.** Token budget, temperature, raw vs <Term>tuned lens</Term>, and which collector
+  tiers are on (`t1+t2+t3`). Lens overhead is reported separately from throughput – 0.16 ms/token
+  on Qwen3-1.7B, measured on an M5 Pro – so the instrument's cost stays checkable.
+- **Six presets.** Each is chosen to make one phenomenon visible, not to show off the model.
+  More on those below.
+- **Token verdict.** "Decided at layer 23 of 28 · 16 changes of mind · half-converged by layer
+  20" plus a **layer trail** – what each layer would have emitted if you had stopped there. On
+  the strawberry count, early layers guess punctuation and fragments; the digit only wins late.
+- **Five per-layer charts.** Decision, Convergence (<Term>KL divergence</Term> to final),
+  Uncertainty (entropy), Attention (<Term>prompt mass</Term> and <Term>attention sink</Term>),
+  Residual geometry (cosine similarity to the layer below – near 1 means the layer barely moved
+  the stream).
+
+Below the charts sits the **run heatmap**: tokens × layers, switchable between rank of the chosen
+token, KL to final, attention on the prompt, sink mass, and layer similarity. Long runs wrap into
+side-by-side blocks. This is where run-level shape appears – a band of high rank several tokens
+*before* the prose goes wrong is the model losing the thread, visible before you notice in the text.
+
+## A forward pass will tell you where a token was decided
+
+Another very importand and exposed number is <Term>decision depth</Term>: how far up the stack
+the answer settled. Ask for the capital of Australia and "Canberra" is already the top-1 guess
+a third of the way up – the fact was retrieved, not derived. Ask for the area of a hexagon with
+a side of 7 and the digits do not settle until the last two layers.
+
+<figure className="article-figure">
+  <img src={lensStack} alt="A decoder stack on the left; each layer's residual stream is projected through the shared final norm and unembedding into a per-layer distribution on the right; below, a curve of KL to the output distribution collapsing with depth, with the halving point marked" />
+  <figcaption>
+    One generated token, read at every layer. The lens is cheap because it reuses tensors the
+    pass already produced – 0.16 ms per token on Qwen3-1.7B, measured on an M5 Pro separately
+    from throughput so the claim stays checkable.
+  </figcaption>
+</figure>
+
+Attach a forward hook per decoder layer, keep the last position, project:
+
+```python
+def hook(_module, _args, output):
+    hidden = output[0] if isinstance(output, tuple) else output
+    captured.append(hidden[:, -1, :])          # last position only
+
+handles = [layer.register_forward_hook(hook) for layer in model.model.layers]
+
+# after the step, for every captured layer:
+logits = model.lm_head(model.model.norm(h))    # the model's own norm, not a copy
+probs = logits.float().softmax(-1)
+```
+
+Skip the final norm and you still get logits, still get a plausible-looking bar chart, and
+every number in it is wrong: mid-stack activation scales are nothing like what `lm_head`
+expects. Nothing crashes. That is why the app reports which layer a measurement came from
+rather than a single summary score.
+
+Reading the raw depth curve, though, the middle of the stack is suspiciously bad at everything.
+
+### Raw logit lens vs tuned logit lens
+
+On Llama- and Qwen-family models the raw <Term>logit lens</Term> reads intermediate layers
+poorly – the residual basis drifts, so a straight projection under-reads what the layer
+knows. The fix is a <Term>tuned lens</Term>: a small affine translator per layer, trained to
+map that residual into the output basis first. Roughly three minutes on an M5 Pro:
+
+```bash
+uv run python -m scripts.train_tuned_lens --steps 600 --seq-len 256
+```
+
+Mean <Term>KL divergence</Term> reduction against the raw lens: 71.6% on Qwen3-1.7B, 75.6% on
+Gemma 4 E2B-it. That is a large correction, and the kind of number that invites you to stop
+asking questions.
+
+Then I ran a Polish prompt through the same lens. The reduction fell from about 74% to about
+35%. The translator had been trained on English wikitext. Nothing errored; the curves just
+got less honest. So the trainer takes a corpus:
+
+```bash
+uv run python -m scripts.train_tuned_lens --corpus my_corpus.txt --steps 600
+```
+
+A lens is an instrument with a calibration, and the calibration belongs to a language and a
+format, not to a model. Which raises the obvious follow-up: if the tool can be quietly wrong
+about what a layer thinks, what does it get *right* often enough to act on?
+
+### Six prompts that fullfill different use cases
+
+The preset catalogue is not a demo reel. Each entry is an instrument calibration – a question
+you run once to learn what a healthy curve looks like, then read everything else against it.
+
+| Preset | What to watch | What a healthy run looks like |
+| --- | --- | --- |
+| **Capital of Australia** | <Term>Decision depth</Term> | Shallow and confident – the answer is in the prompt or trivially retrievable |
+| **Count the r's** | Depth + flip count on the digit | The model never sees letters, only <Term>BPE</Term> tokens; depth spikes on the number |
+| **Letter to Santa** | Depth throughout | Template completion, no correct answer – shallow depth = "not thinking hard" |
+| **Hexagon area** | Depth on the final digits | Multi-step geometry; prediction settles in the last third of the stack |
+| **Longest valid parentheses** | <Term>Prompt mass</Term> on the heatmap | Model must keep re-reading the problem; collapse = structural failure incoming |
+| **False premise** | Confidence trace | Turing was never offered a Nobel – pushback vs confabulation look completely different |
+
+Default temperature is 0 and top-p is1.0. This is a measuring instrument; silently truncating the
+distribution would make every sampled run a measurement of a distribution the model did not
+produce. A warning appears when temperature ≥ 1 meets top-p = 1.
+
+### Comparison module – two runs, one question
+
+Once you have a baseline run, Comparison is where model families and prompt variants become
+legible. Pick two runs – the same prompt on Qwen vs Gemma, or hexagon area run #67 vs #68 –
+and the view averages per-layer curves over the answer plus a metric table.
+
+<figure className="article-figure">
+  <img
+    src={comparisonUi}
+    alt="LLM-monitoring Comparison view: two hexagon-area runs side by side with probability and prompt-mass curves plus a metrics table"
+  />
+  <figcaption>
+    Two runs on the hexagon-area preset. Probability of the chosen token stays flat until
+    roughly layer 18, then rises – the answer crystallizes in the final third. Cross-model
+    comparison uses <Term>depth ratio</Term> (layer ÷ total layers), not raw index, because a
+    28-layer and a 35-layer stack are not comparable position by position.
+  </figcaption>
+</figure>
+
+The registry is a comparison set, not a menu – three <Term>ModelSpec</Term> rows, each isolating one variable:
+
+| id | checkpoint | why it is in the set |
+| --- | --- | --- |
+| `qwen3-1.7b` | `Qwen/Qwen3-1.7B` | Default. Uniform global attention, no softcapping – simplest baseline. 3.4 GB. |
+| `gemma4-e2b` | `google/gemma-4-E2B-it` | Size-matched control: hybrid <Term>sliding-window attention</Term> + <Term>logit softcapping</Term>. 10.2 GB. |
+| `bielik-7b` | `speakleash/Bielik-7B-Instruct-v0.1` | Third architecture – Mistral, Polish-heavy, 32k vocab vs Qwen's 151k. ~14 GB. |
+
+Reference throughput on Apple MPS (M5 Pro): Qwen 8.3 tok/s, Gemma 6.8 tok/s. One model resident
+at a time – these are 3–14 GB objects, and switching evicts the previous checkpoint.
+
+## Boundaries of the application
+
+The hard boundary is architectural. This needs the forward pass in-process, with
+<Term>eager attention</Term> so the attention matrix is actually materialized.
+
+<figure className="article-figure">
+  <img src={hookPath} alt="Two paths: an HTTP backend that returns only text and cannot be lensed, versus an in-process transformers stack with eager attention, per-layer hooks, scalars aggregated in the hook, and FastAPI streaming those scalars to the UI over SSE" />
+  <figcaption>
+    An 8B residual is about 260 KB per token; a thousand-token answer of raw states is 260 MB.
+    Aggregation happens in the hook during the pass, or the numbers never exist.
+  </figcaption>
+</figure>
+
+That rules out Ollama, llama.cpp and every HTTP backend: they return text. It also rules out
+<Term>GGUF</Term> – `transformers` dequantizes it to fp32 on load, so a 12B checkpoint becomes
+about 48 GB and the quantization buys nothing. Weight-only schemes that keep hooks working,
+like GPTQ or AWQ, are fine, and are where the <Term>massive activations</Term> view earns its
+place – single residual dimensions running 100–1000× larger than the rest are what breaks
+quantization, and they are visible directly in tier 2.
+
+The softer boundary is correlational. A layer where the answer settles is not proof that the
+layer computed it, and this app does not do interventions. Causal claims need ablation and
+patching – a different tool, a different cost.
+
+
+### Important design choices
+
+**In-process hooks over API wrappers.** The moment the model runs behind someone else's HTTP
+endpoint, all of this is gone. The premise of the project is that the instrument and the forward
+pass share one address space.
+
+**Aggregation in the hook, not in the browser.** Raw states do not cross the wire. Scalars do.
+That is a performance choice and an honesty choice – if you cannot afford to store it, you cannot
+pretend you measured it.
+
+**Validation before registry.** `check_model` exists because silent wrong numbers are worse than
+crashes. The decode-loop diff line is the one that matters.
+
+**Presets as calibration, not demos.** Six prompts that teach you what healthy curves look like
+beat a thousand ad-hoc generations you cannot compare.
+
+**<Term>Depth ratio</Term> for cross-model comparison.** Raw layer index compares unlike stacks.
+Ratio does not.
+
+What I would not claim: that a shallow <Term>decision depth</Term> proves retrieval, that high
+<Term>prompt mass</Term> proves correct RAG, or that the <Term>tuned lens</Term> is ground truth.
+They are correlates you act on when the alternative is reading fluent text and guessing.
+
+## Where it landed
+
+One FastAPI process serves the compiled frontend. 219 backend tests cover collectors, the decode
+loop, and the model registry; 180 frontend tests cover the React shell. Deep capture writes raw
+tensor dumps to `.npz` under a disk budget for offline analysis the UI does not surface yet.
+Per-head attention matrices are collected but not rendered. Stored runs predating the candidate
+list field reopen without "what the model nearly said."
+
+What is left is the honest version of a question worth asking often: not "is the model right",
+which you can check, but "was it ever in doubt" – and, for RAG, "did it ever read what I gave
+it" – which until you open the forward pass you cannot.
+
+Clone, build, run:
+
+```bash
+git clone https://github.com/JanBancerewicz/LLM-monitoring.git
+cd LLM-monitoring && uv sync
+npm install --prefix frontend && npm run build --prefix frontend
+uv run uvicorn backend.api:app --port 8100
+```
+
+Open [http://localhost:8100](http://localhost:8100). Try it yourself with one of the predefined prompts , then run the same model with different prompts and compare their depth curves. This sequence is what the project was built for.

@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700" role="img" aria-label="One forward pass read at every layer: each decoder layer's residual stream is passed through the final norm and the unembedding, producing a distribution per layer whose KL to the output collapses with depth">
+  <defs>
+    <linearGradient id="warm" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0%" stop-color="#2f6fd4"/>
+      <stop offset="55%" stop-color="#6a6fc0"/>
+      <stop offset="100%" stop-color="#d9531e"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#5b6472"/>
+    </marker>
+  </defs>
+
+  <rect width="1200" height="700" fill="#f4f6f9"/>
+
+  <text x="60" y="58" font-family="Georgia, serif" font-size="27" fill="#10161c">One forward pass, twenty-eight readings</text>
+  <text x="60" y="86" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#5b6472">Qwen3-1.7B, one generated token. Nothing is re-run — every row is a projection of a tensor the pass already produced.</text>
+
+  <!-- stack -->
+  <text x="60" y="128" font-family="Helvetica, Arial, sans-serif" font-size="13" letter-spacing="1.4" fill="#5b6472">DECODER STACK</text>
+  <g font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#10161c">
+    <rect x="60" y="146" width="190" height="46" rx="5" fill="#ffffff" stroke="#c9d2de"/>
+    <text x="76" y="175">layer 27 — residual</text>
+    <rect x="60" y="204" width="190" height="46" rx="5" fill="#ffffff" stroke="#c9d2de"/>
+    <text x="76" y="233">layer 20 — residual</text>
+    <rect x="60" y="262" width="190" height="46" rx="5" fill="#ffffff" stroke="#c9d2de"/>
+    <text x="76" y="291">layer 11 — residual</text>
+    <rect x="60" y="320" width="190" height="46" rx="5" fill="#ffffff" stroke="#c9d2de"/>
+    <text x="76" y="349">layer 4 — residual</text>
+    <rect x="60" y="378" width="190" height="46" rx="5" fill="#ffffff" stroke="#c9d2de"/>
+    <text x="76" y="407">layer 0 — embedding</text>
+  </g>
+  <path d="M 155 378 L 155 200" stroke="#c9d2de" stroke-width="2" fill="none" marker-end="url(#arrow)" stroke-dasharray="4 5"/>
+
+  <!-- lens -->
+  <g font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#10161c">
+    <rect x="330" y="146" width="150" height="278" rx="6" fill="#ffffff" stroke="#2f6fd4" stroke-width="1.5"/>
+    <text x="405" y="262" text-anchor="middle" font-size="14" fill="#2f6fd4">final norm</text>
+    <text x="405" y="284" text-anchor="middle" font-size="14" fill="#2f6fd4">+ unembedding</text>
+    <text x="405" y="312" text-anchor="middle" font-size="12" fill="#5b6472">(the model's own,</text>
+    <text x="405" y="330" text-anchor="middle" font-size="12" fill="#5b6472">not a copy)</text>
+  </g>
+  <g stroke="#5b6472" stroke-width="1.4" fill="none" marker-end="url(#arrow)">
+    <path d="M 250 169 L 322 240"/>
+    <path d="M 250 227 L 322 254"/>
+    <path d="M 250 285 L 322 285"/>
+    <path d="M 250 343 L 322 316"/>
+    <path d="M 250 401 L 322 330"/>
+  </g>
+
+  <!-- per-layer distributions -->
+  <text x="560" y="128" font-family="Helvetica, Arial, sans-serif" font-size="13" letter-spacing="1.4" fill="#5b6472">WHAT THAT LAYER WOULD HAVE SAID</text>
+  <g font-family="Helvetica, Arial, sans-serif" font-size="13">
+    <text x="560" y="175" fill="#10161c">"Canberra"</text>
+    <rect x="700" y="160" width="380" height="18" rx="3" fill="#e2e7ee"/>
+    <rect x="700" y="160" width="358" height="18" rx="3" fill="#d9531e"/>
+    <text x="1096" y="175" fill="#5b6472">0.94</text>
+
+    <text x="560" y="233" fill="#10161c">"Canberra"</text>
+    <rect x="700" y="218" width="380" height="18" rx="3" fill="#e2e7ee"/>
+    <rect x="700" y="218" width="243" height="18" rx="3" fill="#a95a71"/>
+    <text x="1096" y="233" fill="#5b6472">0.64</text>
+
+    <text x="560" y="291" fill="#10161c">"Sydney"</text>
+    <rect x="700" y="276" width="380" height="18" rx="3" fill="#e2e7ee"/>
+    <rect x="700" y="276" width="118" height="18" rx="3" fill="#6a6fc0"/>
+    <text x="1096" y="291" fill="#5b6472">0.31</text>
+
+    <text x="560" y="349" fill="#10161c">"the"</text>
+    <rect x="700" y="334" width="380" height="18" rx="3" fill="#e2e7ee"/>
+    <rect x="700" y="334" width="42" height="18" rx="3" fill="#3f6bcc"/>
+    <text x="1096" y="349" fill="#5b6472">0.11</text>
+
+    <text x="560" y="407" fill="#10161c">noise</text>
+    <rect x="700" y="392" width="380" height="18" rx="3" fill="#e2e7ee"/>
+    <rect x="700" y="392" width="9" height="18" rx="3" fill="#2f6fd4"/>
+    <text x="1096" y="407" fill="#5b6472">0.02</text>
+  </g>
+
+  <!-- KL panel -->
+  <rect x="60" y="470" width="1080" height="180" rx="6" fill="#ffffff" stroke="#c9d2de"/>
+  <text x="88" y="502" font-family="Helvetica, Arial, sans-serif" font-size="13" letter-spacing="1.4" fill="#5b6472">KL TO THE OUTPUT DISTRIBUTION — HOW MUCH THIS LAYER STILL DOES NOT KNOW</text>
+  <path d="M 100 530 L 100 620 L 1100 620" stroke="#c9d2de" stroke-width="1.4" fill="none"/>
+  <path d="M 100 534 C 240 545, 330 575, 430 596 C 540 616, 700 618, 1100 619" stroke="url(#warm)" stroke-width="3" fill="none"/>
+  <line x1="430" y1="530" x2="430" y2="620" stroke="#d9531e" stroke-width="1.4" stroke-dasharray="5 4"/>
+  <text x="440" y="552" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#d9531e">KL halves here — the model has made up its mind</text>
+  <text x="100" y="644" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">layer 0</text>
+  <text x="1060" y="644" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">layer 27</text>
+</svg>

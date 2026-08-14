@@ -5,25 +5,25 @@
     </filter>
     
     <radialGradient id="accentTL" cx="0%" cy="0%" r="85%" gradientUnits="objectBoundingBox">
-      <stop offset="0%" stop-color="#c43c4a" stop-opacity="0.85"/>
-      <stop offset="35%" stop-color="#c43c4a" stop-opacity="0.50"/>
-      <stop offset="70%" stop-color="#c43c4a" stop-opacity="0.15"/>
-      <stop offset="100%" stop-color="#c43c4a" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#9e1825" stop-opacity="0.85"/>
+      <stop offset="35%" stop-color="#9e1825" stop-opacity="0.50"/>
+      <stop offset="70%" stop-color="#9e1825" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#9e1825" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="accentTR" cx="100%" cy="0%" r="75%" gradientUnits="objectBoundingBox">
-      <stop offset="0%" stop-color="#c43c4a" stop-opacity="0.65"/>
-      <stop offset="40%" stop-color="#c43c4a" stop-opacity="0.30"/>
-      <stop offset="100%" stop-color="#c43c4a" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#9e1825" stop-opacity="0.65"/>
+      <stop offset="40%" stop-color="#9e1825" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#9e1825" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="accentBL" cx="0%" cy="100%" r="70%" gradientUnits="objectBoundingBox">
-      <stop offset="0%" stop-color="#c43c4a" stop-opacity="0.60"/>
-      <stop offset="40%" stop-color="#c43c4a" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="#c43c4a" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#9e1825" stop-opacity="0.60"/>
+      <stop offset="40%" stop-color="#9e1825" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#9e1825" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="accentBR" cx="100%" cy="100%" r="65%" gradientUnits="objectBoundingBox">
-      <stop offset="0%" stop-color="#c43c4a" stop-opacity="0.50"/>
-      <stop offset="45%" stop-color="#c43c4a" stop-opacity="0.20"/>
-      <stop offset="100%" stop-color="#c43c4a" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#9e1825" stop-opacity="0.50"/>
+      <stop offset="45%" stop-color="#9e1825" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#9e1825" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="frost" x1="0" y1="0" x2="0.15" y2="1">
       <stop offset="0%" stop-color="#f3f6fa" stop-opacity="0.18"/>
@@ -77,7 +77,7 @@
     <div style="display:inline-block;box-sizing:border-box;
       background:#ffffff;border-radius:999px;padding:14px 24px;
       font-family:'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;font-size:33px;font-weight:700;
-      letter-spacing:0.12em;color:#c43c4a;line-height:1.1;
+      letter-spacing:0.12em;color:#9e1825;line-height:1.1;
       white-space:nowrap;">APPLIED ML</div>
   </div>
 </foreignObject>
@@ -85,7 +85,7 @@
   <text x="48" y="317" font-family="'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif" font-size="138"
         font-weight="700" letter-spacing="-0.045em"
         paint-order="stroke fill"
-        stroke="#ffffff" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"><tspan x="48" dy="0" fill="#10161c">HRV with Neural</tspan><tspan x="48" dy="141" fill="#c43c4a">Networks</tspan></text>
+        stroke="#ffffff" stroke-width="11" stroke-linejoin="round" stroke-linecap="round"><tspan x="48" dy="0" fill="#10161c">HRV with Neural</tspan><tspan x="48" dy="141" fill="#9e1825">Networks</tspan></text>
 
   <foreignObject x="72" y="661" width="1456" height="67">
   <div xmlns="http://www.w3.org/1999/xhtml"
@@ -93,7 +93,7 @@
     <div style="display:inline-block;box-sizing:border-box;
       background:#ffffff;border-radius:999px;padding:14px 24px;
       font-family:'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;font-size:33px;font-weight:700;
-      letter-spacing:0.14em;color:#c43c4a;line-height:1.1;
+      letter-spacing:0.14em;color:#9e1825;line-height:1.1;
       white-space:nowrap;">RESEARCH PAPER</div>
   </div>
 </foreignObject>

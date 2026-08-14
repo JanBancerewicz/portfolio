@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 1600" role="img" aria-label="LLM Internal Layer Monitoring">
+  <defs>
+    <filter id="mute" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="1 0.04 0.04 0 0.05  0.04 0.62 0.04 0 0.05  0.04 0.04 1 0 0.05  0 0 0 1 0"/>
+    </filter>
+    
+    <radialGradient id="accentTL" cx="0%" cy="0%" r="85%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#6b4fd8" stop-opacity="0.85"/>
+      <stop offset="35%" stop-color="#6b4fd8" stop-opacity="0.50"/>
+      <stop offset="70%" stop-color="#6b4fd8" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#6b4fd8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="accentTR" cx="100%" cy="0%" r="75%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#6b4fd8" stop-opacity="0.65"/>
+      <stop offset="40%" stop-color="#6b4fd8" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#6b4fd8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="accentBL" cx="0%" cy="100%" r="70%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#6b4fd8" stop-opacity="0.60"/>
+      <stop offset="40%" stop-color="#6b4fd8" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#6b4fd8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="accentBR" cx="100%" cy="100%" r="65%" gradientUnits="objectBoundingBox">
+      <stop offset="0%" stop-color="#6b4fd8" stop-opacity="0.50"/>
+      <stop offset="45%" stop-color="#6b4fd8" stop-opacity="0.20"/>
+      <stop offset="100%" stop-color="#6b4fd8" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="darkFrost" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0%" stop-color="#060a10" stop-opacity="0.55"/>
+      <stop offset="45%" stop-color="#0a121c" stop-opacity="0.42"/>
+      <stop offset="100%" stop-color="#05080c" stop-opacity="0.62"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(-1308.0 0.0) scale(2.00000)">
+    <g filter="url(#mute)">
+    <defs>
+      <linearGradient id="llmbg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#3a6fa0"/><stop offset="45%" stop-color="#2d5680"/><stop offset="100%" stop-color="#25486c"/>
+      </linearGradient>
+      <linearGradient id="tokBlue" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0073ff"/><stop offset="100%" stop-color="#3da0ff"/></linearGradient>
+      <linearGradient id="tokCyan" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#06b6d4"/><stop offset="100%" stop-color="#22d3ee"/></linearGradient>
+      <linearGradient id="tokViolet" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c5cff"/><stop offset="100%" stop-color="#a78bfa"/></linearGradient>
+    </defs>
+    <rect width="1200" height="800" fill="url(#llmbg)"/>
+    <ellipse cx="600" cy="380" rx="480" ry="300" fill="#0073ff" opacity="0.22"/>
+    <ellipse cx="280" cy="160" rx="220" ry="140" fill="#22d3ee" opacity="0.16"/>
+    <ellipse cx="980" cy="560" rx="240" ry="160" fill="#8b5cf6" opacity="0.18"/>
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20">
+      <rect x="60" y="100" width="90" height="44" rx="9" fill="#2a5678" stroke="#7eb8e8" stroke-width="1.5"/><text x="82" y="128" fill="#d7e8f8" fill-opacity="0.75">the</text>
+      <rect x="168" y="100" width="120" height="44" rx="9" fill="url(#tokBlue)"/><text x="190" y="128" fill="#fff" fill-opacity="0.92">model</text>
+      <rect x="306" y="100" width="110" height="44" rx="9" fill="#2a5678" stroke="#7eb8e8" stroke-width="1.5"/><text x="328" y="128" fill="#d7e8f8" fill-opacity="0.75">learns</text>
+      <rect x="434" y="100" width="88" height="44" rx="9" fill="#2a5678" stroke="#7eb8e8" stroke-width="1.5"/><text x="456" y="128" fill="#d7e8f8" fill-opacity="0.7">from</text>
+      <rect x="540" y="100" width="140" height="44" rx="9" fill="url(#tokCyan)"/><text x="562" y="128" fill="#06202a" fill-opacity="0.85">context</text>
+      <rect x="698" y="100" width="72" height="44" rx="9" fill="#2a5678" stroke="#7eb8e8" stroke-width="1.5"/><text x="716" y="128" fill="#d7e8f8" fill-opacity="0.7">and</text>
+      <rect x="788" y="100" width="110" height="44" rx="9" fill="url(#tokViolet)"/><text x="808" y="128" fill="#fff" fill-opacity="0.9">tokens</text>
+      <rect x="916" y="100" width="90" height="44" rx="9" fill="#2a5678" stroke="#7eb8e8" stroke-width="1.5"/><text x="938" y="128" fill="#d7e8f8" fill-opacity="0.7">flow</text>
+
+      <rect x="100" y="180" width="110" height="44" rx="9" fill="#2a5678" stroke="#7eb8e8" stroke-width="1.5"/><text x="120" y="208" fill="#d7e8f8" fill-opacity="0.72">layers</text>
+      <rect x="228" y="180" width="70" height="44" rx="9" fill="#345e80"/><text x="248" y="208" fill="#d7e8f8" fill-opacity="0.72">of</text>
+      <rect x="316" y="180" width="150" height="44" rx="9" fill="url(#tokBlue)"/><text x="336" y="208" fill="#fff" fill-opacity="0.92">attention</text>
+      <rect x="484" y="180" width="100" height="44" rx="9" fill="#2a5678" stroke="#7eb8e8" stroke-width="1.5"/><text x="504" y="208" fill="#d7e8f8" fill-opacity="0.7">heads</text>
+      <rect x="602" y="180" width="96" height="44" rx="9" fill="#2a5678" stroke="#7eb8e8" stroke-width="1.5"/><text x="622" y="208" fill="#d7e8f8" fill-opacity="0.7">weigh</text>
+      <rect x="716" y="180" width="110" height="44" rx="9" fill="url(#tokCyan)" opacity="0.9"/><text x="736" y="208" fill="#06202a" fill-opacity="0.8">every</text>
+      <rect x="844" y="180" width="140" height="44" rx="9" fill="url(#tokViolet)" opacity="0.85"/><text x="864" y="208" fill="#fff" fill-opacity="0.88">sequence</text>
+
+      <rect x="160" y="300" width="140" height="56" rx="11" fill="url(#tokBlue)"/><text x="184" y="336" fill="#fff" fill-opacity="0.95" font-size="24">prompt</text>
+      <rect x="320" y="300" width="116" height="56" rx="11" fill="#1e4868" stroke="#22d3ee" stroke-width="2"/><text x="344" y="336" fill="#b8f0ff" fill-opacity="0.9" font-size="24">cache</text>
+      <rect x="456" y="300" width="90" height="56" rx="11" fill="url(#tokCyan)"/><text x="480" y="336" fill="#06202a" fill-opacity="0.85" font-size="24">hit</text>
+      <rect x="566" y="300" width="180" height="56" rx="11" fill="url(#tokViolet)"/><text x="590" y="336" fill="#fff" fill-opacity="0.95" font-size="24">embedding</text>
+      <rect x="766" y="300" width="130" height="56" rx="11" fill="#1e4868" stroke="#a78bfa" stroke-width="2"/><text x="790" y="336" fill="#e4d9ff" fill-opacity="0.9" font-size="24">vector</text>
+
+      <rect x="80" y="420" width="100" height="40" rx="9" fill="#2a5678" opacity="0.85"/><text x="100" y="446" fill="#c8dcec" fill-opacity="0.65" font-size="17">logit</text>
+      <rect x="200" y="420" width="120" height="40" rx="9" fill="#2a5678" opacity="0.85"/><text x="220" y="446" fill="#c8dcec" fill-opacity="0.65" font-size="17">softmax</text>
+      <rect x="340" y="420" width="90" height="40" rx="9" fill="#0073ff" opacity="0.55"/><text x="360" y="446" fill="#fff" fill-opacity="0.75" font-size="17">beam</text>
+      <rect x="450" y="420" width="140" height="40" rx="9" fill="#06b6d4" opacity="0.45"/><text x="470" y="446" fill="#06202a" fill-opacity="0.7" font-size="17">sampling</text>
+      <rect x="610" y="420" width="110" height="40" rx="9" fill="#2a5678" opacity="0.8"/><text x="630" y="446" fill="#c8dcec" fill-opacity="0.6" font-size="17">decode</text>
+      <rect x="740" y="420" width="160" height="40" rx="9" fill="#7c5cff" opacity="0.45"/><text x="760" y="446" fill="#fff" fill-opacity="0.7" font-size="17">temperature</text>
+    </g>
+    <path d="M220,140 C360,250 500,250 600,140" fill="none" stroke="#22d3ee" stroke-width="2.5" opacity="0.35"/>
+    <path d="M400,210 C560,290 720,290 860,210" fill="none" stroke="#a78bfa" stroke-width="2" opacity="0.3"/>
+    <path d="M230,328 C400,400 600,400 840,328" fill="none" stroke="#0073ff" stroke-width="3" opacity="0.35"/>
+    <rect x="0" y="560" width="1200" height="240" fill="#0c2038" opacity="0.28"/>
+    <g opacity="0.3">
+      <rect x="40" y="600" width="80" height="26" rx="6" fill="#5a88b0"/>
+      <rect x="140" y="600" width="110" height="26" rx="6" fill="#0073ff"/>
+      <rect x="270" y="600" width="70" height="26" rx="6" fill="#22d3ee"/>
+      <rect x="360" y="600" width="140" height="26" rx="6" fill="#3a6080"/>
+      <rect x="520" y="600" width="90" height="26" rx="6" fill="#8b5cf6"/>
+      <rect x="630" y="600" width="120" height="26" rx="6" fill="#0073ff"/>
+      <rect x="770" y="600" width="100" height="26" rx="6" fill="#22d3ee"/>
+      <rect x="890" y="600" width="80" height="26" rx="6" fill="#3a6080"/>
+      <rect x="990" y="600" width="130" height="26" rx="6" fill="#8b5cf6"/>
+    </g>
+    <rect width="1200" height="800" fill="#102038" opacity="0.42"/>
+  </g>
+  </g>
+  <rect width="900" height="1600" fill="url(#darkFrost)"/>
+  <rect width="900" height="1600" fill="url(#accentTL)"/>
+  <rect width="900" height="1600" fill="url(#accentTR)"/>
+  <rect width="900" height="1600" fill="url(#accentBL)"/>
+  <rect width="900" height="1600" fill="url(#accentBR)"/>
+
+  <foreignObject x="48" y="48" width="804" height="134">
+  <div xmlns="http://www.w3.org/1999/xhtml"
+       style="display:flex;flex-direction:column;align-items:flex-end;gap:12px;width:100%;margin:0;padding:0;">
+    <div style="display:inline-block;box-sizing:border-box;
+      background:rgba(8,12,18,0.72);border-radius:999px;padding:13px 22px;
+      font-family:'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;font-size:30px;font-weight:700;
+      letter-spacing:0.12em;color:#f4f7fa;line-height:1.1;white-space:nowrap;">LLM INTERPRETABILITY</div>
+    <div style="display:inline-block;box-sizing:border-box;
+      background:rgba(8,12,18,0.72);border-radius:999px;padding:13px 22px;
+      font-family:'Inter Tight', Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;font-size:30px;font-weight:700;
+      letter-spacing:0.12em;color:#f4f7fa;line-height:1.1;white-space:nowrap;">LOGIT LENS</div>
+  </div>
+</foreignObject>
+</svg>

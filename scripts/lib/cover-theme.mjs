@@ -13,7 +13,7 @@ export const ACCENTS = {
   orange: "#c65d2e",
   mint: "#1a9a88",
   gold: "#f2cb05",
-  red: "#c43c4a",
+  red: "#9e1825",
   berry: "#85295c",
   coral: "#d9534f",
 };

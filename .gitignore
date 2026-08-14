@@ -166,3 +166,4 @@ covers-preview.png
 .playwright-mcp/
 *.sh
 scripts/generate-favicon-png.mjs
+prompts/*

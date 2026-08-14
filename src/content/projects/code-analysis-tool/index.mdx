@@ -1,0 +1,255 @@
+import cover from "./cover.svg";
+import poster from "./poster.svg";
+import callResolution from "./call-resolution.svg";
+
+export const meta = {
+  slug: "code-analysis-tool",
+  title: "Code ReViewer",
+  date: "2026",
+  order: 6,
+  category: "Static analysis, Developer tooling",
+  role: "Engineering thesis — backend rewrite, extension host, protocol",
+  summary:
+    "A VS Code / Cursor extension that parses C, Java and Python with ANTLR and draws the call graph as an interactive WebGL map, coloured by 14 code-quality metrics. Engineering thesis at Gdańsk University of Technology, built with Gabriel Myszkier and Jakub Stachowicz.",
+  cover,
+  poster,
+  reelCaption:
+    "Parse → call graph → colour by metric. 13,180 lines of C in 0.48 s, and 1,467 call sites deliberately left undrawn.",
+  tags: [
+    "TypeScript",
+    "Kotlin",
+    "ANTLR 4",
+    "VS Code Extension",
+    "Sigma.js",
+    "graphology",
+    "WebGL",
+    "GraalVM",
+    "Static Analysis",
+    "NDJSON",
+  ],
+  links: [
+    {
+      label: "Website",
+      href: "https://gre-v-el.github.io/crv-docs/",
+    },
+  ],
+};
+
+export const glossary = [
+  {
+    term: "ANTLR",
+    definition:
+      "Parser generator. We feed it the community .g4 grammars for C, Java and Python and it hands back a lexer, a parser and a listener base class per language — which is the only reason supporting a third language was a week and not a semester.",
+  },
+  {
+    term: "call graph",
+    definition:
+      "Nodes are functions and methods, edges are calls. The whole product is this one picture: what calls what, across every file you selected, in one view.",
+  },
+  {
+    term: "candidate list",
+    definition:
+      "The ordered guesses a call site produces about who it is calling — db.Repo.load, then app.View.load, and so on. Replaces the type checker we did not write.",
+  },
+  {
+    term: "composite metric",
+    definition:
+      "A metric computed from other metrics rather than from the syntax tree. All eight Halstead derivatives are composites; a topological sort decides what to compute first and silently drops anything whose inputs are missing.",
+  },
+  {
+    term: "cyclomatic complexity",
+    definition:
+      "One plus the number of decision points in a function. Cheap to count off a syntax tree, and the one metric on the list that developers actually argue about.",
+  },
+  {
+    term: "deferred call resolution",
+    definition:
+      "Call sites are buffered during parsing and only matched to definitions once every file has been read. Without it, any call to a function defined later in the project would be lost.",
+  },
+  {
+    term: "ForceAtlas2",
+    definition:
+      "The force-directed layout that decides where nodes sit. Tightly coupled functions end up near each other because nothing pushed them apart, not because anyone computed a clustering.",
+  },
+  {
+    term: "GraalVM native image",
+    definition:
+      "Ahead-of-time compiled binary of the Kotlin backend, so the extension can analyse code on a machine with no Java installed.",
+  },
+  {
+    term: "Halstead metrics",
+    definition:
+      "A 1977 family of size and difficulty estimates derived from counting distinct and total operators and operands. Treat the derived ones — effort, time, bugs — as ordering, not as measurement.",
+  },
+  {
+    term: "metric description",
+    definition:
+      "The first thing the backend emits: a metric's name, its prose explanation, and its default good and bad thresholds. Ships as data so the UI can re-colour without re-analysing.",
+  },
+  {
+    term: "module anchor",
+    definition:
+      "An invisible node, one per file or class, wired to its members by invisible edges. It exists purely so the layout pulls a module together on screen.",
+  },
+  {
+    term: "NDJSON",
+    definition:
+      "One JSON object per line. The contract between the analysis process and the editor — it streams, so the graph starts drawing before parsing finishes.",
+  },
+  {
+    term: "reduced parse tree",
+    definition:
+      "The ANTLR tree with everything the analysis does not need collapsed out, using a per-language whitelist. Nodes that fail the whitelist are deleted and their children promoted into their place.",
+  },
+  {
+    term: "Sigma.js",
+    definition:
+      "WebGL graph renderer. Keeps a few thousand nodes at 60 fps inside a webview, and lets you bolt a custom fragment shader underneath the nodes.",
+  },
+  {
+    term: "uniqueName",
+    definition:
+      "The string a function is keyed by. package.Type.method in Java, the bare identifier in C and Python. Every ambiguity in the graph traces back to this one choice.",
+  },
+];
+
+`j2k.c` is 13,180 lines of OpenJPEG's JPEG 2000 codec, sitting in our repo as a test fixture. Analysing it takes 0.479 seconds and produces 336 lines of output: 14 metric definitions, 1 module, 172 functions, and 149 edges.
+
+The interesting number is not in that list. While walking the file, the analyser found **1,616 call sites**. It drew 149 of them and threw the other 1,467 away without a word.
+
+Code ReViewer is a VS Code and Cursor extension that parses C, Java and Python with <Term>ANTLR</Term>, extracts a <Term>call graph</Term> plus fourteen per-function quality metrics, and renders the result as an interactive WebGL map you can filter, colour and search. It was our engineering thesis at Gdańsk University of Technology — mine, [Gabriel Myszkier](https://github.com/gre-v-el)'s and Jakub Stachowicz's.
+
+Everyone who sees a call-graph tool asks how it finds the edges. The more useful question turned out to be how it decides not to.
+
+## Every edge in this graph is a guess that survived a lookup
+
+There is no type checker in Code ReViewer. There is no symbol table in the compiler sense, no scope resolution, no inference. What there is instead: while walking the tree, a call site produces an ordered <Term>candidate list</Term> of full names it might be calling, and every function definition it has ever seen goes into one flat map keyed by <Term>uniqueName</Term>.
+
+Then, after every file has been read — that ordering matters, and it is what <Term>deferred call resolution</Term> buys you — the resolver walks the buffer:
+
+```ts
+for (const candidate of calleeUniqueNameCandidates) {
+  callee = this.allFunctions.get(candidate);
+  if (callee) break;
+}
+
+if (callee) {
+  this.emit(call({ callerId: caller.id, calleeId: callee.id }));
+}
+```
+
+First match wins. No match, no `else` branch — the call site evaporates.
+
+How good the guesses are depends entirely on the language. In C and Python a function's `uniqueName` is just its identifier, so `parse` in one file and `parse` in another are the same node with two definition locations. Java gets the real work: the analyser tracks the package, the imports, the static imports, the current type's `extends` and `implements`, its fields, and the local variables and parameters of the method being walked. A call with a receiver runs down six ordered cases — `this`, a field of `this`, a local variable, a field, a statically imported type, and finally a fully qualified or same-package name — and each case turns the receiver into a type, and the type plus the method name into a candidate.
+
+What it deliberately does *not* do is match argument signatures. Java `uniqueName` is `package.Type.method` with no parameter types, so every overload of `render` collapses into a single node carrying three or four source locations. You click the node, you get a list, you pick which definition to open.
+
+<figure className="article-figure">
+  <img
+    src={callResolution}
+    alt="Call resolution: a call site produces an ordered candidate list, each candidate is looked up in the map of all function definitions, the first hit becomes an edge, and a call whose candidates all miss produces nothing at all."
+  />
+  <figcaption>
+    The whole resolver. Top path: a receiver resolves through the field table to
+    db.Repo.load, which exists, so an edge is drawn. Bottom path: memcpy is
+    not in the analysed set, so nothing is drawn and nothing is logged.
+  </figcaption>
+</figure>
+
+Which leaves the obvious objection: a tool that discards 91% of what it sees sounds broken.
+
+## Dropping 1,467 of 1,616 call sites is what keeps the graph readable
+
+Two measurements, both from this repo, both with the resolver instrumented to count:
+
+| Input | Lines | Call sites | Edges drawn | Resolved |
+| --- | --- | --- | --- | --- |
+| `j2k.c` (OpenJPEG) | 13,180 | 1,616 | 149 | 9.2% |
+| `pybottle.py` | 4,583 | 1,310 | 506 | 38.6% |
+
+`j2k.c` is one translation unit lifted out of a much larger C project. Almost everything it calls — `memcpy`, `opj_malloc`, the event manager, every function in the other forty files of the codec — is not in the analysed set. The Python file scores four times better for exactly one reason: it is self-contained, so more of its callees are things it also defines.
+
+The alternative design is to invent a node whenever a candidate misses. Every C file would then grow a halo of `memcpy`, `free`, `fprintf`, `assert`, plus one phantom per typo and per macro that merely looks like a call. On `j2k.c` that is up to 1,467 extra nodes hanging off a 172-node graph, and the thing you opened the tool to see — which of *your* functions call which — disappears under library noise.
+
+So the rule is: an edge means two functions we actually parsed, and a miss means silence. Not a warning, not a placeholder. The cost is real and you should know it before you trust a picture from this tool: the graph is only ever as complete as the file set you handed it, and a sparse graph is ambiguous between "loosely coupled" and "you selected one file".
+
+That is the honest answer for structure. Quality is a harder problem, because structure has a right answer and quality does not.
+
+## Every judgement call lives in the webview, not the backend
+
+The backend computes fourteen metrics per function and refuses to say whether any of them is good.
+
+Six are counted straight off the <Term>reduced parse tree</Term>: lines of code, <Term>cyclomatic complexity</Term>, and the four Halstead base counts — distinct operators, distinct operands, total operators, total operands. The other eight are <Term>Halstead metrics</Term> derived from those, and they depend on each other: volume needs length and vocabulary, effort needs volume and difficulty, bugs needs effort. Rather than hardcode an evaluation order, each <Term>composite metric</Term> declares its dependencies and a Kahn topological sort produces the order. Anything still holding unmet dependencies at the end is dropped rather than computed wrong, which is what makes adding a metric a one-file change.
+
+What the backend ships alongside each value is a <Term>metric description</Term>: the name, prose explaining it, and default thresholds. Cyclomatic complexity arrives as good at 10, bad at 25. Halstead bugs as good at 0, bad at 0.15. They are defaults, not verdicts — every one is a slider in the sidebar, and moving it recolours the graph instantly because the raw values are already in the browser.
+
+### Colour is a function you can read in four lines
+
+Interpretation is a two-step collapse in the webview. First each raw value becomes a score in the range 0 to 1:
+
+```ts
+if (value <= good && low !== null) {
+  return value <= low ? 0 : (value - low) / (good - low);
+}
+if (value >= good && high !== null) {
+  return value >= high ? 0 : (high - value) / (high - good);
+}
+return 1;
+```
+
+Then the scores for whichever metrics you ticked are joined — product or arithmetic mean, your choice — and the result becomes a hue: `120 * score`, so 1 is green and 0 is red, with a continuous ramp between. Product is the pessimistic join, since one bad metric drags the node red; the mean is the forgiving one. Having both in a dropdown was worth more than arguing about which is correct.
+
+### Shape comes from nodes that are not there
+
+Layout gets the same treatment: nothing in the backend knows where anything goes. The webview builds a graphology `DirectedGraph` and hands it to <Term>ForceAtlas2</Term> in Barnes-Hut mode, tuned soft — gravity 0.1, `slowDown` 20, log-attraction on — so a graph settles rather than snaps.
+
+Modules cluster because of a trick I still like: for every file or class the webview adds a hidden <Term>module anchor</Term> node and a hidden edge from it to each of its members. There is no clustering algorithm. The layout simply cannot help pulling a module's functions together, because they are all tied to the same invisible point. Repeated calls between the same pair get their edge weight bumped by 0.1 each time, so hot paths pull tighter than cold ones.
+
+The coloured blobs around each module are a custom WebGL2 fragment shader under the <Term>Sigma.js</Term> layer: node positions get uploaded as an RG32F texture, the shader sums a `smoothstep` falloff per group and draws the iso-line using screen-space derivatives, so the contour keeps constant pixel thickness at any zoom. The stock approach caps out at around sixteen groups; one program plus one texture does not. It is also the first thing we switch off — above 300 nodes the checkbox disables itself, because at that size the blobs merge into a single sheet and tell you nothing anyway.
+
+All of this only works if metric values and graph structure arrive in the browser as separate, self-describing pieces. Which is a claim about a data format, and a data format is easy to over-trust until something forces you to test it.
+
+## Writing the same engine twice is how we found out the protocol was real
+
+The backend is a CLI process the extension spawns. It writes <Term>NDJSON</Term> to stdout — one object per line, tagged with a one-character discriminator: `MD` for a metric description, `M` for a module, `F` for a function, `L` for an extra definition location of a function already emitted, `C` for a call.
+
+```
+{"@t":"F","id":0,"name":"opj_j2k_update_tlm","uniqueName":"opj_j2k_update_tlm",
+ "moduleId":0,"metrics":[{"name":"Lines of Code","value":16},
+ {"name":"Cyclomatic complexity","value":2}, …],
+ "locations":[{"filename":"j2k.c","line":911}]}
+```
+
+The extension host splits the stream on newlines and forwards each parsed object to the webview as it arrives, so the graph grows during analysis instead of appearing after it. The ordering falls out of the analysis itself: descriptions first, then modules and functions interleaved as files are walked, then every edge at the end, once resolution can finally run.
+
+The original engine was Kotlin — ANTLR on the JVM, a shadow jar, and a <Term>GraalVM native image</Term> for machines without Java. Then we wrote the whole analyser a second time in TypeScript, sharing nothing with the first except the `.g4` grammars and this protocol. Three interchangeable artifacts now sit in the extension, selected by one setting:
+
+| `codereviewer.backend` | Artifact | Needs |
+| --- | --- | --- |
+| `node` (default) | `reviewer.js` | nothing |
+| `jar` | `reviewer.jar` | `java` on PATH |
+| `native` | `reviewer-<platform>` | a GraalVM build |
+
+The rewrite was not a migration and the Kotlin backend is not deprecated. It was a deployment problem: launching a jar or an unsigned binary is blocked by group policy on plenty of managed machines, whereas the TypeScript backend is `fork`ed onto the Node runtime the extension host is already running on, so it needs no external toolchain at all.
+
+The useful side effect was the test suite. The Kotlin backend regenerates golden output files, and the TypeScript suite asserts byte-level parity against them — 120 tests across 20 files, all green, of which the parity spec is the one that actually matters. Two independent implementations agreeing line-for-line on the same NDJSON is a much stronger statement about the protocol than either implementation passing its own unit tests. It also caught the boring divergences: a metric named slightly differently, a location line off by one.
+
+## Where the graph stops being trustworthy
+
+The honest limits, in the order you will hit them.
+
+**Name collisions in C and Python.** Two functions called `run` in different files are one node with two locations. Their callers merge onto that node, and the graph now shows an edge that exists in neither file. Java avoids this through package plus type; C and Python have no equivalent, and fixing it properly means the type resolution we chose not to write.
+
+**Anything dynamic is invisible.** A call through a function pointer, a virtual dispatch resolved at runtime, `getattr`, a callback passed as an argument — the candidate list has nothing to key on, so the edge is missing. This is not a bug we can close; it is the boundary of static name matching.
+
+**One language per run.** The backend exits with an error if the file set spans more than one extension. A polyglot repository gets one graph per language, and the calls across the boundary are not modelled at all.
+
+**Halstead's derived metrics are folklore.** Effort, time and bugs are arithmetic on operator counts from 1977. They order functions within one codebase perfectly well; they do not measure anything absolute. Colouring by cyclomatic complexity and lines of code is defensible. Colouring by estimated delivered bugs is a conversation starter.
+
+**The scale ceiling is real.** The design target was around 500 nodes rendered smoothly and 50,000 lines analysed in under 30 seconds. Module contours already turn themselves off at 300 nodes. On a large monorepo you will hit the graph's usable limit long before you hit the parser's — force layout on ten thousand nodes produces a hairball, and no amount of colouring rescues it.
+
+**Custom metrics are still a promise.** The documentation lists user-defined metrics in Lua as a planned feature. It is not implemented, and there is no Lua anywhere in the source. Adding a metric today means writing a calculator class and rebuilding — a five-minute job for us, and not something a user can do.
+
+Where it does earn its place: dropping into an unfamiliar C or Java codebase, selecting a directory, and getting one picture of what calls what, with the twenty worst functions glowing red before you have read a line. That is a narrow claim, and it is one the tool actually delivers.
+
+Documentation and install instructions live at [gre-v-el.github.io/crv-docs](https://gre-v-el.github.io/crv-docs/). Every number above was measured on the repository at the time of writing; where the code and the docs disagree, the code is what I quoted.

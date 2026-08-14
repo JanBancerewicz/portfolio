@@ -79,6 +79,30 @@ export const conceptIcons: Record<string, ConceptIcon> = {
     ],
   },
 
+  Interpretability: {
+    title: "Interpretability — probing inside the layers",
+    paths: [
+      "M3 4h13",
+      "M3 8.5h13",
+      "M3 13h9",
+      "M3 17.5h9",
+      "M20.5 14a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z",
+      "M19.6 16.6 22 19",
+    ],
+  },
+
+  "Logit lens": {
+    title: "Logit lens — read a layer through the unembedding",
+    paths: [
+      "M3 4h13",
+      "M3 8.5h13",
+      "M3 13h9",
+      "M3 17.5h9",
+      "M20.5 14a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z",
+      "M19.6 16.6 22 19",
+    ],
+  },
+
   "Multimodal / VLMs": {
     title: "Multimodal — vision and language together",
     paths: [

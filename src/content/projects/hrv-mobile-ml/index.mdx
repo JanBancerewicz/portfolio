@@ -11,7 +11,7 @@ export const meta = {
   title: "Analysis of HRV Using Mobile Devices and Machine Learning",
   date: "2025",
   order: 3,
-  category: "Research / Applied ML (biosignals)",
+  category: "Research, Applied ML, Biosignals",
   role: "Co-author & primary codebase contributor (team of five)",
   summary:
     "Research project for mobile ECG/PPG peak detection and HRV analysis. Compares 1D-CNN detectors against classical Pan–Tompkins/NeuroKit baselines using smartphone camera PPG and Polar H10 ECG. Peer-reviewed TASK Quarterly publication (March 2026).",
@@ -63,12 +63,17 @@ export const glossary = [
   {
     term: "HRV",
     definition:
-      "Heart rate variability – statistics of variation between successive beat intervals (e.g. SDNN, RMSSD), used as a physiology/research marker.",
+      "Heart rate variability – statistics of variation between successive NN intervals (e.g. SDNN, RMSSD), used as a physiology/research marker.",
   },
   {
     term: "RR interval",
     definition:
       "Time between consecutive ECG R-peaks; the classical beat-to-beat interval for HRV from ECG.",
+  },
+  {
+    term: "NN",
+    definition:
+      "Normal-to-normal interval – successive beat intervals kept only when both beats are sinus/normal (ectopics dropped). SDNN and RMSSD are defined on this series; here, detected peaks after refractory filtering are treated as NN.",
   },
   {
     term: "IBI",
@@ -131,6 +136,11 @@ export const glossary = [
       "The prominent upward spike of the ECG QRS complex that marks a ventricular beat; RR intervals and ECG peak F1 are defined from these timestamps.",
   },
   {
+    term: "QRS",
+    definition:
+      "The ECG waveform of ventricular depolarization (Q, R, and S deflections). The R-peak inside it is the timestamp used for RR / NN intervals; Polar QRS morphology at ~130 Hz is why the ECG network gets a ~2 s window of context.",
+  },
+  {
     term: "1D-CNN",
     definition:
       "One-dimensional convolutional network that slides along the time axis of a biosignal window; the shared pattern behind both the ECG and PPG peak scorers.",
@@ -159,7 +169,7 @@ This research project, developed at Gdańsk University of Technology (2025) and 
 **Authors:** Jan Bancerewicz, Julian Kotłowski, Mateusz Rzęsa, Julia Morawska, and Ostap Lozovyy under the academic supervision of Ph.D. Julian Szymański.
 
 
-**In scope:** ML architecture design and offline neural network training/evaluation, automated beat-matching logic within strict time tolerances, comparison against classical peak detectors, end-to-end signal filtering, <Term>HRV</Term> (<Term>RMSSD</Term>/<Term>SDNN</Term>) and <Term>PTT</Term> computation, and desktop GUI for live/replay signal inspection.
+**In scope:** ML architecture design and offline neural network training/evaluation, automated beat-matching logic within strict time tolerances, comparison against classical peak detectors, end-to-end signal filtering, <Term>HRV</Term> (<Term>RMSSD</Term>/<Term>SDNN</Term> from <Term>NN</Term> intervals) and <Term>PTT</Term> computation, and desktop GUI for live/replay signal inspection.
 
 **Out of scope:** clinical certification, on-device mobile ML execution, full cohort raw dataset distribution (privacy/size constraints), production CI/CD, hospital integration.
 ## Why Standard Mobile Pulse Estimation Fails for HRV
@@ -178,7 +188,7 @@ Without modality-specific <Term>band-pass</Term> filters, a refractory gap betwe
 
 **Then:** live plots → <Term>HRV</Term> GUI metrics → <Term>PPG</Term> CNN branch → timestamp/alignment fixes → classical <Term>Pan–Tompkins</Term> baselines → redesigned <Term>PPG</Term> residual + <Term>SE block</Term> network → cleanup for publication.
 
-**End:** Replay (or stream) fingertip <Term>PPG</Term> next to Polar/file <Term>ECG</Term>, mark peaks classically and with CNNs, show <Term>RMSSD</Term> / <Term>SDNN</Term> / <Term>RR interval</Term> side by side, export aligned CSV, reproduce detector comparisons. Under controlled recording, mobile <Term>PPG</Term> can approximate <Term>ECG</Term>-based <Term>HRV</Term> while staying more artifact-sensitive.
+**End:** Replay (or stream) fingertip <Term>PPG</Term> next to Polar/file <Term>ECG</Term>, mark peaks classically and with CNNs, show <Term>RMSSD</Term> / <Term>SDNN</Term> (from <Term>NN</Term> intervals) / <Term>RR interval</Term> side by side, export aligned CSV, reproduce detector comparisons. Under controlled recording, mobile <Term>PPG</Term> can approximate <Term>ECG</Term>-based <Term>HRV</Term> while staying more artifact-sensitive.
 
 <figure className="article-figure">
   <img
@@ -217,7 +227,7 @@ Windowed processors (**256** samples for <Term>ECG</Term>, **~100** for <Term>PP
    - **<Term>ECG</Term>** – input length **256**. Conv1D channels **1 → 16 → 32 → 64 → 128** (kernels 5 / 5 / 3 / 3), BatchNorm + LeakyReLU, max-pool, unidirectional <Term>LSTM</Term>, FC head → per-sample logits. Training: labels from <Term>Pan–Tompkins</Term> on filtered Polar recordings; BCE-with-logits; Adam **1e-4**. Two held-out recordings stay out of training.
    - **<Term>PPG</Term>** – segments **50–100** samples (paths disagree – real friction). Initial Conv1D 1→32 (k=7, GELU + BN); residual blocks 32→64 (k=9), 64→128 (k=5), 128→128 (k=3), 128→128 (k=7) with dropout; <Term>SE block</Term> on 128 channels; avg+max pool; FC → sigmoid per-sample peak probability. Validation uses a held-out multi-minute fingertip recording.
 4. **Postprocess** – threshold probabilities (often 0.5; probabilistic <Term>PPG</Term> eval also uses height 0.25 on the probability trace), enforce minimum inter-peak distance, map to unix timestamps for pairing.
-5. **<Term>HRV</Term> / <Term>PTT</Term>** – <Term>RR interval</Term> from <Term>ECG</Term>, <Term>IBI</Term> from <Term>PPG</Term> → mean / <Term>SDNN</Term> / <Term>RMSSD</Term> (rolling window ~60 s in the paper narrative). After absolute-time alignment, pair each <Term>R-peak</Term> with the next chronological <Term>PPG</Term> peak:
+5. **<Term>HRV</Term> / <Term>PTT</Term>** – <Term>RR interval</Term> from <Term>ECG</Term>, <Term>IBI</Term> from <Term>PPG</Term> → treated as <Term>NN</Term> intervals → mean / <Term>SDNN</Term> / <Term>RMSSD</Term> (rolling window ~60 s in the paper narrative). After absolute-time alignment, pair each <Term>R-peak</Term> with the next chronological <Term>PPG</Term> peak:
 
 ```math
 PTT = t_(PPG) - t_(ECG)
@@ -257,7 +267,7 @@ Offline evaluation compares detectors head-to-head:
 ### Decisions worth defending
 
 1. **Classical + neural side by side.** <Term>ECG</Term> training labels partly come from <Term>Pan–Tompkins</Term>. Shipping the classical detector next to the CNN makes label circularity visible instead of one glossy neural score.
-2. **Separate architectures per sensor.** Polar QRS context at 130 Hz and camera pulse morphology are not one problem. Forcing a shared “universal beats model” would hide that.
+2. **Separate architectures per sensor.** Polar <Term>QRS</Term> context at 130 Hz and camera pulse morphology are not one problem. Forcing a shared “universal beats model” would hide that.
 3. **Thin phone, heavy desktop.** PPGbetter only acquires. Tkinter + CUDA/CPU PyTorch owns ML and paper figures. A plain <Term>WebSocket</Term> line protocol on :8765 stays trivial on Android – at the cost of no auth on `0.0.0.0`. Fine for a lab LAN.
 4. **Explicit held-out recordings.** Not a full MLOps story, but an anti-leakage gesture that is written down rather than hoped for.
 
@@ -273,7 +283,7 @@ Offline evaluation compares detectors head-to-head:
 | <Term>PPG</Term> <Term>F1</Term> span | **~0.824–0.977** | Peak-match @ ~264 ms → sample-level classification | Protocol dominates the headline |
 | <Term>ECG</Term> <Term>match tolerance</Term> | ~**10 ms** | FS = 130 Hz | Stricter than <Term>PPG</Term> evals |
 | <Term>PPG</Term> <Term>band-pass</Term> | **0.5–5 Hz**, order 4 | vs <Term>ECG</Term> **0.5–45 Hz** | Wrong filter destroys optical peaks |
-| <Term>ECG</Term> window / FS | **256** samples @ **130 Hz** | ECG network input | ≈ 2 s of QRS context |
+| <Term>ECG</Term> window / FS | **256** samples @ **130 Hz** | ECG network input | ≈ 2 s of <Term>QRS</Term> context |
 | Cohort | **6** subjects | Author-confirmed | Keep generalization claims narrow |
 | Paper <Term>RMSSD</Term>/<Term>SDNN</Term> error tables | – | – | **Not quoted** in this write-up |
 | <Term>F1</Term> @ 50/100/150 ms, median <Term>PTT</Term>, plot latency | not frozen here | pipelines exist | Re-measure if needed |

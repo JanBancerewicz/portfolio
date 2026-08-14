@@ -25,9 +25,11 @@ const root = join(here, "..");
 const MAP = {
   // Languages
   Python: "siPython",
+  // Java: coffee-cup mark lives in CUSTOM — simple-icons dropped Oracle's logo.
   TypeScript: "siTypescript",
   "C++": "siCplusplus",
   "Spring / Java": "siSpring",
+  "Spring Boot": "siSpringboot",
   Kotlin: "siKotlin",
 
   // Core AI / ML frameworks
@@ -36,10 +38,13 @@ const MAP = {
   Transformers: "siHuggingface",
   "scikit-learn": "siScikitlearn",
   OpenCV: "siOpencv",
+  vLLM: "siVllm",
   "vLLM / Ollama": "siVllm",
   MLflow: "siMlflow",
+  Pandas: "siPandas",
 
   // GenAI & LLM stack
+  Qdrant: "siQdrant",
   "Qdrant / ChromaDB": "siQdrant",
   "Anthropic/OpenAI API": "siAnthropic",
   "Google ADK": "siGoogle",
@@ -57,6 +62,7 @@ const MAP = {
   Docker: "siDocker",
   Kubernetes: "siKubernetes",
   "Azure Databricks": "siDatabricks",
+  "Next.js": "siNextdotjs",
   "React / Next.js": "siReact",
   React: "siReact",
   Vite: "siVite",
@@ -64,7 +70,6 @@ const MAP = {
   MDX: "siMdx",
   Linux: "siLinux",
   "CI/CD & GitHub Actions": "siGithubactions",
-  "NVIDIA Jetson": "siNvidia",
 
   // Tools
   "Claude Code": "siClaudecode",
@@ -78,6 +83,13 @@ const MAP = {
  * Same shape as a baked simple-icons entry: title, hex without `#`, path.
  */
 const CUSTOM = {
+  // Oracle's coffee-cup trademark is gone from simple-icons; a generic café
+  // mug still reads as "Java" next to Python/TypeScript without copying the mark.
+  Java: {
+    title: "Java",
+    hex: "ED8B00",
+    path: "M20 3H4v10c0 2.21 1.79 4 4 4h6c2.21 0 4-1.79 4-4v-3h2c1.11 0 2-.89 2-2V5c0-1.11-.89-2-2-2zm0 5h-2V5h2v3zM4 19h16v2H4z",
+  },
   // OpenAI removed from simple-icons; classic blossom mark.
   "OpenAI Codex": {
     title: "OpenAI",

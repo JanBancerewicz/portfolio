@@ -71,7 +71,6 @@ export const projectTargets = [
     bg: "datacenter",
     muteChannel: "r",
     accent: "purple",
-    extras: ["featured"],
   },
   {
     dir: "src/content/projects/qwen-vl-angiography",
@@ -93,13 +92,15 @@ export const projectTargets = [
     accent: "orange",
   },
   {
-    dir: "src/content/projects/jetson-yolo-boat",
-    coverTitle: "Boat Vision",
-    category: "Edge AI",
-    tag: "YOLO",
-    bg: "flowchart",
-    muteChannel: "b",
-    accent: "gold",
+    dir: "src/content/projects/llm-monitoring",
+    coverTitle: "LLM Internal Layer Monitoring",
+    category: "LLM Interpretability",
+    tag: "Logit Lens",
+    bg: "tokens",
+    muteChannel: "g",
+    accent: "purple",
+    extras: ["featured"],
+
   },
   {
     dir: "src/content/projects/code-analysis-tool",
