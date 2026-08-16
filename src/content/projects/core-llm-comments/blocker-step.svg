@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" width="900" height="640" role="img" aria-label="One decoding step of the comment blocker: the decoded context is trimmed to the text after the final think-close tag, then the extractor is asked whether that context ends inside an open comment; if it does not, active_triggers narrows 761 opener candidates down to the 197 the context can arm and only those are classified and masked, and if it does, the whole 248,320-entry logit row is banned and only the 961 verified closers and the special token ids are cleared so the request can still stop; either way the resulting mask is filled with negative infinity before sampling.">
+  <g font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Helvetica, Arial, sans-serif" fill="#16181d">
+
+    <!-- step 1 -->
+    <rect x="150" y="24" width="600" height="52" rx="6" fill="#ffffff" stroke="#16181d" stroke-width="1.6"/>
+    <text x="450" y="46" text-anchor="middle" font-size="15" font-weight="600">decoded context</text>
+    <text x="450" y="65" text-anchor="middle" font-size="13" fill="#454a55">prompt (only if scope = "full") + every output token committed so far</text>
+
+    <path d="M450 76 L450 106" stroke="#6b7280" stroke-width="1.6" fill="none"/>
+    <path d="M450 112 l-5 -9 h10 z" fill="#6b7280"/>
+
+    <!-- step 2 -->
+    <rect x="150" y="112" width="600" height="52" rx="6" fill="#ffffff" stroke="#16181d" stroke-width="1.6"/>
+    <text x="450" y="134" text-anchor="middle" font-size="14">keep only what follows the final <tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="13">&lt;/think&gt;</tspan></text>
+    <text x="450" y="153" text-anchor="middle" font-size="13" fill="#454a55">a reasoning trace is prose, not source — lexing it is wrong and slow</text>
+
+    <path d="M450 164 L450 194" stroke="#6b7280" stroke-width="1.6" fill="none"/>
+    <path d="M450 200 l-5 -9 h10 z" fill="#6b7280"/>
+
+    <!-- decision -->
+    <rect x="240" y="200" width="420" height="46" rx="23" fill="#eceae3" stroke="#16181d" stroke-width="1.6"/>
+    <text x="450" y="229" text-anchor="middle" font-size="14" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">is_context_in_comment(context)</text>
+
+    <!-- split -->
+    <path d="M450 246 L450 264 M450 264 L215 264 M450 264 L685 264 M215 264 L215 296 M685 264 L685 296" stroke="#6b7280" stroke-width="1.6" fill="none"/>
+    <path d="M215 302 l-5 -9 h10 z" fill="#6b7280"/>
+    <path d="M685 302 l-5 -9 h10 z" fill="#6b7280"/>
+    <text x="330" y="282" text-anchor="middle" font-size="13" font-weight="600" fill="#6b7280">false — outside a comment</text>
+    <text x="572" y="282" text-anchor="middle" font-size="13" font-weight="600" fill="#6b7280">true — a comment is open</text>
+
+    <!-- left branch -->
+    <rect x="40" y="302" width="350" height="176" rx="6" fill="#ffffff" stroke="#16181d" stroke-width="1.6"/>
+    <text x="60" y="326" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">active_triggers(context)</text>
+    <text x="60" y="348" font-size="13" fill="#454a55">arms 197 of the 761 Python opener</text>
+    <text x="60" y="366" font-size="13" fill="#454a55">candidates — 0.08% of the vocabulary</text>
+    <line x1="60" y1="382" x2="370" y2="382" stroke="#c9c5b8" stroke-width="1"/>
+    <text x="60" y="404" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">is_token_a_comment</text>
+    <text x="60" y="424" font-size="13" fill="#454a55">re-parses context + token, once per</text>
+    <text x="60" y="442" font-size="13" fill="#454a55">candidate. 160 came back banned.</text>
+    <text x="60" y="464" font-size="13" font-weight="600">mask = those 160 ids</text>
+
+    <!-- right branch -->
+    <rect x="510" y="302" width="350" height="176" rx="6" fill="#ffffff" stroke="#16181d" stroke-width="1.6"/>
+    <text x="530" y="326" font-size="13" fill="#454a55">every token continues the comment</text>
+    <text x="530" y="344" font-size="13" fill="#454a55">and carries no marker of its own</text>
+    <line x1="530" y1="360" x2="840" y2="360" stroke="#c9c5b8" stroke-width="1"/>
+    <text x="530" y="382" font-size="13" font-weight="600">ban all 248,320 ids by default</text>
+    <text x="530" y="404" font-size="13" fill="#454a55">then clear the 961 verified closers</text>
+    <text x="530" y="422" font-size="13" fill="#454a55">that really terminate it,</text>
+    <text x="530" y="444" font-size="13" fill="#454a55">and clear <tspan font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="12">all_special_ids</tspan> — otherwise</text>
+    <text x="530" y="462" font-size="13" fill="#454a55">EOS goes too and nothing can stop</text>
+
+    <!-- merge -->
+    <path d="M215 478 L215 508 M685 478 L685 508 M215 508 L685 508 M450 508 L450 534" stroke="#6b7280" stroke-width="1.6" fill="none"/>
+    <path d="M450 540 l-5 -9 h10 z" fill="#6b7280"/>
+
+    <rect x="230" y="540" width="440" height="46" rx="6" fill="#16181d"/>
+    <text x="450" y="569" text-anchor="middle" font-size="14" fill="#fbfaf7" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">logits[i].masked_fill_(mask, -inf)</text>
+
+    <text x="450" y="612" text-anchor="middle" font-size="12.5" fill="#6b7280">runs again on the next step — the context grew by one token</text>
+  </g>
+</svg>

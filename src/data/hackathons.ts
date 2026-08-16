@@ -31,7 +31,7 @@ export const hackathons: Hackathon[] = [
     highlight: true,
     role: "Representing Gdańsk University of Technology",
     what: "Representing my university in the Polish collegiate programming contest (ICPC) since 2024, placing #34 nationally in 2024 and #55 in 2025 (out of ~80 teams). \u00A0 As President of the Sfera PG Algorithmic Club, I lead team training in advanced algorithms, complex data structures, and high-pressure problem-solving in C++.",
-    tags: ["Algorithms & Data Structures", "ICPC","C++"],
+    tags: ["Algorithms & Data Structures", "ICPC", "C++", "Problem Solving"],
     href: "https://amppz.edu.pl/"
   },
   {
@@ -75,7 +75,7 @@ export const hackathons: Hackathon[] = [
     result: "Solo debut, high score",
     role: "Biohacking Category",
     what: "My first hackathon! I built StressLess – a mobile biofeedback app measuring heart rate and HRV via smartphone camera PPG. Combined biometric signals with an LLM pipeline to deliver real-time stress analysis and biohacking insights.",
-    tags: ["Android", "Signal Processing", "LLM API", "Spring / Java"],
+    tags: ["Android", "Signal Processing", "LLM API", "Java"],
     href: "https://hackyeah.pl/pl/"
   },
 ];

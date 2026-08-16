@@ -8,65 +8,63 @@
     </marker>
   </defs>
 
-  <rect width="1200" height="520" fill="#f4f6f9"/>
-
-  <text x="60" y="52" font-family="Georgia, serif" font-size="27" fill="#10161c">Aggregation happens in the hook, or the numbers never exist</text>
-  <text x="60" y="82" font-family="Helvetica, Arial, sans-serif" font-size="15" fill="#5b6472">An 8B residual is about 260 KB per token. A thousand-token answer of raw states is 260 MB. Attention is worse : it grows with seq squared.</text>
+  <text x="60" y="52" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="27" fill="#5b6472">Aggregation happens in the hook, or the numbers never exist</text>
+  <text x="60" y="82" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="15" fill="#5b6472">An 8B residual is about 260 KB per token. A thousand-token answer of raw states is 260 MB. Attention is worse : it grows with seq squared.</text>
 
   <!-- dead path -->
-  <text x="60" y="128" font-family="Helvetica, Arial, sans-serif" font-size="13" letter-spacing="1.4" fill="#5b6472">HTTP BACKEND</text>
+  <text x="60" y="128" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" letter-spacing="1.4" fill="#5b6472">HTTP BACKEND</text>
 
   <rect x="60" y="146" width="170" height="70" rx="6" fill="#ffffff" stroke="#c9d2de"/>
-  <text x="145" y="176" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">Ollama /</text>
-  <text x="145" y="196" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">llama.cpp / API</text>
+  <text x="145" y="176" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">Ollama /</text>
+  <text x="145" y="196" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">llama.cpp / API</text>
 
   <path d="M 238 181 L 292 181" stroke="#d9531e" stroke-width="1.6" fill="none" marker-end="url(#hp-dead)"/>
 
   <rect x="300" y="146" width="170" height="70" rx="6" fill="#ffffff" stroke="#d9531e" stroke-width="1.5"/>
-  <text x="385" y="176" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">text</text>
-  <text x="385" y="196" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#5b6472">no residual, no matrix</text>
+  <text x="385" y="176" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">text</text>
+  <text x="385" y="196" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#5b6472">no residual, no matrix</text>
 
   <path d="M 478 181 L 532 181" stroke="#d9531e" stroke-width="1.6" fill="none" marker-end="url(#hp-dead)"/>
 
   <rect x="540" y="146" width="200" height="70" rx="6" fill="#fdece6" stroke="#d9531e" stroke-width="1.5"/>
-  <text x="640" y="176" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#d9531e">nothing to lens</text>
-  <text x="640" y="196" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#5b6472">GGUF dequantizes to fp32 anyway</text>
+  <text x="640" y="176" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#d9531e">nothing to lens</text>
+  <text x="640" y="196" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#5b6472">GGUF dequantizes to fp32 anyway</text>
 
   <!-- live path -->
-  <text x="60" y="268" font-family="Helvetica, Arial, sans-serif" font-size="13" letter-spacing="1.4" fill="#5b6472">IN-PROCESS</text>
+  <text x="60" y="268" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" letter-spacing="1.4" fill="#5b6472">IN-PROCESS</text>
 
   <rect x="60" y="286" width="170" height="86" rx="6" fill="#ffffff" stroke="#2f6fd4" stroke-width="1.5"/>
-  <text x="145" y="318" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">transformers</text>
-  <text x="145" y="338" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2f6fd4">eager attention</text>
-  <text x="145" y="356" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">one model resident</text>
+  <text x="145" y="318" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">transformers</text>
+  <text x="145" y="338" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2f6fd4">eager attention</text>
+  <text x="145" y="356" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">one model resident</text>
 
   <path d="M 238 329 L 292 329" stroke="#5b6472" stroke-width="1.6" fill="none" marker-end="url(#hp-arrow)"/>
 
   <rect x="300" y="286" width="170" height="86" rx="6" fill="#ffffff" stroke="#2f6fd4" stroke-width="1.5"/>
-  <text x="385" y="318" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">forward hooks</text>
-  <text x="385" y="338" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2f6fd4">every decoder layer</text>
-  <text x="385" y="356" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">last position only</text>
+  <text x="385" y="318" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">forward hooks</text>
+  <text x="385" y="338" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2f6fd4">every decoder layer</text>
+  <text x="385" y="356" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">last position only</text>
 
   <path d="M 478 329 L 532 329" stroke="#5b6472" stroke-width="1.6" fill="none" marker-end="url(#hp-arrow)"/>
 
   <rect x="540" y="286" width="210" height="86" rx="6" fill="#ffffff" stroke="#2f6fd4" stroke-width="1.5"/>
-  <text x="645" y="318" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">aggregate in the hook</text>
-  <text x="645" y="338" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2f6fd4">~100 KB of scalars / run</text>
-  <text x="645" y="356" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">not the raw tensor</text>
+  <text x="645" y="318" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">aggregate in the hook</text>
+  <text x="645" y="338" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2f6fd4">~100 KB of scalars / run</text>
+  <text x="645" y="356" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">not the raw tensor</text>
 
   <path d="M 758 329 L 812 329" stroke="#5b6472" stroke-width="1.6" fill="none" marker-end="url(#hp-arrow)"/>
 
   <rect x="820" y="286" width="170" height="86" rx="6" fill="#ffffff" stroke="#2f6fd4" stroke-width="1.5"/>
-  <text x="905" y="318" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">FastAPI</text>
-  <text x="905" y="338" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="13" fill="#2f6fd4">SSE per token</text>
-  <text x="905" y="356" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">one port, one process</text>
+  <text x="905" y="318" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">FastAPI</text>
+  <text x="905" y="338" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="13" fill="#2f6fd4">SSE per token</text>
+  <text x="905" y="356" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">one port, one process</text>
 
   <path d="M 998 329 L 1052 329" stroke="#5b6472" stroke-width="1.6" fill="none" marker-end="url(#hp-arrow)"/>
 
   <rect x="1060" y="286" width="90" height="86" rx="6" fill="#ffffff" stroke="#10161c" stroke-width="1.5"/>
-  <text x="1105" y="328" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">UI</text>
-  <text x="1105" y="348" text-anchor="middle" font-family="Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">charts</text>
+  <text x="1105" y="328" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">UI</text>
+  <text x="1105" y="348" text-anchor="middle" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="12" fill="#5b6472">charts</text>
 
-  <text x="60" y="430" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#10161c">SDPA and FlashAttention never materialize the attention matrix, so under them the attention collector has nothing to compute from.</text>
-  <text x="60" y="456" font-family="Helvetica, Arial, sans-serif" font-size="14" fill="#5b6472">Weight-only schemes that keep hooks working : GPTQ, AWQ : are fine. GGUF is not: transformers dequantizes it on load, and a 12B checkpoint becomes about 48 GB.</text>
+  <text x="60" y="430" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#5b6472">SDPA and FlashAttention never materialize the attention matrix, so under them the attention collector has nothing to compute from.</text>
+  <text x="60" y="456" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" font-size="14" fill="#5b6472">Weight-only schemes that keep hooks working : GPTQ, AWQ : are fine. GGUF is not: transformers dequantizes it on load, and a 12B checkpoint becomes about 48 GB.</text>
 </svg>

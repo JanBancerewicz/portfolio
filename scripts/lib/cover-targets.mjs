@@ -70,7 +70,7 @@ export const projectTargets = [
     tag: "Research Paper",
     bg: "datacenter",
     muteChannel: "r",
-    accent: "purple",
+    accent: "berry",
   },
   {
     dir: "src/content/projects/qwen-vl-angiography",
@@ -81,15 +81,6 @@ export const projectTargets = [
     muteChannel: "g",
     accent: "mint",
     extras: ["featured"],
-  },
-  {
-    dir: "src/content/projects/shelf-vision-pipeline",
-    coverTitle: "Shelf Vision",
-    category: "Computer vision",
-    tag: "CV",
-    bg: "graph",
-    muteChannel: "g",
-    accent: "orange",
   },
   {
     dir: "src/content/projects/llm-monitoring",
@@ -107,8 +98,8 @@ export const projectTargets = [
     coverTitle: "Code Reviewer Plugin",
     category: "Code Parsing",
     tag: "Graph Analysis",
-    bg: "graph",
-    muteChannel: "gb",
+    bg: "techgrid",
+    muteChannel: "b",
     accent: "gold",
   },
 ];

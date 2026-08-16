@@ -1,7 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 940 560" width="940" height="560" role="img" aria-label="Diagram of Code ReViewer's call resolution: a call expression in source produces an ordered list of candidate unique names, which are looked up one by one in the map of every function definition seen across all files; the first hit becomes a graph edge, and a call whose candidates all miss is dropped without drawing anything.">
-  <rect x="0" y="0" width="940" height="560" fill="#f7f5f0"/>
-
-  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" fill="#15130f">
+  <g font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif" fill="#4a463d">
 
     <!-- column headings -->
     <text x="30" y="40" font-size="14" font-weight="700" letter-spacing="1.2">1 · CALL SITE</text>
@@ -11,7 +9,7 @@
     <!-- ============ resolved case ============ -->
     <rect x="30" y="62" width="238" height="86" rx="6" fill="#ffffff" stroke="#15130f" stroke-width="1.6"/>
     <text x="46" y="88" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#4a463d">class Panel extends View {</text>
-    <text x="46" y="108" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">  this.repo.load();</text>
+    <text x="46" y="108" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15130f">  this.repo.load();</text>
     <text x="46" y="128" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#4a463d">}</text>
 
     <text x="30" y="170" font-size="12.5" fill="#4a463d">receiver this.repo is a field</text>
@@ -21,11 +19,11 @@
 
     <!-- candidate rows, resolved -->
     <rect x="300" y="62" width="326" height="34" rx="5" fill="#ffffff" stroke="#a8a294" stroke-width="1.3"/>
-    <text x="314" y="84" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">app.Panel.load</text>
+    <text x="314" y="84" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15130f">app.Panel.load</text>
     <text x="596" y="84" font-size="16" fill="#8a8577" text-anchor="middle">✕</text>
 
     <rect x="300" y="104" width="326" height="34" rx="5" fill="#ffffff" stroke="#a8a294" stroke-width="1.3"/>
-    <text x="314" y="126" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">app.View.load</text>
+    <text x="314" y="126" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15130f">app.View.load</text>
     <text x="596" y="126" font-size="16" fill="#8a8577" text-anchor="middle">✕</text>
 
     <rect x="300" y="146" width="326" height="34" rx="5" fill="#e9f2e4" stroke="#2f6b32" stroke-width="2"/>
@@ -38,7 +36,7 @@
 
     <!-- ============ the map ============ -->
     <rect x="686" y="62" width="224" height="196" rx="6" fill="#ffffff" stroke="#15130f" stroke-width="1.6"/>
-    <text x="700" y="86" font-size="12.5" font-weight="700">allFunctions</text>
+    <text x="700" y="86" font-size="12.5" font-weight="700" fill="#15130f">allFunctions</text>
     <text x="700" y="104" font-size="11.5" fill="#4a463d">every definition seen, all files</text>
     <line x1="700" y1="114" x2="896" y2="114" stroke="#d8d3c6" stroke-width="1.2"/>
     <text x="700" y="136" font-size="12" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#4a463d">app.Panel.render</text>
@@ -66,7 +64,7 @@
 
     <!-- ============ dropped case ============ -->
     <rect x="30" y="436" width="238" height="60" rx="6" fill="#ffffff" stroke="#15130f" stroke-width="1.6"/>
-    <text x="46" y="472" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">  memcpy(dst, src, n);</text>
+    <text x="46" y="472" font-size="13" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" fill="#15130f">  memcpy(dst, src, n);</text>
     <text x="30" y="518" font-size="12.5" fill="#4a463d">callee is defined outside the analysed set</text>
 
     <path d="M272 466 H 296" stroke="#15130f" stroke-width="1.6" fill="none" marker-end="url(#ink)"/>

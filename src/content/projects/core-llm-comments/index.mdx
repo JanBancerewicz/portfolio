@@ -1,5 +1,6 @@
 import cover from "./cover.svg";
 import poster from "./poster.svg";
+import diagram from "./blocker-step.svg";
 
 export const meta = {
   slug: "core-llm-comments",
@@ -7,54 +8,165 @@ export const meta = {
   date: "2026",
   order: 5,
   category: "LLM interpretability",
-  role: "Research — probing, experiments, analysis",
+  role: "Co-author – probing, decode-time interventions, analysis",
   summary:
-    "COmments as a REasoning: do code comments actually change how a language model reasons, or only how its output reads? We answer it by opening the model up rather than grading what comes out.",
+    "COmments as a REasoning: do code comments change how a language model reasons, or only how its output reads? Decode-time comment blocking on vLLM, built with Gradient PG – research paper in preparation. Code yet to be released.",
   cover,
   poster,
-  // Drop an 8s vertical clip next to this file, import it, and set `reel`.
-  // reel,
   reelCaption:
-    "Do comments change how an LLM thinks, or just how it writes? We opened the model to find out.",
-  tags: ["PyTorch", "Transformers", "LLM fine-tuning", "Python"],
-  links: [{ label: "GitHub", href: "https://github.com/JanBancerewicz" }],
+    "Do comments change how an LLM thinks, or just how it writes? We open the model to find out.",
+  tags: [
+    "vLLM",
+    "PyTorch",
+    "Transformers",
+    "Python",
+    "LLM Interpretability",
+    "Logit masking",
+  ],
+  links: [{ label: "GitHub", href: "https://github.com/Gradient-PG" }],
 };
 
-/** Fill in when the case-study rewrite lands. Used by ArticlePage Term definitions. */
-export const glossary = [];
+export const glossary = [
+  {
+    term: "ablation",
+    definition:
+      "An experiment that removes one factor while holding everything else fixed, then measures what changes. Here: forbid comment tokens at decode time and compare programs plus activations against the unblocked run.",
+  },
+  {
+    term: "logits processor",
+    definition:
+      "A hook vLLM calls with the raw score row for every in-flight request, right before sampling. Where you change what a model can say without changing what you asked it.",
+  },
+  {
+    term: "decode step",
+    definition:
+      "One forward pass producing one token. Anything attached to the sampler runs here, once per generated token, per request.",
+  },
+  {
+    term: "comment extractor",
+    definition:
+      "The per-language object that owns what a comment looks like – locating spans, spelling delimiters, and deciding whether a candidate token would land inside one.",
+  },
+  {
+    term: "opener candidate",
+    definition:
+      "A vocabulary token that could start a comment, found once per vocabulary. A deliberate over-approximation that shrinks the set the expensive per-step check must look at.",
+  },
+  {
+    term: "active trigger",
+    definition:
+      "The condition that has to hold for a group of opener candidates to fire. Lets a step skip tokens that are only dangerous next to a quote the context does not have.",
+  },
+  {
+    term: "closer candidate",
+    definition:
+      "A token that could terminate an already-open comment. Once a comment is open the mask inverts, and something has to stay legal or the request can never leave.",
+  },
+  {
+    term: "blocker pair",
+    definition:
+      "Two requests with byte-identical prompts that differ only in whether comment blocking is on. The unit of comparison the design exists to make possible.",
+  },
+  {
+    term: "runtime diagnostics",
+    definition:
+      "Counters the processor accumulates and ships with the response – because 'the flag was set' and 'the code ran' turned out to be different claims.",
+  },
+  {
+    term: "speculative decoding",
+    definition:
+      "Generating several candidate tokens ahead and verifying them in one pass. In vLLM it is also the extension point non-speculative features get bolted onto.",
+  },
+  {
+    term: "hidden-state extraction",
+    definition:
+      "Pulling internal activations out of a running engine alongside the text. Here it is implemented as a speculative method, which is how the blocker once went missing.",
+  },
+  {
+    term: "fail-open default",
+    definition:
+      "A base-class fallback that stays correct while quietly doing no work. The worst kind of default in a hot path: it shows up as a slow benchmark, not as an error.",
+  },
+  {
+    term: "capture point",
+    definition:
+      "The exact place in the layer stack an activation is read from. Naming it precisely is what separates a reproducible probe from a tensor of unknown provenance.",
+  },
+  {
+    term: "EvalPlus",
+    definition:
+      "The pinned HumanEval harness that executes generated programs in a container. The part of the pipeline that can say whether suppressed comments cost correctness.",
+  },
+];
 
-Everyone has an opinion about whether comments help a language model write
-better code. Almost all of that opinion is formed by reading the model's output
-and deciding whether it looks smarter. That is a measurement of prose, not of
-reasoning. CORE is a second research paper, in preparation with the Gradient PG
-AI/ML science club, that tries to answer the question mechanistically.
+## Introduction
 
-## The question
+Everyone has an opinion about whether comments help a language model write better code. Almost all of that opinion comes from reading the output and deciding whether it looks smarter. That measures prose, not reasoning.
 
-Given the same function with and without comments, does the model take a
-different internal route to its answer — or does it arrive the same way and
-merely narrate differently?
+**CORE** (COmments as a REasoning) asks the mechanistic version: given the same function with and without comments, does the model take a different internal route – or arrive the same way and only narrate differently? The planned intervention is an <Term>ablation</Term>: hold everything fixed, remove the model's ability to emit comments at decode time, and compare both generated programs and internal activations.
 
-## How we probe it
+I am one of the authors on this workstream inside [Gradient PG](https://github.com/Gradient-PG), the AI/ML science club at Gdańsk University of Technology. The project is still in progress; we intend to publish a research paper and open the repository after the conference release. This write-up covers the engineering half that already works – not scientific conclusions, which we do not have yet. Applying the intervention turned out to be the easy part; proving the model would have done the thing you suppressed is still open.
 
-Three angles, none of which depend on judging output quality:
+## Why the intervention lives in the sampler
 
-- **Logit masking.** Suppress the comment tokens' contribution and watch what
-  moves. If the reasoning genuinely depends on them, the effect should show up
-  well before the final token.
-- **Hidden state analysis.** Compare layer-by-layer representations of the
-  commented and uncommented versions, looking for where the two trajectories
-  diverge rather than whether they end in the same place.
-- **Weight inspection.** Which heads and circuits change their attribution when
-  a comment is present.
+### Byte-identical prompts or nothing
 
-## Why it matters
+A <Term>blocker pair</Term> must send byte-identical prompts, verified by hash. The pilot records confirm it – e.g. `HumanEval/0` at `00b2e074…557a`, 348 bytes, for both the allowed and blocked condition.
 
-PLACEHOLDER — the practical version of the finding. If comments do real work
-inside the model, that changes how we should write code destined for AI review,
-and how much we should trust a model that has only ever seen stripped source.
+Appending "do not write comments" changes the prompt. Stripping comments after generation leaves activations already contaminated by the thing you meant to remove. The only place left is between the model and the sampler: a <Term>logits processor</Term> that, on every <Term>decode step</Term>, works out which vocabulary entries would extend the source into a comment and sets those logits to negative infinity before sampling.
 
-## Status
+## How the comment mask stays affordable
 
-PLACEHOLDER — paper in preparation. Update with the venue and the headline
-result once you have them.
+### Narrowing ~248k logits down to a few hundred
+
+The honest check appends a candidate to the decoded context, re-parses with the language's <Term>comment extractor</Term>, and asks whether the appended region overlaps a comment span – the only way to get `#` inside a string and `//` inside `"http://…"` right. Running that over a ~248k logit row every step is arithmetically impossible, so the set narrows twice: once per vocabulary into <Term>opener candidate</Term>s filed under <Term>active trigger</Term>s, once per step to the groups the current context can arm.
+
+On Qwen3.5-9B, Python has **761** <Term>opener candidate</Term>s (**197** always-live, **281** under `"`, **283** under `'`). Mid-function, only **197** of ~248k entries are classified – **0.08%**, in **7.7 ms**, of which **160** come back banned. Inside an open comment the narrowing inverts: ban by default, clear only verified <Term>closer candidate</Term>s (Python has **961**) plus special ids – otherwise EOS goes with the blanket ban and the request never stops.
+
+<figure className="article-figure">
+  <img
+    src={diagram}
+    alt="Flow of one decoding step: context is trimmed past the final think tag, tested for an open comment; outside narrows openers and masks a subset, inside bans all ids and clears closers plus specials; both end in masked_fill_ with negative infinity."
+  />
+  <figcaption>
+    One decoding step. Everything above the black bar decides which of a quarter-million logits to touch; the touching itself is one line.
+  </figcaption>
+</figure>
+
+### One parser, three languages so far
+
+The same <Term>comment extractor</Term> package serves noise generation, post-generation span extraction, and the decode-time blocker. Java and C++ are already measured on the parser side – **1,308** <Term>opener candidate</Term>s each (**164** always-live + **1,144** under `/`) – waiting only on task families and per-request language plumbing to reach the runtime. Parser hot-path work also showed up in the numbers: skipping empty span scans cut Java from **98.3 → 89.2 ms/step** and Python from **210.3 → 190.3 ms/step** on a 162-candidate step against an 8.6k-character context.
+
+## Silent failures cost more than slow ones
+
+### The processor was accepted and then discarded
+
+vLLM drops most processors when <Term>speculative decoding</Term> config is set. <Term>hidden-state extraction</Term> is implemented *as* a speculative method, so the flag was accepted by the request schema and the processor was thrown away before it saw a logit. The fix constructs the blocker explicitly in that branch. <Term>runtime diagnostics</Term> now ship invocation count, candidates examined, and tokens masked – because "requested" and "ran" had been the same claim for months and were not.
+
+### Detection that failed without complaining
+
+An unpaired apostrophe in prose (`don't`, chat templates, reasoning traces) made a fallback scanner swallow the rest of the buffer and hide every later `#` and triple quote. Decode context is prompt plus generation, so it is full of English – exactly where the real Python parsers bail out and the fallback scanners are the only detector left. Detection went to zero. The fix treats a literal left open by a newline as a stray quote, and the processor lexes only what follows the final closing think tag.
+
+A third failure of the same species: `preprocess_vocab` used to have a <Term>fail-open default</Term> on the base class that returned every non-empty token. A <Term>comment extractor</Term> that forgot to override it did not crash – the candidate filter simply stopped filtering and the benchmark ran orders of magnitude longer. It is abstract now, so a missing filter fails at construction instead of at the end of a wasted night.
+
+## What the pilot actually showed
+
+### The mask fired; the bytes did not move
+
+Qwen3.5-9B, temperature **0.0**, top_p **1.0**, seed **42**, 512-token cap, thinking disabled, eager decode. Five HumanEval tasks × two conditions (blocker OFF / ON). The run stalled later on a lock timeout – but `HumanEval/0` and `HumanEval/1` completed in both conditions with usable diagnostics.
+
+`HumanEval/0` examined **50,987** candidates and masked **10,300** across **67** <Term>decode step</Term>s; `HumanEval/1` examined **19,025** and masked **3,568** across **25**. The paired completions were byte-identical under OFF and ON – same SHA-256. Not similar. The same bytes.
+
+An earlier behavioral check had already found the same thing from the other direction: prompts that explicitly asked for inline comments still produced zero comments when unblocked, so the pre-registered validation threshold (≥ 2 comment-containing unblocked outputs) was unreachable. No criterion weakening, no output rewrite.
+
+So the <Term>ablation</Term> is currently subtracting from zero. On this workload the model was not going to write comments; every masked logit was a token it was not going to sample. The blocker is correct, measured, and – here – inert. That is a workload problem, not an implementation one: we need tasks where the unblocked model reliably comments (longer tasks, chat mode, thinking enabled) before the blocked condition can differ.
+
+## Status and what is still open
+
+### Built, unfinished, and unclaimed
+
+**296** CPU tests pass in **0.59 s**. The <Term>capture point</Term> for activations is verified against a pinned vLLM source fingerprint – a provenance guarantee, not a numerical tensor check. The <Term>ablation</Term> machine is built and instrumented.
+
+<Term>EvalPlus</Term> is wired in (pinned to v0.3.1, prompts byte-verified against HumanEval+) and has never executed a generated program on this host, because Docker was unavailable. So there is not yet an answer to whether a model forbidden from writing comments writes worse code.
+
+There is also no scientific conclusion yet on whether comments function as reasoning for the model. The paper is the planned deliverable; the repository stays private until that release. Until the workload produces comments to ablate, CORE's honest status is: intervention verified, experiment incomplete.

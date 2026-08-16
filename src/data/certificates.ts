@@ -56,7 +56,7 @@ export const certificateGroups: CertificateGroup[] = [
     logo: gdanskUniversityLogo,
     logoTone: "ink",
     items: [
-      { title: "Bachelor's thesis – defending 2026", year: "2026" },
+      { title: "Bachelor's thesis – defending Feb 2027", year: "2026" },
       {
         title: "Gradient PG - AI & Machine Learning Science Club – Board Member",
         year: "2025",

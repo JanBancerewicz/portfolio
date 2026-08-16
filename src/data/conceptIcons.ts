@@ -67,6 +67,30 @@ export const conceptIcons: Record<string, ConceptIcon> = {
     ],
   },
 
+  LLMs: {
+    title: "LLM — stacked transformer layers",
+    paths: [
+      "M3 5h18",
+      "M3 9.5h18",
+      "M3 14h18",
+      "M3 18.5h18",
+      "M7 5v13.5",
+      "M17 5v13.5",
+    ],
+  },
+
+  LLM: {
+    title: "LLM — stacked transformer layers",
+    paths: [
+      "M3 5h18",
+      "M3 9.5h18",
+      "M3 14h18",
+      "M3 18.5h18",
+      "M7 5v13.5",
+      "M17 5v13.5",
+    ],
+  },
+
   "LLM Interpretability": {
     title: "Interpretability — probing inside the layers",
     paths: [
@@ -158,6 +182,23 @@ export const conceptIcons: Record<string, ConceptIcon> = {
       "M20 19a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
       "M12 7v5",
       "M6 17v-3h12v3",
+    ],
+  },
+
+  "ANTLR 4": {
+    title: "ANTLR — grammar to parse tree",
+    paths: [
+      "M14 3.5a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
+      "M7 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
+      "M14 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
+      "M21 11a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
+      "M10 20a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
+      "M18 20a2 2 0 1 1-4 0 2 2 0 0 1 4 0z",
+      "M12 5.5 5 9",
+      "M12 5.5v3.5",
+      "M12 5.5 19 9",
+      "M12 13v3",
+      "M12 13l4 5",
     ],
   },
 
