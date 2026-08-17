@@ -182,6 +182,17 @@ export function ArticlePage({ kind }: { kind: ContentKind }) {
 }
 
 function ProjectLinkButton({ link }: { link: ContentLink }) {
+  if (!link.href) {
+    return (
+      <span
+        className="inline-flex items-center gap-3 rounded-sm border border-rule-strong bg-paper-raised px-6 py-3.5 text-[1rem] font-medium text-ink-muted md:px-7 md:py-4 md:text-[1.0625rem]"
+        aria-label={`${link.label}: Available Soon`}
+      >
+        Available Soon
+      </span>
+    );
+  }
+
   if (link.label === "GitHub") {
     return (
       <a

@@ -34,7 +34,7 @@ export const site = {
      * project site the app lives under `/<repo>/` and a bare `/resume.pdf`
      * resolves to the domain root, which is somebody else's 404.
      */
-    cv: `${import.meta.env.BASE_URL}resume.pdf`,
+    cv: `${import.meta.env.BASE_URL}pdfs/CV_JanBancerewicz.pdf`,
   },
 } as const;
 

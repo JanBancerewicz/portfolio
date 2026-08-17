@@ -12,13 +12,13 @@ React app, shipped as a folder of static HTML files, hosted on GitHub Pages.
 Three constraints drove every architectural decision:
 
 1. **The host serves files, not routes.** GitHub Pages has no server, no
-   rewrite rules and no response headers. Anything that needs a runtime is off
+  rewrite rules and no response headers. Anything that needs a runtime is off
    the table.
 2. **A crawler and a link preview must see real content.** A portfolio that
-   renders to an empty `<div id="root">` does not get indexed and does not
+  renders to an empty `<div id="root">` does not get indexed and does not
    produce a card when someone pastes it into Slack.
 3. **It has to feel designed.** Motion, a canvas hero, a horizontal project
-   shelf — none of which may cost the first paint.
+  shelf — none of which may cost the first paint.
 
 The answer is *prerender everything, hydrate afterwards*. The build renders each
 route to real HTML with React's SSR renderer, writes it as its own directory,
@@ -53,7 +53,7 @@ routing, no redirect hack, no 404-as-index trick.
 
 ### Decisions worth knowing about
 
-**Per-route `<head>`, rewritten at build time.** Every prerendered page used to
+**Per-route** `<head>`**, rewritten at build time.** Every prerendered page used to
 carry the one title baked into `index.html`, so twelve pages looked identical to
 a crawler. `src/lib/seo.ts` owns the metadata; the prerender step asks it for
 each route and rewrites the title, description, canonical, OG and Twitter tags
@@ -80,6 +80,8 @@ same source works either way.
 
 ---
 
+
+
 ## How the data is split
 
 Content lives in exactly three places, and the split is by *who edits it and how
@@ -90,17 +92,19 @@ often*, not by type.
 Plain TypeScript modules, each a typed array or record. No CMS, no fetch, no
 runtime cost: they compile straight into the bundle and the prerendered HTML.
 
-| Module | Holds | Notes |
-| --- | --- | --- |
-| `site.ts` | Name, role, tagline, location, availability, links, nav, hero stats | The single source of truth for identity |
-| `technologies.ts` | The stack, grouped | `marqueeTech` is the same list flattened for the ribbon — derived, never duplicated |
-| `experience.ts` | Internships, newest first | Company logos imported as modules from `src/assets/logos/` |
-| `hackathons.ts` | Competitions | `editions` lets one row count as more than one entry, so the headline total cannot drift from the list |
-| `certificates.ts` | Certifications, grouped by issuer | Section total is summed from the groups |
-| `detections.ts` | Bounding boxes for the hero's mock detector | Fractions of the hero crop — re-measure if the crop changes |
-| `techIcons.ts` | Brand SVG paths | **Generated** by `npm run icons`; nothing from `simple-icons` ships to the browser |
-| `conceptIcons.ts` | Line diagrams for techniques with no logo | Hand-drawn — a method is not a product, and the glyph says so |
-| `heroMosaic.ts` | Base64 triangle colour table | **Generated** by `npm run hero` |
+
+| Module            | Holds                                                               | Notes                                                                                                  |
+| ----------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `site.ts`         | Name, role, tagline, location, availability, links, nav, hero stats | The single source of truth for identity                                                                |
+| `technologies.ts` | The stack, grouped                                                  | `marqueeTech` is the same list flattened for the ribbon — derived, never duplicated                    |
+| `experience.ts`   | Internships, newest first                                           | Company logos imported as modules from `src/assets/logos/`                                             |
+| `hackathons.ts`   | Competitions                                                        | `editions` lets one row count as more than one entry, so the headline total cannot drift from the list |
+| `certificates.ts` | Certifications, grouped by issuer                                   | Section total is summed from the groups                                                                |
+| `detections.ts`   | Bounding boxes for the hero's mock detector                         | Fractions of the hero crop — re-measure if the crop changes                                            |
+| `techIcons.ts`    | Brand SVG paths                                                     | **Generated** by `npm run icons`; nothing from `simple-icons` ships to the browser                     |
+| `conceptIcons.ts` | Line diagrams for techniques with no logo                           | Hand-drawn — a method is not a product, and the glyph says so                                          |
+| `heroMosaic.ts`   | Base64 triangle colour table                                        | **Generated** by `npm run hero`                                                                        |
+
 
 Rule of thumb: if a component needs a number that a data module already implies,
 it derives it (`certificateGroups.reduce(…)`, `hackathons.reduce(…)`) rather
@@ -153,17 +157,21 @@ section number.
 
 ---
 
+
+
 ## Libraries, and why each one
 
-| | Why |
-| --- | --- |
-| **React 19** | `renderToString` + `hydrateRoot` is the whole prerender strategy. |
-| **React Router 7** | `BrowserRouter` on the client, `StaticRouter` in the SSR bundle, same tree. Real URLs, which the static-file layout depends on. |
-| **Vite 8** | Two builds (client + SSR) from one config, and `import.meta.glob` is what makes the content directory self-registering. |
-| **Tailwind CSS v4** | Via `@tailwindcss/vite`. Design tokens are CSS custom properties in `index.css`, so both themes are one variable swap and the canvas components can read the palette at runtime. |
-| **MDX** (`@mdx-js/rollup`) | Articles are components. Prose stays markdown, but a case study can drop in a chart or a comparison table without a shortcode system. |
-| **Anime.js v4** | Its `onScroll()` autoplay driver replaces hand-rolled IntersectionObserver bookkeeping in every reveal, and it can animate a plain JS object — which is how the `clip-path` wipe stays cheap. |
-| **sharp**, **simple-icons** | Build-time only. Neither ships to the browser: they generate `heroMosaic.ts` and `techIcons.ts`. |
+
+|                             | Why                                                                                                                                                                                           |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **React 19**                | `renderToString` + `hydrateRoot` is the whole prerender strategy.                                                                                                                             |
+| **React Router 7**          | `BrowserRouter` on the client, `StaticRouter` in the SSR bundle, same tree. Real URLs, which the static-file layout depends on.                                                               |
+| **Vite 8**                  | Two builds (client + SSR) from one config, and `import.meta.glob` is what makes the content directory self-registering.                                                                       |
+| **Tailwind CSS v4**         | Via `@tailwindcss/vite`. Design tokens are CSS custom properties in `index.css`, so both themes are one variable swap and the canvas components can read the palette at runtime.              |
+| **MDX** (`@mdx-js/rollup`)  | Articles are components. Prose stays markdown, but a case study can drop in a chart or a comparison table without a shortcode system.                                                         |
+| **Anime.js v4**             | Its `onScroll()` autoplay driver replaces hand-rolled IntersectionObserver bookkeeping in every reveal, and it can animate a plain JS object — which is how the `clip-path` wipe stays cheap. |
+| **sharp**, **simple-icons** | Build-time only. Neither ships to the browser: they generate `heroMosaic.ts` and `techIcons.ts`.                                                                                              |
+
 
 No state manager, no data-fetching library, no component library, no icon
 runtime. There is no server and no mutable state — the whole app is a pure
@@ -175,14 +183,13 @@ Tailwind's breakpoints do the layout, but two components branch on **input
 capability rather than width**, which is the part worth copying:
 
 - `ProjectRail` picks its mode from `(min-width: 768px) and (pointer: fine)`.
-  With a mouse it is a *pinned* shelf: the section is made taller than the
-  viewport by exactly the rail's travel and its contents are `position: sticky`,
-  so ordinary page scrolling moves the shelf sideways. No wheel interception, no
-  `preventDefault` — scrollbars and keyboard paging keep working. On touch it is
-  native horizontal overflow with snap points, because a finger already does the
-  right thing and pinning a tall section on a phone fights the dynamic viewport.
-- `HeroMosaic` gates its hover interaction behind `(hover: hover) and
-  (pointer: fine)` and falls back to tap-to-toggle.
+With a mouse it is a *pinned* shelf: the section is made taller than the
+viewport by exactly the rail's travel and its contents are `position: sticky`,
+so ordinary page scrolling moves the shelf sideways. No wheel interception, no
+`preventDefault` — scrollbars and keyboard paging keep working. On touch it is
+native horizontal overflow with snap points, because a finger already does the
+right thing and pinning a tall section on a phone fights the dynamic viewport.
+- `HeroMosaic` gates its hover interaction behind `(hover: hover) and (pointer: fine)` and falls back to tap-to-toggle.
 
 Card sizing lives in `.reel-card` and is driven by height so a card always fits
 a pinned viewport, but bounded by viewport width too — otherwise a tall phone
@@ -193,22 +200,26 @@ move is dropped, and the project reels fall back to their poster stills.
 
 ---
 
+
+
 ## Motion
 
 Curves and durations follow the design-engineering standards vendored in
 `.claude/skills/` (from [emilkowalski/skills](https://github.com/emilkowalski/skills)):
 
 - `cubic-bezier(0.23, 1, 0.32, 1)` for entrances, `cubic-bezier(0.77, 0, 0.175, 1)`
-  for on-screen movement. Never `ease-in`.
+for on-screen movement. Never `ease-in`.
 - UI feedback under 300ms; only editorial reveals run longer.
 - Only `transform`, `opacity` and `clip-path` are animated.
 
-| Component | Job |
-| --- | --- |
-| `Reveal` | Scroll-triggered fade/rise, optionally staggering its children |
-| `SplitLines` | Headline lines sliding up from behind a clipping mask |
+
+| Component     | Job                                                                        |
+| ------------- | -------------------------------------------------------------------------- |
+| `Reveal`      | Scroll-triggered fade/rise, optionally staggering its children             |
+| `SplitLines`  | Headline lines sliding up from behind a clipping mask                      |
 | `CoverReveal` | Cover wiping in via `clip-path` while the image settles from an over-scale |
-| `Ticker` | Number counting up when the stat enters the viewport |
+| `Ticker`      | Number counting up when the stat enters the viewport                       |
+
 
 **The hero plate** (`HeroMosaic`) is a canvas, not a video. The low-poly artwork
 is re-cut into triangles that flip in a diagonal wave, each starting as a
@@ -232,6 +243,8 @@ creates a containing block and breaks the sticky positioning.
 
 ---
 
+
+
 ## Security notes
 
 A static site has a small attack surface, but not an empty one.
@@ -252,7 +265,7 @@ the inline theme script is computed from the built HTML rather than written by
 hand, so it cannot go stale. `frame-ancestors` and HSTS are unavailable over
 `<meta>` — that is a hosting limitation, not an oversight.
 
-**Every outbound link carries `rel="noreferrer noopener"`**, and
+**Every outbound link carries** `rel="noreferrer noopener"`, and
 `<meta name="referrer" content="strict-origin-when-cross-origin">` keeps paths
 out of referrer headers site-wide.
 
@@ -261,6 +274,8 @@ a third party. Self-hosting the three families under `public/fonts/` would
 remove that and one round-trip with it.
 
 ---
+
+
 
 ## Commands
 
@@ -302,20 +317,24 @@ afterwards, since those boxes are fractions of the crop.
 
 ---
 
+
+
 ## Where to edit content
 
-| What | Where |
-| --- | --- |
-| Name, tagline, links, availability, hero stats | `src/data/site.ts` |
-| Nav items | `src/data/site.ts` (`navigation`) |
-| Email address | `src/data/site.ts` (`emailObfuscated` — regeneration command is in the comment) |
-| Tech stack table + marquee | `src/data/technologies.ts` |
-| Hackathons / certificates / experience | `src/data/*.ts` |
-| Hero detection boxes | `src/data/detections.ts` |
-| Project case studies | `src/content/projects/<slug>/index.mdx` |
-| Blog posts | `src/content/blog/<slug>/index.mdx` |
-| CV PDF | `public/resume.pdf` |
-| Terminal commands | `src/components/ui/Terminal.tsx` |
+
+| What                                           | Where                                                                           |
+| ---------------------------------------------- | ------------------------------------------------------------------------------- |
+| Name, tagline, links, availability, hero stats | `src/data/site.ts`                                                              |
+| Nav items                                      | `src/data/site.ts` (`navigation`)                                               |
+| Email address                                  | `src/data/site.ts` (`emailObfuscated` — regeneration command is in the comment) |
+| Tech stack table + marquee                     | `src/data/technologies.ts`                                                      |
+| Hackathons / certificates / experience         | `src/data/*.ts`                                                                 |
+| Hero detection boxes                           | `src/data/detections.ts`                                                        |
+| Project case studies                           | `src/content/projects/<slug>/index.mdx`                                         |
+| Blog posts                                     | `src/content/blog/<slug>/index.mdx`                                             |
+| CV PDF                                         | `public/resume.pdf`                                                             |
+| Terminal commands                              | `src/components/ui/Terminal.tsx`                                                |
+
 
 Anything still reading `PLACEHOLDER` is meant to be replaced.
 

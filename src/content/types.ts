@@ -5,7 +5,8 @@ export type ContentKind = "project" | "post";
 
 export type ContentLink = {
   label: "GitHub" | "Demo" | "Website" | "Devpost" | "Paper";
-  href: string;
+  /** Omit when the destination is not ready yet — renders as non-clickable. */
+  href?: string;
 };
 
 export type ContentMeta = {
