@@ -30,7 +30,7 @@ export const hackathons: Hackathon[] = [
     win: false,
     highlight: true,
     role: "Representing Gdańsk University of Technology",
-    what: "Representing my university in the Polish collegiate programming contest (ICPC) since 2024, placing #34 nationally in 2024 and #55 in 2025 (out of ~80 teams). \u00A0 As President of the Sfera PG Algorithmic Club, I lead team training in advanced algorithms, complex data structures, and high-pressure problem-solving in C++.",
+    what: "Representing my university in the Polish collegiate programming contest (ICPC) since 2024, placing #34 nationally in 2024 and #53 in 2025 (out of ~80 teams). \u00A0 As President of the Sfera PG Algorithmic Club, I lead team training in advanced algorithms, complex data structures, and high-pressure problem-solving in C++.",
     tags: ["Algorithms & Data Structures", "ICPC", "C++", "Problem Solving"],
     href: "https://amppz.edu.pl/"
   },
