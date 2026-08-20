@@ -167,3 +167,5 @@ covers-preview.png
 *.sh
 scripts/generate-favicon-png.mjs
 prompts/*
+rag/
+BLOG/
